@@ -1,0 +1,151 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Bourdon</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #e8f5e9;
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .question-image {
+      display: block;
+      width: 100%;
+      height: 180px;
+      margin-bottom: 15px;
+      background-color: #fffde7;
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="gold"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="22" fill="black">🐝</text></svg>');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 80px 80px;
+    }
+    .score {
+      font-weight: bold;
+      color: #2e7d32;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    .question {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .options label {
+      display: block;
+      background-color: #f1f8e9;
+      border-radius: 8px;
+      padding: 12px;
+      margin: 8px 0;
+      border: 2px solid transparent;
+      transition: border 0.2s ease;
+      cursor: pointer;
+    }
+    .options input[type="radio"] {
+      margin-right: 10px;
+    }
+    .options label:hover {
+      border-color: #a5d6a7;
+    }
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+    }
+    .navigation button {
+      padding: 10px 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      background-color: #66bb6a;
+      color: white;
+      cursor: pointer;
+    }
+    .navigation button:hover {
+      background-color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <div class="score">Score : <span id="score">0</span></div>
+    <div class="question-image"></div>
+    <div class="question" id="questionText">Chargement...</div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="navigation">
+      <button onclick="prevQuestion()">Précédent</button>
+      <button onclick="nextQuestion()">Suivant</button>
+    </div>
+  </div>
+
+  <script>
+    const quiz = [
+      { q: "Combien y-a-t-il d’espèces de bourdon ?", options: ["45", "65", "100"], answer: "45" },
+      { q: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", options: ["Insectivore", "Nectarivore", "Omnivore"], answer: "Nectarivore" },
+      { q: "Où vit le bourdon ?", options: ["Dans la forêt", "Dans les plaines et les montagnes", "Dans la ville"], answer: "Dans les plaines et les montagnes" },
+      { q: "Quels sont ses prédateurs naturels ?", options: ["La Bondrée", "Le chat", "Le serpent"], answer: "La Bondrée" },
+      { q: "Quel est le nom scientifique ?", options: ["Apis mellifera", "Bombus terrestris", "Vespa crabro"], answer: "Bombus terrestris" },
+      { q: "Il est de quelle famille ?", options: ["Apidae", "Formicidae", "Culicidae"], answer: "Apidae" },
+      { q: "De quel ordre est-il ?", options: ["Hymenoptera", "Coleoptera", "Lepidoptera"], answer: "Hymenoptera" },
+      { q: "Quelle taille fait-il ?", options: ["12 mm", "25 mm", "50 mm"], answer: "25 mm" },
+      { q: "Une colonie peut contenir combien d’individus ?", options: ["100 à 200", "300 à 500", "4000 à 6000"], answer: "300 à 500" },
+      { q: "Qu’est-ce qui recouvre son corps ?", options: ["Beaucoup de poils", "Une carapace", "Des écailles"], answer: "Beaucoup de poils" },
+      { q: "Où est-il présent ?", options: ["En Afrique", "En Asie", "Dans toute l’Europe"], answer: "Dans toute l’Europe" }
+    ];
+
+    let current = 0;
+    let score = 0;
+
+    function loadQuestion(index) {
+      const question = quiz[index];
+      document.getElementById("questionText").textContent = question.q;
+
+      const container = document.getElementById("optionsContainer");
+      container.innerHTML = "";
+
+      question.options.forEach(opt => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "option";
+        input.value = opt;
+        input.onclick = () => {
+          if (input.value === question.answer) {
+            score++;
+          }
+          document.getElementById("score").textContent = score;
+        };
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(" " + opt));
+        container.appendChild(label);
+      });
+    }
+
+    function nextQuestion() {
+      if (current < quiz.length - 1) {
+        current++;
+        loadQuestion(current);
+      }
+    }
+
+    function prevQuestion() {
+      if (current > 0) {
+        current--;
+        loadQuestion(current);
+      }
+    }
+
+    window.onload = () => loadQuestion(current);
+  </script>
+</body>
+</html>
