@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -54,8 +53,13 @@
     .options input[type="radio"] {
       margin-right: 10px;
     }
-    .options label:hover {
-      border-color: #a5d6a7;
+    .options label.correct {
+      background-color: #c8e6c9;
+      border-color: #4caf50;
+    }
+    .options label.wrong {
+      background-color: #ffcdd2;
+      border-color: #e53935;
     }
     .navigation {
       display: flex;
@@ -105,6 +109,7 @@
 
     let current = 0;
     let score = 0;
+    let userAnswers = Array(quiz.length).fill(null);
 
     function loadQuestion(index) {
       const question = quiz[index];
@@ -119,12 +124,30 @@
         input.type = "radio";
         input.name = "option";
         input.value = opt;
+
+        if (userAnswers[index]) {
+          input.disabled = true;
+          if (opt === question.answer) label.classList.add("correct");
+          if (opt === userAnswers[index] && opt !== question.answer) label.classList.add("wrong");
+          if (opt === userAnswers[index]) input.checked = true;
+        }
+
         input.onclick = () => {
-          if (input.value === question.answer) {
+          if (userAnswers[index]) return;
+          userAnswers[index] = opt;
+          if (opt === question.answer) {
             score++;
+            label.classList.add("correct");
+          } else {
+            label.classList.add("wrong");
+            container.querySelectorAll("label").forEach(lab => {
+              if (lab.textContent.trim() === question.answer) lab.classList.add("correct");
+            });
           }
           document.getElementById("score").textContent = score;
+          container.querySelectorAll("input").forEach(i => i.disabled = true);
         };
+
         label.appendChild(input);
         label.appendChild(document.createTextNode(" " + opt));
         container.appendChild(label);
