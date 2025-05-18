@@ -2,114 +2,182 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Dictée Animée - Zheng He</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictée animée - Zheng He</title>
   <style>
-    body { font-family: 'Segoe UI', 'Arial', sans-serif; background: #e9f1f7; color: #223; margin: 0; padding: 0; }
-    .container { max-width: 740px; margin: 30px auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 32px #b2cbde42; padding: 40px 28px 32px 28px; }
-    .title { font-size: 2.1em; margin-bottom: 10px; font-weight: 600; color: #23537a; letter-spacing: 1px; }
-    .subtitle { font-size: 1.1em; color: #457; margin-bottom: 32px; }
-    .dictation-text { margin: 30px 0 20px 0; font-size: 1.35em; background: #f0f7fb; padding: 25px; border-radius: 14px; box-shadow: 0 2px 8px #b2cbde13; min-height: 90px; line-height: 2.0; display: flex; flex-wrap: wrap; gap: 8px 4px; justify-content: center; }
-    .word { transition: background .2s, color .2s, box-shadow .2s; padding: 4px 8px; border-radius: 7px; cursor: pointer; }
-    .word.active { background: #f9cb77; color: #333; font-weight: 700; box-shadow: 0 0 0 2px #d9b364; animation: magicpop 0.4s; }
-    @keyframes magicpop { 0% { transform: scale(1);} 30% { transform: scale(1.27);} 70% { transform: scale(0.95);} 100% { transform: scale(1);} }
-    .audioplayer { display: flex; align-items: center; gap: 13px; margin: 22px 0; border-radius: 8px; background: #e4eefd; padding: 10px 14px; box-shadow: 0 2px 8px #b2cbde22; }
-    .audioplayer label { font-size: 1.1em; color: #23537a; font-weight: 500; width: 168px; min-width: 100px; }
-    audio { width: 250px; }
-    .footer { margin-top: 35px; font-size: 0.99em; color: #888; text-align: center; }
-    @media (max-width: 850px) { .container { max-width: 97vw; padding: 12vw 2vw; } .dictation-text { font-size: 1.05em; } }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1e293b; padding: 30px; max-width: 960px; margin: auto;}
+    h1 { text-align: center; color: #1d4ed8;}
+    .word-display { text-align: center; font-size: 2rem; padding: 30px; margin: 40px 0; background: #fff; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);}
+    .controls { display: flex; justify-content: center; gap: 10px; margin: 10px 0;}
+    button { padding: 10px 16px; font-size: 1rem; border: none; border-radius: 8px; background: #3b82f6; color: white; cursor: pointer;}
+    button:hover { background: #2563eb;}
+    .player-block { margin: 30px 0; padding: 20px; background: #e0e7ff; border-radius: 12px;}
+    audio { display: block; margin: 10px auto; width: 100%;}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="title">Dictée Animée – Zheng He</div>
-    <div class="subtitle">
-      <span style="color:#257d93;">Lecture animée mot à mot + relecture finale</span>
+  <h1>📚 Dictée animée - Zheng He</h1>
+
+  <div class="player-block">
+    <h2>1. Dictée mot à mot (avec erreurs visuelles)</h2>
+    <audio id="audioSlow" src="version lente.mp3"></audio>
+    <div class="controls">
+      <button onclick="document.getElementById('audioSlow').play()">▶️ Lecture</button>
+      <button onclick="document.getElementById('audioSlow').pause()">⏸️ Pause</button>
+      <button onclick="audioJump('audioSlow', -5)">⏪ -5s</button>
+      <button onclick="audioJump('audioSlow', 5)">⏩ +5s</button>
     </div>
+  </div>
 
-    <div class="audioplayer">
-      <label>Lecture animée (mot à mot)</label>
-      <audio id="audio-animated" src="version lente.mp3" controls></audio>
-    </div>
+  <div class="word-display" id="wordDisplay">Clique sur Lecture</div>
 
-    <div class="audioplayer">
-      <label>Lecture finale (fluide)</label>
-      <audio id="audio-final" src="version normale de relecture (1).mp3" controls></audio>
-    </div>
-
-    <div id="dictation-text" class="dictation-text"></div>
-
-    <div class="footer">
-      <b>Astuce :</b> Si besoin, ajuste le timing dans <code>timedWords</code> pour caler au mieux la synchro sur tes MP3.<br>
-      Réalisé par ChatGPT pour Nico – <a href="https://www.readbeyond.it/aeneas/">Timing via Aeneas</a>
+  <div class="player-block">
+    <h2>2. Relecture finale</h2>
+    <audio id="audioNormal" src="version normale de relecture (1).mp3"></audio>
+    <div class="controls">
+      <button onclick="document.getElementById('audioNormal').play()">▶️ Lecture</button>
+      <button onclick="document.getElementById('audioNormal').pause()">⏸️ Pause</button>
+      <button onclick="audioJump('audioNormal', -5)">⏪ -5s</button>
+      <button onclick="audioJump('audioNormal', 5)">⏩ +5s</button>
     </div>
   </div>
 
   <script>
-  // === Tableau timedWords complet ===
-  const timedWords = [
-    { word: "Zheng", start: 0.00 }, { word: "He", start: 1.04 }, { word: "est", start: 1.04 }, { word: "un", start: 1.16 }, { word: "grand", start: 1.64 },
-    { word: "navigateur", start: 2.36 }, { word: "chinois", start: 3.08 }, { word: "du", start: 3.44 }, { word: "XVe", start: 3.56 }, { word: "siècle", start: 3.80 },
-    { word: "Il", start: 4.12 }, { word: "est", start: 4.36 }, { word: "né", start: 4.56 }, { word: "dans", start: 4.72 }, { word: "les", start: 4.96 }, { word: "montagnes", start: 5.08 },
-    { word: "du", start: 5.52 }, { word: "sud-ouest", start: 5.68 }, { word: "de", start: 6.16 }, { word: "la", start: 6.32 }, { word: "Chine", start: 6.44 }, { word: "actuelle", start: 6.80 },
-    { word: "bien", start: 7.36 }, { word: "loin", start: 7.56 }, { word: "de", start: 7.68 }, { word: "la", start: 7.76 }, { word: "mer", start: 7.80 }, { word: "Mais", start: 8.24 },
-    { word: "un", start: 8.52 }, { word: "événement", start: 8.68 }, { word: "tragique", start: 9.32 }, { word: "vient", start: 9.76 }, { word: "modifier", start: 10.12 },
-    { word: "le", start: 10.56 }, { word: "cours", start: 10.64 }, { word: "de", start: 10.96 }, { word: "sa", start: 11.08 }, { word: "vie", start: 11.16 },
-    { word: "À", start: 11.80 }, { word: "treize", start: 12.20 }, { word: "ans", start: 12.60 }, { word: "il", start: 12.92 }, { word: "est", start: 13.08 }, { word: "capturé", start: 13.20 },
-    { word: "par", start: 13.72 }, { word: "l’armée", start: 13.96 }, { word: "impériale", start: 14.36 }, { word: "Il", start: 15.00 }, { word: "sera", start: 15.20 }, { word: "alors", start: 15.44 },
-    { word: "forcé", start: 15.72 }, { word: "de", start: 16.24 }, { word: "servir", start: 16.32 }, { word: "l’empereur", start: 16.64 }, { word: "à", start: 16.92 }, { word: "la", start: 17.04 },
-    { word: "cour", start: 17.08 }, { word: "Au", start: 17.64 }, { word: "fil", start: 17.84 }, { word: "du", start: 18.12 }, { word: "temps", start: 18.32 }, { word: "Zheng", start: 18.52 },
-    { word: "He", start: 18.72 }, { word: "réussit", start: 18.88 }, { word: "à", start: 19.48 }, { word: "se", start: 19.64 }, { word: "distinguer", start: 19.80 }, { word: "et", start: 20.60 },
-    { word: "à", start: 20.76 }, { word: "se", start: 20.84 }, { word: "faire", start: 20.96 }, { word: "remarquer", start: 21.24 }, { word: "par", start: 21.60 }, { word: "l’empereur", start: 21.80 },
-    { word: "Il", start: 22.48 }, { word: "devient", start: 22.64 }, { word: "ainsi", start: 22.96 }, { word: "son", start: 23.20 }, { word: "plus", start: 23.40 }, { word: "fidèle", start: 23.60 },
-    { word: "conseiller", start: 23.92 }, { word: "Vers", start: 24.44 }, { word: "1405", start: 24.76 }, { word: "l’empereur", start: 25.04 }, { word: "confie", start: 25.24 },
-    { word: "à", start: 25.56 }, { word: "Zheng", start: 25.64 }, { word: "He", start: 25.76 }, { word: "une", start: 25.96 }, { word: "flotte", start: 26.28 }, { word: "gigantesque", start: 26.68 },
-    { word: "qui", start: 27.04 }, { word: "compte", start: 27.16 }, { word: "deux-cent-cinquante-cinq", start: 27.40 }, { word: "navires", start: 27.96 }, { word: "Zheng", start: 28.36 },
-    { word: "He", start: 28.48 }, { word: "explore", start: 28.56 }, { word: "alors", start: 28.88 }, { word: "les", start: 29.04 }, { word: "îles", start: 29.20 }, { word: "de", start: 29.44 },
-    { word: "l’océan", start: 29.52 }, { word: "Indien", start: 29.80 }, { word: "puis", start: 30.24 }, { word: "se", start: 30.32 }, { word: "rend", start: 30.48 }, { word: "en", start: 30.68 },
-    { word: "Égypte", start: 31.20 }
-  ];
+    // Tableau généré à partir de ton CSV (seulement les colonnes utiles)
+    const timedWords = [
+      { word: "Zheng", time: 0.000 },
+      { word: "He", time: 1.040 },
+      { word: "est", time: 1.040 },
+      { word: "un", time: 1.160 },
+      { word: "grand", time: 1.640 },
+      { word: "navigateur", time: 2.360 },
+      { word: "chinois", time: 3.080 },
+      { word: "du", time: 3.720 },
+      { word: "XVe", time: 4.200 },
+      { word: "siècle", time: 4.680 },
+      { word: "Il", time: 5.240 },
+      { word: "est", time: 6.400 },
+      { word: "né", time: 6.680 },
+      { word: "dans", time: 7.000 },
+      { word: "les", time: 7.560 },
+      { word: "montagnes", time: 7.840 },
+      { word: "du", time: 8.280 },
+      { word: "sud-ouest", time: 8.440 },
+      { word: "de", time: 9.360 },
+      { word: "la", time: 9.600 },
+      { word: "Chine", time: 9.960 },
+      { word: "actuelle", time: 10.480 },
+      { word: "bien", time: 11.960 },
+      { word: "loin", time: 12.400 },
+      { word: "de", time: 12.640 },
+      { word: "la", time: 12.720 },
+      { word: "mer", time: 13.120 },
+      { word: "Mais", time: 15.080 },
+      { word: "un", time: 15.400 },
+      { word: "événement", time: 15.920 },
+      { word: "tragique", time: 16.480 },
+      { word: "vient", time: 17.240 },
+      { word: "modifier", time: 17.800 },
+      { word: "le", time: 18.640 },
+      { word: "cours", time: 18.800 },
+      { word: "de", time: 19.200 },
+      { word: "sa", time: 19.400 },
+      { word: "vie", time: 19.840 },
+      { word: "À", time: 20.840 },
+      { word: "treize", time: 22.000 },
+      { word: "ans", time: 22.600 },
+      { word: "il", time: 22.680 },
+      { word: "est", time: 22.800 },
+      { word: "capturé", time: 23.040 },
+      { word: "par", time: 23.640 },
+      { word: "l’armée", time: 24.560 },
+      { word: "impériale", time: 25.040 },
+      { word: "Il", time: 26.200 },
+      { word: "sera", time: 28.720 },
+      { word: "alors", time: 29.520 },
+      { word: "forcé", time: 29.800 },
+      { word: "de", time: 30.600 },
+      { word: "servir", time: 30.760 },
+      { word: "l’empereur", time: 31.560 },
+      { word: "à", time: 32.200 },
+      { word: "la", time: 33.240 },
+      { word: "cour", time: 34.080 },
+      { word: "Au", time: 36.200 },
+      { word: "fil", time: 36.360 },
+      { word: "du", time: 36.880 },
+      { word: "temps", time: 37.080 },
+      { word: "Zheng", time: 38.280 },
+      { word: "He", time: 39.160 },
+      { word: "réussit", time: 39.400 },
+      { word: "à", time: 39.880 },
+      { word: "se", time: 40.560 },
+      { word: "distinguer", time: 40.800 },
+      { word: "et", time: 41.280 },
+      { word: "à", time: 41.760 },
+      { word: "se", time: 43.280 },
+      { word: "faire", time: 43.280 },
+      { word: "remarquer", time: 43.720 },
+      { word: "par", time: 45.160 },
+      { word: "l’empereur", time: 45.640 },
+      { word: "Il", time: 47.800 },
+      { word: "devient", time: 48.120 },
+      { word: "ainsi", time: 48.760 },
+      { word: "son", time: 49.200 },
+      { word: "plus", time: 49.600 },
+      { word: "fidèle", time: 49.840 },
+      { word: "conseiller", time: 50.560 },
+      { word: "Vers", time: 51.640 },
+      { word: "1405", time: 52.960 },
+      { word: "l’empereur", time: 55.320 },
+      { word: "confie", time: 55.840 },
+      { word: "à", time: 56.400 },
+      { word: "Zheng", time: 57.680 },
+      { word: "He", time: 58.000 },
+      { word: "une", time: 58.720 },
+      { word: "flotte", time: 59.720 },
+      { word: "gigantesque", time: 60.240 },
+      { word: "qui", time: 61.840 },
+      { word: "compte", time: 62.240 },
+      { word: "deux-cent-cinquante-cinq", time: 62.920 },
+      { word: "navires", time: 64.680 },
+      { word: "Zheng", time: 65.640 },
+      { word: "He", time: 67.960 },
+      { word: "explore", time: 68.200 },
+      { word: "alors", time: 68.640 },
+      { word: "les", time: 69.200 },
+      { word: "îles", time: 69.600 },
+      { word: "de", time: 69.920 },
+      { word: "l’océan", time: 70.560 },
+      { word: "Indien", time: 71.640 },
+      { word: "puis", time: 73.200 },
+      { word: "se", time: 73.840 },
+      { word: "rend", time: 74.200 },
+      { word: "en", time: 74.280 },
+      { word: "Égypte", time: 74.760 }
+    ];
 
-  // ======= Affichage et synchronisation mot à mot =======
-  const dictationContainer = document.getElementById("dictation-text");
-  timedWords.forEach((item, i) => {
-    const w = document.createElement("span");
-    w.textContent = item.word;
-    w.classList.add("word");
-    w.id = "word-" + i;
-    dictationContainer.appendChild(w);
-  });
+    const display = document.getElementById("wordDisplay");
+    const audio = document.getElementById("audioSlow");
+    let currentIndex = 0;
 
-  let currentIndex = -1;
-  let isPlaying = false;
-  const audio = document.getElementById("audio-animated");
-
-  function highlightWord(index) {
-    if (currentIndex >= 0) document.getElementById("word-" + currentIndex).classList.remove("active");
-    if (index >= 0 && index < timedWords.length) document.getElementById("word-" + index).classList.add("active");
-    currentIndex = index;
-  }
-
-  function updateWordHighlight() {
-    if (!isPlaying) return;
-    const currentTime = audio.currentTime;
-    let idx = timedWords.length - 1;
-    for (let i = 0; i < timedWords.length; i++) {
-      if (timedWords[i].start > currentTime) {
-        idx = i - 1;
-        break;
+    function syncWords() {
+      const currentTime = audio.currentTime;
+      if (currentIndex < timedWords.length && currentTime >= timedWords[currentIndex].time) {
+        display.textContent = timedWords[currentIndex].word;
+        currentIndex++;
       }
+      requestAnimationFrame(syncWords);
     }
-    if (idx !== currentIndex) highlightWord(idx);
-  }
 
-  audio.addEventListener("play", () => { isPlaying = true; });
-  audio.addEventListener("pause", () => { isPlaying = false; });
-  audio.addEventListener("timeupdate", updateWordHighlight);
-  audio.addEventListener("seeked", updateWordHighlight);
-  audio.addEventListener("ended", () => { highlightWord(-1); isPlaying = false; });
-  audio.addEventListener("pause", () => { if (audio.currentTime === 0) highlightWord(-1); });
+    audio.addEventListener("play", () => {
+      currentIndex = 0;
+      requestAnimationFrame(syncWords);
+    });
 
-  highlightWord(-1);
+    function audioJump(id, seconds) {
+      const audio = document.getElementById(id);
+      audio.currentTime += seconds;
+    }
   </script>
 </body>
 </html>
