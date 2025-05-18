@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictée animée - Zheng He</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1e293b;
+      padding: 30px;
+      max-width: 960px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #1d4ed8;
+    }
+    .word-display {
+      text-align: center;
+      font-size: 2rem;
+      padding: 30px;
+      margin: 40px 0;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 16px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .player-block {
+      margin: 30px 0;
+      padding: 20px;
+      background: #e0e7ff;
+      border-radius: 12px;
+    }
+    audio {
+      display: block;
+      margin: 10px auto;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 Dictée animée - Zheng He</h1>
+
+  <div class="player-block">
+    <h2>1. Dictée mot à mot (avec erreurs visuelles)</h2>
+    <audio id="audioSlow" src="version lente.mp3"></audio>
+    <div class="controls">
+      <button onclick="document.getElementById('audioSlow').play()">▶️ Lecture</button>
+      <button onclick="document.getElementById('audioSlow').pause()">⏸️ Pause</button>
+      <button onclick="audioJump('audioSlow', -5)">⏪ -5s</button>
+      <button onclick="audioJump('audioSlow', 5)">⏩ +5s</button>
+    </div>
+  </div>
+
+  <div class="word-display" id="wordDisplay">Clique sur Lecture</div>
+
+  <div class="player-block">
+    <h2>2. Relecture finale</h2>
+    <audio id="audioNormal" src="version normale de relecture (1).mp3"></audio>
+    <div class="controls">
+      <button onclick="document.getElementById('audioNormal').play()">▶️ Lecture</button>
+      <button onclick="document.getElementById('audioNormal').pause()">⏸️ Pause</button>
+      <button onclick="audioJump('audioNormal', -5)">⏪ -5s</button>
+      <button onclick="audioJump('audioNormal', 5)">⏩ +5s</button>
+    </div>
+  </div>
+
+  <script>
+    const wordList = [
+      "Zheng", "He", "est", "un", "gras", "navigateur", "chinois", "du", "XVe", "siècle", "Il", "est", "né", "dans", "les",
+      "montagne", "du", "sud-ouest", "de", "la", "Chine", "actuelle", "bien", "loin", "de", "la", "mer", "Mais", "un",
+      "évènement", "tragique", "vien", "modifier", "le", "cour", "de", "sa", "vie", "À", "treize", "ans", "il", "est",
+      "capturé", "par", "l’armer", "impériale", "Il", "serra", "alors", "forcé", "de", "servir", "l’empereur", "à", "la",
+      "cour", "Au", "fil", "du", "temps", "Zheng", "He", "réussi", "à", "se", "distinguer", "et", "à", "se", "faire",
+      "remarqué", "par", "l’empereur", "Il", "devient", "ainsi", "son", "plus", "fidele", "conseiller", "Vers", "1405",
+      "l’empereur", "confie", "à", "Zheng", "He", "une", "flotte", "gigantesque", "qui", "compte", "deux-cent-cinquante-cinq",
+      "navires", "Zheng", "He", "explore", "alors", "les", "îles", "de", "l’océan", "Indien", "puis", "se", "rend", "en",
+      "Égypte"
+    ];
+
+    const wordDisplay = document.getElementById("wordDisplay");
+    let wordIndex = 0;
+    let interval = null;
+
+    document.getElementById("audioSlow").addEventListener("play", () => {
+      wordIndex = 0;
+      clearInterval(interval);
+      interval = setInterval(() => {
+        if (wordIndex < wordList.length) {
+          wordDisplay.textContent = wordList[wordIndex];
+          wordIndex++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 700);
+    });
+
+    document.getElementById("audioSlow").addEventListener("pause", () => {
+      clearInterval(interval);
+    });
+
+    function audioJump(id, seconds) {
+      const audio = document.getElementById(id);
+      audio.currentTime += seconds;
+    }
+  </script>
+</body>
+</html>
