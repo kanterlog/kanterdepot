@@ -2,213 +2,22 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dictée animée - Zheng He</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f4f8;
-      color: #1e293b;
-      padding: 30px;
-      max-width: 960px;
-      margin: auto;
-    }
-    h1 {
-      text-align: center;
-      color: #1d4ed8;
-    }
-    .word-display {
-      text-align: center;
-      font-size: 2.2rem;
-      padding: 30px;
-      margin: 40px 0;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-      min-height: 70px;
-    }
-    .controls {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin: 10px 0;
-    }
-    button {
-      padding: 10px 16px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #2563eb;
-    }
-    .player-block {
-      margin: 30px 0;
-      padding: 20px;
-      background: #e0e7ff;
-      border-radius: 12px;
-    }
-    audio {
-      display: block;
-      margin: 10px auto;
-      width: 100%;
-    }
-  </style>
+  <title>Test audio DOMContentLoaded</title>
 </head>
 <body>
-  <h1>📚 Dictée animée - Zheng He</h1>
-
-  <div class="player-block">
-    <h2>1. Dictée audio synchronisée</h2>
-    <audio id="audioSlow" src="version lente.mp3"></audio>
-    <div class="controls">
-      <button onclick="document.getElementById('audioSlow').play()">▶️ Lecture</button>
-      <button onclick="document.getElementById('audioSlow').pause()">⏸️ Pause</button>
-      <button onclick="audioJump('audioSlow', -5)">⏪ -5s</button>
-      <button onclick="audioJump('audioSlow', 5)">⏩ +5s</button>
-    </div>
-  </div>
-
-  <div class="word-display" id="wordDisplay">Clique sur Lecture</div>
+  <audio id="audioSlow" src="version lente.mp3"></audio>
+  <div id="wordDisplay">Prêt !</div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const timedWords = [
-        { word: "Zheng", start: 0.0 },
-        { word: "He", start: 0.7 },
-        { word: "est", start: 1.4 },
-        { word: "un", start: 2.1 },
-        { word: "grand", start: 2.8 },
-        { word: "navigateur", start: 3.5 },
-        { word: "chinois", start: 4.2 },
-        { word: "du", start: 4.9 },
-        { word: "XVe", start: 5.6 },
-        { word: "siècle.", start: 6.3 },
-        { word: "Il", start: 7.0 },
-        { word: "est", start: 7.7 },
-        { word: "né", start: 8.4 },
-        { word: "dans", start: 9.1 },
-        { word: "les", start: 9.8 },
-        { word: "montagnes", start: 10.5 },
-        { word: "du", start: 11.2 },
-        { word: "sud-ouest", start: 11.9 },
-        { word: "de", start: 12.6 },
-        { word: "la", start: 13.3 },
-        { word: "Chine", start: 14.0 },
-        { word: "actuelle,", start: 14.7 },
-        { word: "bien", start: 15.4 },
-        { word: "loin", start: 16.1 },
-        { word: "de", start: 16.8 },
-        { word: "la", start: 17.5 },
-        { word: "mer.", start: 18.2 },
-        { word: "Mais", start: 18.9 },
-        { word: "un", start: 19.6 },
-        { word: "événement", start: 20.3 },
-        { word: "tragique", start: 21.0 },
-        { word: "vient", start: 21.7 },
-        { word: "modifier", start: 22.4 },
-        { word: "le", start: 23.1 },
-        { word: "cours", start: 23.8 },
-        { word: "de", start: 24.5 },
-        { word: "sa", start: 25.2 },
-        { word: "vie.", start: 25.9 },
-        { word: "À", start: 26.6 },
-        { word: "treize", start: 27.3 },
-        { word: "ans,", start: 28.0 },
-        { word: "il", start: 28.7 },
-        { word: "est", start: 29.4 },
-        { word: "capturé", start: 30.1 },
-        { word: "par", start: 30.8 },
-        { word: "l’armée", start: 31.5 },
-        { word: "impériale.", start: 32.2 },
-        { word: "Il", start: 32.9 },
-        { word: "sera", start: 33.6 },
-        { word: "alors", start: 34.3 },
-        { word: "forcé", start: 35.0 },
-        { word: "de", start: 35.7 },
-        { word: "servir", start: 36.4 },
-        { word: "l’empereur", start: 37.1 },
-        { word: "à", start: 37.8 },
-        { word: "la", start: 38.5 },
-        { word: "cour.", start: 39.2 },
-        { word: "Au", start: 39.9 },
-        { word: "fil", start: 40.6 },
-        { word: "du", start: 41.3 },
-        { word: "temps,", start: 42.0 },
-        { word: "Zheng", start: 42.7 },
-        { word: "He", start: 43.4 },
-        { word: "réussit", start: 44.1 },
-        { word: "à", start: 44.8 },
-        { word: "se", start: 45.5 },
-        { word: "distinguer", start: 46.2 },
-        { word: "et", start: 46.9 },
-        { word: "à", start: 47.6 },
-        { word: "se", start: 48.3 },
-        { word: "faire", start: 49.0 },
-        { word: "remarquer", start: 49.7 },
-        { word: "par", start: 50.4 },
-        { word: "l’empereur.", start: 51.1 },
-        { word: "Il", start: 51.8 },
-        { word: "devient", start: 52.5 },
-        { word: "ainsi", start: 53.2 },
-        { word: "son", start: 53.9 },
-        { word: "plus", start: 54.6 },
-        { word: "fidèle", start: 55.3 },
-        { word: "conseiller.", start: 56.0 },
-        { word: "Vers", start: 56.7 },
-        { word: "1405,", start: 57.4 },
-        { word: "l’empereur", start: 58.1 },
-        { word: "confie", start: 58.8 },
-        { word: "à", start: 59.5 },
-        { word: "Zheng", start: 60.2 },
-        { word: "He", start: 60.9 },
-        { word: "une", start: 61.6 },
-        { word: "flotte", start: 62.3 },
-        { word: "gigantesque", start: 63.0 },
-        { word: "qui", start: 63.7 },
-        { word: "compte", start: 64.4 },
-        { word: "deux-cent-cinquante-cinq", start: 65.1 },
-        { word: "navires.", start: 65.8 },
-        { word: "Zheng", start: 66.5 },
-        { word: "He", start: 67.2 },
-        { word: "explore", start: 67.9 },
-        { word: "alors", start: 68.6 },
-        { word: "les", start: 69.3 },
-        { word: "îles", start: 70.0 },
-        { word: "de", start: 70.7 },
-        { word: "l’océan", start: 71.4 },
-        { word: "Indien,", start: 72.1 },
-        { word: "puis", start: 72.8 },
-        { word: "se", start: 73.5 },
-        { word: "rend", start: 74.2 },
-        { word: "en", start: 74.9 },
-        { word: "Égypte.", start: 75.6 }
-      ];
-
-      const display = document.getElementById("wordDisplay");
-      const audio = document.getElementById("audioSlow");
-      let currentIndex = 0;
-
-      function syncWords() {
-        const currentTime = audio.currentTime;
-        if (currentIndex < timedWords.length && currentTime >= timedWords[currentIndex].start) {
-          display.textContent = timedWords[currentIndex].word;
-          currentIndex++;
-        }
-        requestAnimationFrame(syncWords);
-      }
-
-      audio.addEventListener("play", () => {
-        currentIndex = 0;
-        requestAnimationFrame(syncWords);
-      });
-
-      window.audioJump = function(id, seconds) {
-        const audio = document.getElementById(id);
-        audio.currentTime += seconds;
+      const audio = document.getElementById('audioSlow');
+      const display = document.getElementById('wordDisplay');
+      if (audio && display) {
+        audio.addEventListener('play', () => {
+          display.textContent = "Lecture !";
+        });
+      } else {
+        alert('audio ou display PAS trouvé !');
       }
     });
   </script>
