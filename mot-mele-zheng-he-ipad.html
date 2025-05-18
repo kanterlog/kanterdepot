@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mot Mêlé - Zheng He (iPad Friendly)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #e3f2fd;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      gap: 40px;
+    }
+    .left-section {
+      max-width: 70vw;
+    }
+    h1 {
+      color: #0d47a1;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(15, 35px);
+      grid-gap: 2px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .cell {
+      width: 35px;
+      height: 35px;
+      background: #fff;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cell.selected {
+      background-color: #ffcc80;
+    }
+    .cell.found {
+      background-color: #66bb6a;
+      color: #fff;
+    }
+    .word-list {
+      max-width: 300px;
+    }
+    .word-item {
+      padding: 8px 14px;
+      margin: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      font-weight: bold;
+      text-align: center;
+      font-size: 16px;
+    }
+    .word-item.found {
+      display: none;
+    }
+    button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      font-size: 16px;
+      background: #0d47a1;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    svg {
+      width: 100%;
+      height: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="left-section">
+    <h1>🌏 Mot Mêlé - Zheng He</h1>
+    <p style="text-align:center">Tape les lettres dans l'ordre, puis appuie sur "Valider le mot".</p>
+    <div id="grid" class="grid"></div>
+    <div style="text-align:center">
+      <button onclick="validateWord()">Valider le mot</button>
+    </div>
+    <svg viewBox="0 0 512 512">
+      <circle cx="256" cy="256" r="200" fill="#90caf9" />
+      <path d="M150 240 L220 180 L250 260 L300 210 L370 280" stroke="#0d47a1" stroke-width="8" fill="none" />
+    </svg>
+  </div>
+  <div class="word-list" id="wordList"></div>
+
+  <script>
+    const words = [
+      "EMPEREUR", "FLOTTE", "NAVIRES", "MONTAGNES", "CHINE",
+      "ZHENG", "HE", "COUR", "CONSEILLER", "VIE",
+      "EVENEMENT", "OCEAN", "INDIEN", "EGYPTE", "COTES",
+      "AFRICAINES", "COLOMB", "SIECLE", "ARMEE", "TEMPS"
+    ];
+
+    const gridSize = 15;
+    const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+    let selectedCells = [];
+
+    function placeWord(word) {
+      let placed = false;
+      while (!placed) {
+        const dir = Math.floor(Math.random() * 2); // 0 = horiz, 1 = vert
+        const x = Math.floor(Math.random() * (dir ? gridSize : gridSize - word.length));
+        const y = Math.floor(Math.random() * (dir ? gridSize - word.length : gridSize));
+        let fits = true;
+        for (let i = 0; i < word.length; i++) {
+          const cx = dir ? x : x + i;
+          const cy = dir ? y + i : y;
+          if (grid[cy][cx] && grid[cy][cx] !== word[i]) {
+            fits = false;
+            break;
+          }
+        }
+        if (!fits) continue;
+        for (let i = 0; i < word.length; i++) {
+          const cx = dir ? x : x + i;
+          const cy = dir ? y + i : y;
+          grid[cy][cx] = word[i];
+        }
+        placed = true;
+      }
+    }
+
+    words.forEach(placeWord);
+
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        if (!grid[y][x]) grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+      }
+    }
+
+    const gridElement = document.getElementById("grid");
+    function createCell(x, y, letter) {
+      const div = document.createElement("div");
+      div.classList.add("cell");
+      div.textContent = letter;
+      div.dataset.x = x;
+      div.dataset.y = y;
+      div.dataset.letter = letter;
+      div.addEventListener("click", () => {
+        if (!div.classList.contains("selected")) {
+          div.classList.add("selected");
+          selectedCells.push(div);
+        }
+      });
+      return div;
+    }
+
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        const cell = createCell(x, y, grid[y][x]);
+        gridElement.appendChild(cell);
+      }
+    }
+
+    function validateWord() {
+      if (!selectedCells.length) return;
+      const selectedWord = selectedCells.map(c => c.dataset.letter).join("");
+      const reverseWord = selectedWord.split("").reverse().join("");
+      const match = words.find(w => w === selectedWord || w === reverseWord);
+      if (match) {
+        selectedCells.forEach(c => {
+          c.classList.remove("selected");
+          c.classList.add("found");
+        });
+        document.querySelectorAll(".word-item").forEach(w => {
+          if (w.textContent === match) w.classList.add("found");
+        });
+      } else {
+        selectedCells.forEach(c => c.classList.remove("selected"));
+      }
+      selectedCells = [];
+    }
+
+    const wordListElement = document.getElementById("wordList");
+    words.forEach(w => {
+      const item = document.createElement("div");
+      item.classList.add("word-item");
+      item.textContent = w;
+      wordListElement.appendChild(item);
+    });
+  </script>
+</body>
+</html>
