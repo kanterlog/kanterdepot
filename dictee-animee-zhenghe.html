@@ -60,8 +60,9 @@
 <body>
   <h1>📚 Dictée animée - Zheng He</h1>
 
+  <!-- Bloc dictée mot à mot -->
   <div class="player-block">
-    <h2>1. Dictée audio synchronisée</h2>
+    <h2>1. Dictée mot à mot (avec erreurs visuelles)</h2>
     <audio id="audioSlow" src="version lente.mp3"></audio>
     <div class="controls">
       <button onclick="document.getElementById('audioSlow').play()">▶️ Lecture</button>
@@ -73,123 +74,137 @@
 
   <div class="word-display" id="wordDisplay">Clique sur Lecture</div>
 
+  <!-- Bloc relecture finale -->
+  <div class="player-block">
+    <h2>2. Relecture finale</h2>
+    <audio id="audioNormal" src="version normale de relecture (1).mp3"></audio>
+    <div class="controls">
+      <button onclick="document.getElementById('audioNormal').play()">▶️ Lecture</button>
+      <button onclick="document.getElementById('audioNormal').pause()">⏸️ Pause</button>
+      <button onclick="audioJump('audioNormal', -5)">⏪ -5s</button>
+      <button onclick="audioJump('audioNormal', 5)">⏩ +5s</button>
+    </div>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Timings générés par Whisper
       const timedWords = [
-        { word: "Zheng", start: 0.0 },
-        { word: "He", start: 0.7 },
-        { word: "est", start: 1.4 },
-        { word: "un", start: 2.1 },
-        { word: "grand", start: 2.8 },
-        { word: "navigateur", start: 3.5 },
-        { word: "chinois", start: 4.2 },
-        { word: "du", start: 4.9 },
-        { word: "XVe", start: 5.6 },
-        { word: "siècle.", start: 6.3 },
-        { word: "Il", start: 7.0 },
-        { word: "est", start: 7.7 },
-        { word: "né", start: 8.4 },
-        { word: "dans", start: 9.1 },
-        { word: "les", start: 9.8 },
-        { word: "montagnes", start: 10.5 },
-        { word: "du", start: 11.2 },
-        { word: "sud-ouest", start: 11.9 },
-        { word: "de", start: 12.6 },
-        { word: "la", start: 13.3 },
-        { word: "Chine", start: 14.0 },
-        { word: "actuelle,", start: 14.7 },
-        { word: "bien", start: 15.4 },
-        { word: "loin", start: 16.1 },
-        { word: "de", start: 16.8 },
-        { word: "la", start: 17.5 },
-        { word: "mer.", start: 18.2 },
-        { word: "Mais", start: 18.9 },
-        { word: "un", start: 19.6 },
-        { word: "événement", start: 20.3 },
-        { word: "tragique", start: 21.0 },
-        { word: "vient", start: 21.7 },
-        { word: "modifier", start: 22.4 },
-        { word: "le", start: 23.1 },
-        { word: "cours", start: 23.8 },
-        { word: "de", start: 24.5 },
-        { word: "sa", start: 25.2 },
-        { word: "vie.", start: 25.9 },
-        { word: "À", start: 26.6 },
-        { word: "treize", start: 27.3 },
-        { word: "ans,", start: 28.0 },
-        { word: "il", start: 28.7 },
-        { word: "est", start: 29.4 },
-        { word: "capturé", start: 30.1 },
-        { word: "par", start: 30.8 },
-        { word: "l’armée", start: 31.5 },
-        { word: "impériale.", start: 32.2 },
-        { word: "Il", start: 32.9 },
-        { word: "sera", start: 33.6 },
-        { word: "alors", start: 34.3 },
-        { word: "forcé", start: 35.0 },
-        { word: "de", start: 35.7 },
-        { word: "servir", start: 36.4 },
-        { word: "l’empereur", start: 37.1 },
-        { word: "à", start: 37.8 },
-        { word: "la", start: 38.5 },
-        { word: "cour.", start: 39.2 },
-        { word: "Au", start: 39.9 },
-        { word: "fil", start: 40.6 },
-        { word: "du", start: 41.3 },
-        { word: "temps,", start: 42.0 },
-        { word: "Zheng", start: 42.7 },
-        { word: "He", start: 43.4 },
-        { word: "réussit", start: 44.1 },
-        { word: "à", start: 44.8 },
-        { word: "se", start: 45.5 },
-        { word: "distinguer", start: 46.2 },
-        { word: "et", start: 46.9 },
-        { word: "à", start: 47.6 },
-        { word: "se", start: 48.3 },
-        { word: "faire", start: 49.0 },
-        { word: "remarquer", start: 49.7 },
-        { word: "par", start: 50.4 },
-        { word: "l’empereur.", start: 51.1 },
-        { word: "Il", start: 51.8 },
-        { word: "devient", start: 52.5 },
-        { word: "ainsi", start: 53.2 },
-        { word: "son", start: 53.9 },
-        { word: "plus", start: 54.6 },
-        { word: "fidèle", start: 55.3 },
-        { word: "conseiller.", start: 56.0 },
-        { word: "Vers", start: 56.7 },
-        { word: "1405,", start: 57.4 },
-        { word: "l’empereur", start: 58.1 },
-        { word: "confie", start: 58.8 },
-        { word: "à", start: 59.5 },
-        { word: "Zheng", start: 60.2 },
-        { word: "He", start: 60.9 },
-        { word: "une", start: 61.6 },
-        { word: "flotte", start: 62.3 },
-        { word: "gigantesque", start: 63.0 },
-        { word: "qui", start: 63.7 },
-        { word: "compte", start: 64.4 },
-        { word: "deux-cent-cinquante-cinq", start: 65.1 },
-        { word: "navires.", start: 65.8 },
-        { word: "Zheng", start: 66.5 },
-        { word: "He", start: 67.2 },
-        { word: "explore", start: 67.9 },
-        { word: "alors", start: 68.6 },
-        { word: "les", start: 69.3 },
-        { word: "îles", start: 70.0 },
-        { word: "de", start: 70.7 },
-        { word: "l’océan", start: 71.4 },
-        { word: "Indien,", start: 72.1 },
-        { word: "puis", start: 72.8 },
-        { word: "se", start: 73.5 },
-        { word: "rend", start: 74.2 },
-        { word: "en", start: 74.9 },
-        { word: "Égypte.", start: 75.6 }
+        { word: "Zheng", start: 0.15 },
+        { word: "He", start: 0.60 },
+        { word: "est", start: 1.00 },
+        { word: "un", start: 1.36 },
+        { word: "grand", start: 1.71 },
+        { word: "navigateur", start: 2.14 },
+        { word: "chinois", start: 2.63 },
+        { word: "du", start: 3.06 },
+        { word: "XVe", start: 3.19 },
+        { word: "siècle.", start: 3.56 },
+        { word: "Il", start: 4.12 },
+        { word: "est", start: 4.32 },
+        { word: "né", start: 4.48 },
+        { word: "dans", start: 4.72 },
+        { word: "les", start: 5.02 },
+        { word: "montagnes", start: 5.17 },
+        { word: "du", start: 5.53 },
+        { word: "sud-ouest", start: 5.68 },
+        { word: "de", start: 6.15 },
+        { word: "la", start: 6.30 },
+        { word: "Chine", start: 6.42 },
+        { word: "actuelle,", start: 6.77 },
+        { word: "bien", start: 7.15 },
+        { word: "loin", start: 7.34 },
+        { word: "de", start: 7.50 },
+        { word: "la", start: 7.65 },
+        { word: "mer.", start: 7.78 },
+        { word: "Mais", start: 8.22 },
+        { word: "un", start: 8.52 },
+        { word: "événement", start: 8.66 },
+        { word: "tragique", start: 9.12 },
+        { word: "vient", start: 9.48 },
+        { word: "modifier", start: 9.77 },
+        { word: "le", start: 10.11 },
+        { word: "cours", start: 10.27 },
+        { word: "de", start: 10.41 },
+        { word: "sa", start: 10.54 },
+        { word: "vie.", start: 10.67 },
+        { word: "À", start: 11.21 },
+        { word: "treize", start: 11.31 },
+        { word: "ans,", start: 11.55 },
+        { word: "il", start: 11.76 },
+        { word: "est", start: 12.08 },
+        { word: "capturé", start: 12.36 },
+        { word: "par", start: 12.71 },
+        { word: "l’armée", start: 12.91 },
+        { word: "impériale.", start: 13.20 },
+        { word: "Il", start: 13.72 },
+        { word: "sera", start: 13.97 },
+        { word: "alors", start: 14.22 },
+        { word: "forcé", start: 14.45 },
+        { word: "de", start: 14.66 },
+        { word: "servir", start: 14.88 },
+        { word: "l’empereur", start: 15.07 },
+        { word: "à", start: 15.33 },
+        { word: "la", start: 15.43 },
+        { word: "cour.", start: 15.52 },
+        { word: "Au", start: 15.99 },
+        { word: "fil", start: 16.18 },
+        { word: "du", start: 16.33 },
+        { word: "temps,", start: 16.45 },
+        { word: "Zheng", start: 16.81 },
+        { word: "He", start: 16.98 },
+        { word: "réussit", start: 17.32 },
+        { word: "à", start: 17.62 },
+        { word: "se", start: 17.76 },
+        { word: "distinguer", start: 17.93 },
+        { word: "et", start: 18.26 },
+        { word: "à", start: 18.44 },
+        { word: "se", start: 18.55 },
+        { word: "faire", start: 18.68 },
+        { word: "remarquer", start: 18.92 },
+        { word: "par", start: 19.16 },
+        { word: "l’empereur.", start: 19.39 },
+        { word: "Il", start: 19.85 },
+        { word: "devient", start: 19.99 },
+        { word: "ainsi", start: 20.19 },
+        { word: "son", start: 20.39 },
+        { word: "plus", start: 20.58 },
+        { word: "fidèle", start: 20.82 },
+        { word: "conseiller.", start: 21.15 },
+        { word: "Vers", start: 21.75 },
+        { word: "1405,", start: 21.90 },
+        { word: "l’empereur", start: 22.21 },
+        { word: "confie", start: 22.40 },
+        { word: "à", start: 22.62 },
+        { word: "Zheng", start: 22.81 },
+        { word: "He", start: 22.98 },
+        { word: "une", start: 23.17 },
+        { word: "flotte", start: 23.34 },
+        { word: "gigantesque", start: 23.60 },
+        { word: "qui", start: 23.91 },
+        { word: "compte", start: 24.06 },
+        { word: "deux-cent-cinquante-cinq", start: 24.27 },
+        { word: "navires.", start: 24.75 },
+        { word: "Zheng", start: 25.22 },
+        { word: "He", start: 25.38 },
+        { word: "explore", start: 25.66 },
+        { word: "alors", start: 25.96 },
+        { word: "les", start: 26.18 },
+        { word: "îles", start: 26.30 },
+        { word: "de", start: 26.46 },
+        { word: "l’océan", start: 26.65 },
+        { word: "Indien,", start: 26.94 },
+        { word: "puis", start: 27.18 },
+        { word: "se", start: 27.35 },
+        { word: "rend", start: 27.51 },
+        { word: "en", start: 27.61 },
+        { word: "Égypte.", start: 27.90 }
       ];
 
       const display = document.getElementById("wordDisplay");
       const audio = document.getElementById("audioSlow");
       let currentIndex = 0;
+      let rafID = null;
 
       function syncWords() {
         const currentTime = audio.currentTime;
@@ -197,18 +212,29 @@
           display.textContent = timedWords[currentIndex].word;
           currentIndex++;
         }
-        requestAnimationFrame(syncWords);
+        if (!audio.paused && !audio.ended) {
+          rafID = requestAnimationFrame(syncWords);
+        }
       }
 
       audio.addEventListener("play", () => {
         currentIndex = 0;
-        requestAnimationFrame(syncWords);
+        cancelAnimationFrame(rafID);
+        rafID = requestAnimationFrame(syncWords);
+      });
+
+      audio.addEventListener("pause", () => {
+        cancelAnimationFrame(rafID);
+      });
+
+      audio.addEventListener("ended", () => {
+        cancelAnimationFrame(rafID);
       });
 
       window.audioJump = function(id, seconds) {
-        const audio = document.getElementById(id);
-        audio.currentTime += seconds;
-      }
+        const audioElem = document.getElementById(id);
+        audioElem.currentTime += seconds;
+      };
     });
   </script>
 </body>
