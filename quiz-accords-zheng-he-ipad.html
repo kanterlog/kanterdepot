@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Accord - Zheng He</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f1f8e9;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+    h1 {
+      color: #33691e;
+    }
+    .question {
+      margin: 20px 0;
+      padding: 15px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .options button {
+      margin: 8px;
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #c5e1a5;
+      background: #e8f5e9;
+      cursor: pointer;
+    }
+    .options button.correct {
+      background: #a5d6a7;
+      color: white;
+    }
+    .options button.wrong {
+      background: #ef9a9a;
+      color: white;
+    }
+    #score {
+      margin-top: 30px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>📘 Quiz - Accords avec Zheng He</h1>
+  <p>Choisis la bonne réponse dans chaque phrase :</p>
+
+  <div class="question" data-answer="est">
+    1. À treize ans, il <b>___</b> capturé par l’armée impériale.<br>
+    <div class="options">
+      <button>est</button>
+      <button>sont</button>
+      <button>es</button>
+    </div>
+  </div>
+
+  <div class="question" data-answer="sera">
+    2. Il <b>___</b> alors forcé de servir l’empereur.
+    <div class="options">
+      <button>sera</button>
+      <button>serait</button>
+      <button>serons</button>
+    </div>
+  </div>
+
+  <div class="question" data-answer="réussit">
+    3. Zheng He <b>___</b> à se faire remarquer.
+    <div class="options">
+      <button>réussit</button>
+      <button>réussissent</button>
+      <button>réussis</button>
+    </div>
+  </div>
+
+  <div class="question" data-answer="fidèle">
+    4. Il devient ainsi son plus <b>___</b> conseiller.
+    <div class="options">
+      <button>fidèle</button>
+      <button>fidèles</button>
+      <button>fidèlesse</button>
+    </div>
+  </div>
+
+  <div class="question" data-answer="temps">
+    5. Au fil du <b>___</b>, il se distingue.
+    <div class="options">
+      <button>temps</button>
+      <button>temp</button>
+      <button>tempss</button>
+    </div>
+  </div>
+
+  <div class="question" data-answer="devient">
+    6. Il <b>___</b> un conseiller important.
+    <div class="options">
+      <button>devient</button>
+      <button>deviens</button>
+      <button>devenez</button>
+    </div>
+  </div>
+
+  <div id="score"></div>
+
+  <script>
+    let total = 0;
+    let correct = 0;
+
+    document.querySelectorAll('.question').forEach(q => {
+      const answer = q.dataset.answer;
+      const buttons = q.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('correct') || btn.classList.contains('wrong')) return;
+          total++;
+          if (btn.textContent === answer) {
+            btn.classList.add('correct');
+            correct++;
+          } else {
+            btn.classList.add('wrong');
+            buttons.forEach(b => {
+              if (b.textContent === answer) b.classList.add('correct');
+            });
+          }
+          if (total === 6) {
+            document.getElementById('score').textContent = `🎉 Score : ${correct} / 6`;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
