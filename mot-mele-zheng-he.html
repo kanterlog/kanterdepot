@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mot Mêlé - Zheng He</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f8ff;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    h1 {
+      color: #336699;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(15, 40px);
+      grid-gap: 2px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      background: #fff;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cell.selected {
+      background-color: #ffeb3b;
+    }
+    .cell.found {
+      background-color: #a5d6a7;
+      color: #fff;
+    }
+    .word-list {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .word-item {
+      padding: 6px 12px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+      background: #fff;
+      transition: 0.2s;
+    }
+    .word-item.found {
+      background: #4caf50;
+      color: white;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌐 Mot Mêlé - Zheng He</h1>
+  <p>Trouve les 20 mots cachés dans la grille. Clique et fais glisser pour sélectionner !</p>
+
+  <div id="grid" class="grid"></div>
+
+  <div class="word-list" id="wordList"></div>
+
+  <script>
+    const words = [
+      "EMPEREUR", "FLOTTE", "NAVIRES", "MONTAGNES", "CHINE",
+      "ZHENG", "HE", "COUR", "CONSEILLER", "VIE",
+      "EVENEMENT", "OCEAN", "INDIEN", "EGYPTE", "COTES",
+      "AFRICAINES", "COLOMB", "SIECLE", "ARMEE", "TEMPS"
+    ];
+
+    const gridSize = 15;
+    const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+
+    function placeWord(word) {
+      let placed = false;
+      while (!placed) {
+        const dir = Math.floor(Math.random() * 2); // 0 = horiz, 1 = vert
+        const x = Math.floor(Math.random() * (dir ? gridSize : gridSize - word.length));
+        const y = Math.floor(Math.random() * (dir ? gridSize - word.length : gridSize));
+
+        let fits = true;
+        for (let i = 0; i < word.length; i++) {
+          const cx = dir ? x : x + i;
+          const cy = dir ? y + i : y;
+          if (grid[cy][cx] && grid[cy][cx] !== word[i]) {
+            fits = false;
+            break;
+          }
+        }
+        if (!fits) continue;
+
+        for (let i = 0; i < word.length; i++) {
+          const cx = dir ? x : x + i;
+          const cy = dir ? y + i : y;
+          grid[cy][cx] = word[i];
+        }
+        placed = true;
+      }
+    }
+
+    words.forEach(word => placeWord(word));
+
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        if (!grid[y][x]) {
+          const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+          grid[y][x] = letter;
+        }
+      }
+    }
+
+    const gridElement = document.getElementById("grid");
+    const wordListElement = document.getElementById("wordList");
+    let isSelecting = false;
+    let selectedCells = [];
+
+    function createCell(x, y, letter) {
+      const div = document.createElement("div");
+      div.classList.add("cell");
+      div.textContent = letter;
+      div.dataset.x = x;
+      div.dataset.y = y;
+      div.dataset.letter = letter;
+      div.addEventListener("mousedown", () => {
+        isSelecting = true;
+        clearSelection();
+        div.classList.add("selected");
+        selectedCells.push(div);
+      });
+      div.addEventListener("mouseover", () => {
+        if (isSelecting && !selectedCells.includes(div)) {
+          div.classList.add("selected");
+          selectedCells.push(div);
+        }
+      });
+      return div;
+    }
+
+    function clearSelection() {
+      selectedCells.forEach(c => c.classList.remove("selected"));
+      selectedCells = [];
+    }
+
+    function finalizeSelection() {
+      if (!selectedCells.length) return;
+      const selectedWord = selectedCells.map(c => c.dataset.letter).join("");
+      const reverseWord = selectedWord.split("").reverse().join("");
+      const match = words.find(w => w === selectedWord || w === reverseWord);
+      if (match) {
+        selectedCells.forEach(c => {
+          c.classList.remove("selected");
+          c.classList.add("found");
+        });
+        document.querySelectorAll(".word-item").forEach(w => {
+          if (w.textContent === match) w.classList.add("found");
+        });
+      } else {
+        clearSelection();
+      }
+    }
+
+    document.body.addEventListener("mouseup", () => {
+      isSelecting = false;
+      finalizeSelection();
+    });
+
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        const cell = createCell(x, y, grid[y][x]);
+        gridElement.appendChild(cell);
+      }
+    }
+
+    words.forEach(w => {
+      const item = document.createElement("div");
+      item.classList.add("word-item");
+      item.textContent = w;
+      wordListElement.appendChild(item);
+    });
+  </script>
+</body>
+</html>
