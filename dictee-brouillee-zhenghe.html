@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dictée brouillée - Zheng He</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f4f8;
+      padding: 30px;
+      max-width: 960px;
+      margin: auto;
+      color: #374151;
+    }
+    h1 {
+      text-align: center;
+      color: #1e40af;
+    }
+    .bloc {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .phrase {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+    .choices {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .choice {
+      background: #e0e7ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .choice:hover {
+      background: #c7d2fe;
+    }
+    .correct {
+      background: #bbf7d0 !important;
+      color: #065f46;
+      font-weight: bold;
+    }
+    .wrong {
+      background: #fecaca !important;
+      color: #991b1b;
+    }
+    #result {
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📃 Dictée Brouillée - Zheng He</h1>
+
+  <div class="bloc" data-answer="grand">
+    <div class="phrase">Zheng He est un <span class="drop">___</span> navigateur chinois.</div>
+    <div class="choices">
+      <span class="choice">gras</span>
+      <span class="choice">grain</span>
+      <span class="choice">grand</span>
+    </div>
+  </div>
+
+  <div class="bloc" data-answer="montagnes">
+    <div class="phrase">Il est né dans les <span class="drop">___</span> du sud-ouest.</div>
+    <div class="choices">
+      <span class="choice">montagnards</span>
+      <span class="choice">montagnes</span>
+      <span class="choice">montagne</span>
+    </div>
+  </div>
+
+  <div class="bloc" data-answer="vient">
+    <div class="phrase">Un événement tragique <span class="drop">___</span> bouleverser sa vie.</div>
+    <div class="choices">
+      <span class="choice">vien</span>
+      <span class="choice">vient</span>
+      <span class="choice">viont</span>
+    </div>
+  </div>
+
+  <div class="bloc" data-answer="armée">
+    <div class="phrase">Il est capturé par l'<span class="drop">___</span> impériale.</div>
+    <div class="choices">
+      <span class="choice">armer</span>
+      <span class="choice">armée</span>
+      <span class="choice">armé</span>
+    </div>
+  </div>
+
+  <div class="bloc" data-answer="sera">
+    <div class="phrase">Il <span class="drop">___</span> alors forcé de servir l’empereur.</div>
+    <div class="choices">
+      <span class="choice">sera</span>
+      <span class="choice">serra</span>
+      <span class="choice">seras</span>
+    </div>
+  </div>
+
+  <div class="bloc" data-answer="fidèle">
+    <div class="phrase">Il devient son plus <span class="drop">___</span> conseiller.</div>
+    <div class="choices">
+      <span class="choice">fidele</span>
+      <span class="choice">fidèle</span>
+      <span class="choice">fidels</span>
+    </div>
+  </div>
+
+  <div id="result"></div>
+
+  <script>
+    const blocs = document.querySelectorAll('.bloc');
+    let score = 0;
+
+    blocs.forEach(bloc => {
+      const answer = bloc.dataset.answer;
+      const choices = bloc.querySelectorAll('.choice');
+      const drop = bloc.querySelector('.drop');
+
+      choices.forEach(choice => {
+        choice.addEventListener('click', () => {
+          if (drop.textContent !== '___') return;
+
+          const selected = choice.textContent;
+          drop.textContent = selected;
+
+          if (selected === answer) {
+            choice.classList.add('correct');
+            score++;
+          } else {
+            choice.classList.add('wrong');
+          }
+
+          if (score === blocs.length) {
+            document.getElementById('result').textContent = `✨ Bravo ! Tu as tout corrigé.`;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
