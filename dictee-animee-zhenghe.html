@@ -75,7 +75,7 @@
   <div class="word-display" id="wordDisplay">Clique sur Lecture</div>
 
   <script>
-    window.onload = function () {
+    document.addEventListener('DOMContentLoaded', function () {
       const timedWords = [
         { word: "Zheng", start: 0.0 },
         { word: "He", start: 0.7 },
@@ -210,7 +210,7 @@
         const audio = document.getElementById(id);
         audio.currentTime += seconds;
       }
-    };
+    });
   </script>
 </body>
 </html>
