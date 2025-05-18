@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Correction Magique - Zheng He</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+      padding: 30px;
+      max-width: 960px;
+      margin: auto;
+      color: #263238;
+    }
+    h1 {
+      text-align: center;
+      color: #1e88e5;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+    }
+    p {
+      font-size: 1.25rem;
+      line-height: 2em;
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .wrong {
+      cursor: pointer;
+      position: relative;
+      transition: 0.4s;
+      border-bottom: 2px dashed transparent;
+    }
+    .wrong:hover {
+      border-color: #90caf9;
+    }
+    .corrected {
+      color: #43a047;
+      font-weight: 600;
+      background: linear-gradient(to right, #dcedc8, #c8e6c9);
+      border-radius: 6px;
+      padding: 0 4px;
+    }
+    .sparkle, .blast {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .sparkle {
+      width: 8px;
+      height: 8px;
+      background: gold;
+      animation: sparkle 0.6s linear forwards;
+    }
+    .blast {
+      width: 25px;
+      height: 25px;
+      background: radial-gradient(circle, red, orange);
+      box-shadow: 0 0 20px 6px rgba(255,87,34,0.8);
+      animation: boom 0.5s ease-out forwards;
+      z-index: 2;
+    }
+    @keyframes sparkle {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(2) translateY(-20px); }
+    }
+    @keyframes boom {
+      0% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(3); }
+    }
+  </style>
+</head>
+<body>
+  <h1>💥 Correction Magique - Zheng He</h1>
+  <p>
+    Vers <span class="wrong" data-correct="1405">14055</span>, l’empereur confie à Zheng He une <span class="wrong" data-correct="flotte">flote</span> <span class="wrong" data-correct="gigantesque">giganteste</span> qui <span class="wrong" data-correct="compte">compt</span> deux-cent-cinquante-cinq <span class="wrong" data-correct="navires">navire</span>. <span class="wrong" data-correct="Zheng">Zeng</span> He <span class="wrong" data-correct="explore">explor</span> alors les îles de l’<span class="wrong" data-correct="océan">océan</span> Indien, <span class="wrong" data-correct="puis">puit</span> se rend en <span class="wrong" data-correct="Égypte">Egipte</span>…
+  </p>
+
+  <script>
+    const wrongs = document.querySelectorAll('.wrong');
+
+    wrongs.forEach(el => {
+      el.style.color = "inherit";
+      el.addEventListener('click', (e) => {
+        if (el.classList.contains('corrected')) return;
+
+        const text = el.dataset.correct;
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const blast = document.createElement('div');
+        blast.classList.add('blast');
+        blast.style.left = x + 'px';
+        blast.style.top = y + 'px';
+        el.appendChild(blast);
+        setTimeout(() => blast.remove(), 500);
+
+        for (let i = 0; i < 12; i++) {
+          const sparkle = document.createElement('div');
+          sparkle.classList.add('sparkle');
+          sparkle.style.left = Math.random() * 100 + '%';
+          sparkle.style.top = Math.random() * 40 + '%';
+          el.appendChild(sparkle);
+          setTimeout(() => sparkle.remove(), 600);
+        }
+
+        setTimeout(() => {
+          el.textContent = text;
+          el.classList.add('corrected');
+        }, 300);
+      });
+    });
+  </script>
+</body>
+</html>
