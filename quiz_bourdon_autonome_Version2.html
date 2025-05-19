@@ -82,6 +82,13 @@
       75% { transform: translateX(-5px); }
       100% { transform: translateX(0); }
     }
+    .final-image {
+      display: block;
+      margin: 30px auto;
+      max-width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
@@ -106,45 +113,65 @@
       { question: "Qu’est-ce qui recouvre son corps ?", image: "q10.jpg", answers: { a: "Poils", b: "Carapace", c: "Écailles" }, correct: "a" },
       { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" },
     ];
+
     let currentQuestion = 0;
     let score = 0;
     let answeredCorrectly = Array(quizData.length).fill(false);
+
     const scoreCounter = document.getElementById("score-counter");
     const questionArea = document.getElementById("question-area");
     const prevBtn = document.getElementById("prev-btn");
+
     function updateScore() {
       scoreCounter.textContent = `Score: ${score}`;
     }
+
+    function showFinalScreen() {
+      questionArea.innerHTML = '';
+      const finalImage = document.createElement("img");
+      finalImage.className = "final-image";
+      if (score >= 8) {
+        finalImage.src = "IMG20250516160347 (2).jpg";
+      } else {
+        finalImage.src = "IMG20250516160354.jpg";
+      }
+      questionArea.appendChild(finalImage);
+      document.querySelector(".nav-buttons").style.display = "none";
+    }
+
     function renderQuestion(index) {
       const q = quizData[index];
-      let html = `<img class="question-image" src="${q.image}" alt="Illustration question"><div class="question-text">${q.question}</div><div class="answers">`;
+      let html = `<img class="question-image" src="${q.image}" alt="Illustration question">
+        <div class="question-text">${q.question}</div>
+        <div class="answers">`;
       for (let key in q.answers) {
         html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}"> ${q.answers[key]}</label>`;
       }
       html += `</div>`;
       questionArea.innerHTML = html;
+
       document.querySelectorAll(".answers label").forEach(label => {
         label.addEventListener("click", () => {
           const selected = label.getAttribute("data-key");
           const correct = q.correct;
           const labels = document.querySelectorAll(".answers label");
           labels.forEach(l => l.classList.remove("correct", "wrong"));
+
           if (selected === correct) {
             label.classList.add("correct");
             if (!answeredCorrectly[index]) {
               score += 1;
               answeredCorrectly[index] = true;
               updateScore();
-              setTimeout(() => {
-                if (currentQuestion < quizData.length - 1) {
-                  currentQuestion++;
-                  renderQuestion(currentQuestion);
-                } else {
-                  questionArea.innerHTML = `<div class='question-text'>Quiz terminé !<br>Score final : ${score}</div>`;
-                  document.querySelector(".nav-buttons").style.display = "none";
-                }
-              }, 800);
             }
+            setTimeout(() => {
+              if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion(currentQuestion);
+              } else {
+                showFinalScreen();
+              }
+            }, 800);
           } else {
             label.classList.add("wrong");
             score -= 1;
@@ -152,14 +179,17 @@
           }
         });
       });
+
       prevBtn.disabled = index === 0;
     }
+
     prevBtn.onclick = () => {
       if (currentQuestion > 0) {
         currentQuestion--;
         renderQuestion(currentQuestion);
       }
     };
+
     renderQuestion(currentQuestion);
     updateScore();
   </script>
