@@ -1,109 +1,128 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiz Bourdon</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #eafbe7;
-      margin: 0;
-      padding: 0;
       color: #235027;
-      text-align: center;
     }
     #quiz-container {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
+      max-width: 520px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+      position: relative;
+    }
+    #score-counter {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      font-size: 1.5em;
+      background: #d4fbe0;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: bold;
+      color: #2e7d32;
     }
     .question-image {
       width: 100%;
-      max-height: 300px;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 14px;
+      box-shadow: 0 3px 12px #0001;
+      margin-bottom: 20px;
     }
     .question-text {
-      font-size: 1.3em;
-      margin: 20px 0 10px;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 16px;
     }
     .answers label {
       display: block;
-      background: #f0fff3;
-      margin: 10px auto;
-      padding: 12px;
-      border-radius: 10px;
-      max-width: 400px;
-      cursor: pointer;
+      background: #e8f8ec;
+      border-radius: 12px;
+      padding: 14px;
+      margin: 10px 0;
       border: 3px solid transparent;
+      cursor: pointer;
       transition: 0.2s;
     }
-    .answers input[type="radio"] {
-      display: none;
-    }
     .answers label.correct {
-      background: #c8fdd4;
-      border-color: #23a123;
-      animation: pulseGreen 0.3s ease-in-out;
+      background: #d0ffd8;
+      border-color: #25c211;
+      animation: pulse-green 0.6s ease;
     }
     .answers label.wrong {
       background: #ffd6d6;
       border-color: #e74c3c;
-      animation: shakeRed 0.3s ease-in-out;
+      animation: shake-red 0.3s ease;
     }
-    @keyframes pulseGreen {
+    @keyframes pulse-green {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-    @keyframes shakeRed {
-      0%, 100% { transform: translateX(0); }
+    @keyframes shake-red {
+      0% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
       50% { transform: translateX(5px); }
-      75% { transform: translateX(-3px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
     }
-    #score {
-      font-weight: bold;
-      font-size: 1.2em;
-      margin-bottom: 20px;
+    .nav-buttons {
+      margin-top: 24px;
+      text-align: right;
     }
-    #final-screen {
-      position: relative;
-      display: none;
-    }
-    #final-screen img {
-      width: 100%;
-      border-radius: 16px;
-    }
-    #final-score-text {
-      position: absolute;
-      top: 25%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 2em;
-      color: #d62828;
-      background: rgba(255,255,255,0.7);
-      padding: 12px 20px;
+    .nav-buttons button {
+      padding: 12px 24px;
+      border: none;
+      background: #7bcf94;
       border-radius: 10px;
       font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .final-container {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 320px;
+      margin: 30px auto;
+      background-size: cover;
+      background-position: center;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .final-score {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.8);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #e84393;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
   <div id="quiz-container">
-    <div id="score">Score : 0</div>
+    <div id="score-counter">Score: 0</div>
     <div id="question-area"></div>
-  </div>
-
-  <div id="final-screen">
-    <img id="final-img" src="" alt="Résultat">
-    <div id="final-score-text"></div>
+    <div class="nav-buttons">
+      <button id="prev-btn">Précédent</button>
+    </div>
   </div>
 
   <script>
-    const quiz = [
+    const quizData = [
       { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "q1.jpg", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
       { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "q2.jpg", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
       { question: "Où vit le bourdon ?", image: "q3.jpg", answers: { a: "Plaines et montagnes", b: "Déserts", c: "Villes" }, correct: "a" },
@@ -114,71 +133,87 @@
       { question: "Quelle taille fait-il ?", image: "q8.jpg", answers: { a: "12 mm", b: "25 mm", c: "50 mm" }, correct: "b" },
       { question: "Une colonie peut contenir combien d’individus ?", image: "q9.jpg", answers: { a: "100 à 200", b: "300 à 500", c: "4000 à 6000" }, correct: "b" },
       { question: "Qu’est-ce qui recouvre son corps ?", image: "q10.jpg", answers: { a: "Poils", b: "Carapace", c: "Écailles" }, correct: "a" },
-      { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" }
+      { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" },
     ];
 
-    let current = 0;
+    let currentQuestion = 0;
     let score = 0;
+    let answeredCorrectly = Array(quizData.length).fill(false);
 
-    function renderQuestion() {
-      const container = document.getElementById("question-area");
-      const q = quiz[current];
+    const questionArea = document.getElementById("question-area");
+    const scoreCounter = document.getElementById("score-counter");
+    const prevBtn = document.getElementById("prev-btn");
 
-      container.innerHTML = `
-        <img src="${q.image}" class="question-image" alt="">
+    function updateScore() {
+      scoreCounter.textContent = `Score: ${score}`;
+    }
+
+    function renderQuestion(index) {
+      const q = quizData[index];
+      let html = `<img class="question-image" src="${q.image}" alt="Image question">
         <div class="question-text">${q.question}</div>
-        <div class="answers">
-          ${Object.entries(q.answers).map(([key, val]) => `
-            <label data-key="${key}">
-              <input type="radio" name="answer" value="${key}">
-              ${val}
-            </label>
-          `).join("")}
+        <div class="answers">`;
+      for (let key in q.answers) {
+        html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}"> ${q.answers[key]}</label>`;
+      }
+      html += `</div>`;
+      questionArea.innerHTML = html;
+
+      document.querySelectorAll(".answers label").forEach(label => {
+        label.addEventListener("click", () => {
+          const selected = label.getAttribute("data-key");
+          const correct = q.correct;
+          const labels = document.querySelectorAll(".answers label");
+          labels.forEach(l => l.classList.remove("correct", "wrong"));
+
+          if (selected === correct) {
+            label.classList.add("correct");
+            if (!answeredCorrectly[index]) {
+              score += 1;
+              answeredCorrectly[index] = true;
+              updateScore();
+            }
+            setTimeout(() => {
+              if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                renderQuestion(currentQuestion);
+              } else {
+                showFinalScreen();
+              }
+            }, 800);
+          } else {
+            label.classList.add("wrong");
+            score -= 1;
+            updateScore();
+          }
+        });
+      });
+
+      prevBtn.disabled = index === 0;
+    }
+
+    function showFinalScreen() {
+      questionArea.innerHTML = '';
+      const image = (score >= 8) ? "felicitation.png" : "dommage.png";
+
+      questionArea.innerHTML = `
+        <div class="final-container" style="background-image: url('${image}');">
+          <div class="final-score">Score : ${score} / 11</div>
         </div>
       `;
 
-      const labels = container.querySelectorAll("label");
-      labels.forEach(label => {
-        label.onclick = () => {
-          const userAnswer = label.dataset.key;
-          labels.forEach(l => l.classList.remove("correct", "wrong"));
-          if (userAnswer === q.correct) {
-            label.classList.add("correct");
-            score++;
-            updateScore();
-            setTimeout(() => {
-              current++;
-              if (current < quiz.length) {
-                renderQuestion();
-              } else {
-                showFinal();
-              }
-            }, 700);
-          } else {
-            label.classList.add("wrong");
-            score--;
-            updateScore();
-          }
-        };
-      });
+      document.querySelector(".nav-buttons").style.display = "none";
     }
 
-    function updateScore() {
-      document.getElementById("score").textContent = `Score : ${score}`;
-    }
+    prevBtn.onclick = () => {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion(currentQuestion);
+      }
+    };
 
-    function showFinal() {
-      document.getElementById("quiz-container").style.display = "none";
-      const final = document.getElementById("final-screen");
-      const scoreText = document.getElementById("final-score-text");
-      const finalImg = document.getElementById("final-img");
-
-      finalImg.src = score >= 8 ? "felicitation.png" : "dommage.png";
-      scoreText.textContent = `Score : ${score} sur ${quiz.length}`;
-      final.style.display = "block";
-    }
-
-    renderQuestion();
+    renderQuestion(currentQuestion);
+    updateScore();
   </script>
 </body>
 </html>
