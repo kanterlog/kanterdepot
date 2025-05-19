@@ -1,2 +1,489 @@
+--- START OF FILE quiz_bourdon_autonome_Version2.html ---
 
-l
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Nature : Le Bourdon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', 'Arial Rounded MT Bold', Arial, sans-serif;
+      background: #eafbe7;
+      min-height: 100vh;
+      color: #235027;
+      position: relative;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      overflow-x: hidden;
+    }
+    .nature-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(220, 255, 220, 0.35);
+      z-index: 0;
+      pointer-events: none;
+    }
+    #quiz-container {
+      position: relative;
+      background: rgba(255,255,255,0.93);
+      max-width: 520px;
+      margin: 4vh auto 0 auto;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+      padding: 3.5vh 4vw 3vh 4vw;
+      z-index: 1;
+      min-height: 50vh;
+      transition: box-shadow 0.2s;
+    }
+    #score-counter {
+      position: absolute;
+      top: 2.5vh;
+      right: 4vw;
+      font-size: 1.5em;
+      background: #e1f5e8;
+      border-radius: 16px;
+      padding: 7px 22px;
+      box-shadow: 0 2px 8px rgba(0,80,30,0.08);
+      font-weight: bold;
+      color: #39753e;
+      letter-spacing: 1px;
+      z-index: 2;
+    }
+    .question-image {
+      width: 100%;
+      max-width: 480px;
+      display: block;
+      margin: 0 auto 22px auto;
+      border-radius: 15px;
+      box-shadow: 0 3px 16px #0001;
+      user-select: none;
+      pointer-events: none;
+      background: #fdf6e3;
+    }
+    .question-text {
+      font-size: 1.25em;
+      margin-bottom: 2vh;
+      font-weight: 600;
+      text-align: center;
+      color: #2e5c28;
+      letter-spacing: 0.2px;
+    }
+    .answers label {
+      display: block;
+      background: #e8f8ec;
+      border-radius: 13px;
+      margin: 2.3vh 0;
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.25s, transform 0.12s, border-color 0.2s;
+      border: 3px solid transparent;
+      font-size: 1.13em;
+      min-height: 3em;
+      box-sizing: border-box;
+      touch-action: manipulation;
+    }
+    .answers input[type="radio"] {
+      accent-color: #74bb7b;
+      margin-right: 15px;
+      transform: scale(1.5);
+      vertical-align: middle;
+      pointer-events: none;
+      touch-action: manipulation;
+    }
+    .answers label.selected {
+      background: #b6e7c9;
+      border-color: #4caf50;
+      transform: scale(1.04);
+    }
+    .answers label.correct {
+      animation: leafPop 0.9s cubic-bezier(.66,-0.11,.38,1.39);
+      background: #d0ffd8;
+      border-color: #25c211;
+      box-shadow: 0 0 24px 0 #6dd67c70;
+      color: #1c531f;
+    }
+    @keyframes leafPop {
+      0% { box-shadow: 0 0 0 0 #6dd67c00; transform: scale(1);}
+      70%{ box-shadow: 0 0 32px 6px #6dd67c88; transform: scale(1.08);}
+      100%{ box-shadow: 0 0 0 0 #6dd67c00; transform: scale(1);}
+    }
+    .answers label.wrong {
+      animation: wrongShake 0.3s cubic-bezier(.68,-0.55,.27,1.55);
+      background: #ffd6d6;
+      border-color: #e74c3c;
+      color: #a02d2d;
+    }
+    @keyframes wrongShake {
+      0% { transform: translateX(0);}
+      20% { transform: translateX(-7px);}
+      40% { transform: translateX(7px);}
+      60% { transform: translateX(-4px);}
+      80% { transform: translateX(4px);}
+      100% { transform: translateX(0);}
+    }
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 3vh;
+      gap: 10vw;
+    }
+    .nav-buttons button {
+      flex: 1 1 0;
+      background: linear-gradient(90deg, #68be7c 0%, #b6e7c9 100%);
+      color: #245223;
+      padding: 16px 6vw;
+      border: none;
+      border-radius: 13px;
+      font-size: 1.13em;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 2px 14px rgba(42, 111, 61, 0.09);
+      transition: background 0.18s, transform 0.13s;
+      min-width: 110px;
+      margin: 0 6px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .nav-buttons button:active {
+      background: #97cbad;
+      transform: scale(0.98);
+    }
+    #final-score {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 1.5em;
+      color: #2d5c2b;
+      margin-top: 22px;
+      text-align: center;
+      min-height: 350px;
+    }
+    .final-manuscrit {
+      position: relative;
+      max-width: 95vw;
+      margin: 0 auto;
+      padding: 5vw 4vw 32px 4vw;
+      border: 3px solid #e84393;
+      border-radius: 30px 30px 30px 30px;
+      background: url('data:image/svg+xml;utf8,<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg"><rect fill="white" width="100%" height="100%"/><g><rect fill="none" stroke="%23adcbe2" stroke-width="1" width="100%" height="100%"/><g stroke="%23adcbe2" stroke-width="1"><line x1="0" y1="25" x2="400" y2="25"/><line x1="0" y1="50" x2="400" y2="50"/><line x1="0" y1="75" x2="400" y2="75"/><line x1="0" y1="100" x2="400" y2="100"/><line x1="0" y1="125" x2="400" y2="125"/><line x1="0" y1="150" x2="400" y2="150"/><line x1="0" y1="175" x2="400" y2="175"/><line x1="0" y1="200" x2="400" y2="200"/><line x1="0" y1="225" x2="400" y2="225"/><line x1="0" y1="250" x2="400" y2="250"/><line x1="0" y1="275" x2="400" y2="275"/></g></g></svg>'), repeating-linear-gradient(0deg, #fff, #fff 23px, #c4e2ff44 23px, #c4e2ff44 24px);
+      background-size: cover;
+      box-shadow: 0 2px 24px 0 #e8439320;
+      font-family: 'Comic Sans MS', 'Segoe Print', 'Segoe Script', cursive, sans-serif;
+      color: #e84393;
+      font-size: 1.2em;
+      line-height: 1.5em;
+      text-align: left;
+      margin-top: 10px;
+      word-break: break-word;
+    }
+    .final-manuscrit.heart:after {
+      content: "♥";
+      color: #e84393;
+      font-size: 2.2em;
+      position: absolute;
+      bottom: 20px;
+      right: 30px;
+      user-select: none;
+      pointer-events: none;
+    }
+    .final-manuscrit .score-big {
+      font-size: 1.4em;
+      color: #e84393;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .final-manuscrit .msg-title {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #e84393;
+      margin-bottom: 6px;
+    }
+    .final-manuscrit .msg-sub {
+      font-size: 1em;
+      color: #e84393;
+      margin-bottom: 14px;
+    }
+    .final-manuscrit .tryagain {
+      color: #e84393;
+      margin-top: 12px;
+      font-size: 1.1em;
+      font-style: italic;
+    }
+    .leaf {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><ellipse cx="24" cy="24" rx="18" ry="12" fill="%2368be7c" stroke="none" /><ellipse cx="24" cy="24" rx="16" ry="10" fill="white" opacity="0.16"/></svg>') no-repeat center/contain;
+      opacity: 0.4;
+      z-index: 2;
+      pointer-events: none;
+      animation: floatLeaf 7s infinite alternate ease-in-out;
+    }
+    .leaf.l1 { top: 10px; left: 20px; animation-delay: 0s;}
+    .leaf.l2 { top: 40px; right: 20px; animation-delay: 2s;}
+    .leaf.l3 { bottom: 30px; left: 30px; animation-delay: 1.5s;}
+    .leaf.l4 { bottom: 60px; right: 35px; animation-delay: 3.7s;}
+    @keyframes floatLeaf {
+      0% { transform: translateY(0) rotate(-10deg);}
+      100% { transform: translateY(25px) rotate(12deg);}
+    }
+    @media (max-width: 900px) {
+      #quiz-container {
+        max-width: 99vw;
+      }
+      .final-manuscrit {
+        max-width: 98vw;
+        padding: 5vw 2vw 28px 2vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="nature-overlay"></div>
+  <div class="leaf l1"></div>
+  <div class="leaf l2"></div>
+  <div class="leaf l3"></div>
+  <div class="leaf l4"></div>
+  <div id="quiz-container">
+    <div id="score-counter">Score: 0</div>
+    <div id="question-area"></div>
+    <div class="nav-buttons">
+      <button id="prev-btn" disabled>Précédent</button>
+      <button id="next-btn">Suivant</button>
+    </div>
+    <div id="final-score" style="display:none;"></div>
+  </div>
+  <script>
+    // 1ère question : bourdons (image base64)
+    // Les autres : illustrations SVG générées (abeille, fleur, carnet, etc)
+    const questionImages = [
+      // Image bourdons (base64, tronqué ici pour l'affichage, tu peux demander la version complète si tu veux la vraie image !)
+      "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLTAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAEsAroDASIAAhEBAxEB/8QAGgAAAwEBAQEAAAAAAAAAAAAAAAECAwQFBv/EADgQAAEEAQIFAgQEBwAAAAAAAAEAAgMRBBIhMUFRYXGBkaGx8BQiMlKxwdHhI8Hx/8QAGgEBAQEBAQEBAAAAAAAAAAAAAAIDBAUBBv/EACYRAAICAQQABgMBAQEAAAAAAAABAhEDBCEFEjFBUWEiMnGBkaGx/9oADAMBAAIRAxEAPwD7yAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB//Z",
+      // 2 : Abeille dessinée
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><ellipse cx="160" cy="80" rx="60" ry="28" fill="gold"/><ellipse cx="130" cy="72" rx="22" ry="9" fill="#fff" fill-opacity="0.8"/><ellipse cx="190" cy="72" rx="22" ry="9" fill="#fff" fill-opacity="0.8"/><ellipse cx="105" cy="80" rx="16" ry="17" fill="#222"/><ellipse cx="215" cy="80" rx="6" ry="8" fill="#222"/><rect x="150" y="52" width="20" height="56" fill="#222"/><rect x="170" y="52" width="20" height="56" fill="#fff"/><rect x="130" y="52" width="20" height="56" fill="#fff"/><rect x="110" y="52" width="20" height="56" fill="#222"/></svg>',
+      // 3 : Fleur
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><circle cx="160" cy="80" r="34" fill="#FDE68A"/><circle cx="126" cy="80" r="12" fill="#FC8181"/><circle cx="194" cy="80" r="12" fill="#FC8181"/><circle cx="160" cy="46" r="12" fill="#FC8181"/><circle cx="160" cy="114" r="12" fill="#FC8181"/></svg>',
+      // 4 : Nid
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><ellipse cx="160" cy="110" rx="70" ry="28" fill="#E9C46A"/><ellipse cx="160" cy="120" rx="50" ry="14" fill="#FFD166"/><ellipse cx="160" cy="120" rx="40" ry="10" fill="#fff" fill-opacity="0.2"/></svg>',
+      // 5 : Carnet
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><rect x="60" y="30" width="200" height="100" rx="20" fill="#fff" stroke="#adcbe2" stroke-width="4"/><line x1="70" y1="50" x2="250" y2="50" stroke="#adcbe2" stroke-width="2"/><line x1="70" y1="70" x2="250" y2="70" stroke="#adcbe2" stroke-width="2"/><line x1="70" y1="90" x2="250" y2="90" stroke="#adcbe2" stroke-width="2"/><line x1="70" y1="110" x2="250" y2="110" stroke="#adcbe2" stroke-width="2"/></svg>',
+      // 6 : Couronne
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><ellipse cx="160" cy="80" rx="60" ry="28" fill="#FDE68A"/><polygon points="110,80 120,40 130,80" fill="#F6C23E"/><polygon points="150,80 160,40 170,80" fill="#F6C23E"/><polygon points="190,80 200,40 210,80" fill="#F6C23E"/><ellipse cx="160" cy="108" rx="34" ry="8" fill="#fff" fill-opacity="0.2"/></svg>',
+      // 7 : Ovale Apidae
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><ellipse cx="160" cy="80" rx="70" ry="28" fill="#B9F6CA"/><ellipse cx="160" cy="80" rx="40" ry="18" fill="#fff" fill-opacity="0.2"/></svg>',
+      // 8 : Loupe
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><circle cx="120" cy="80" r="32" fill="#ADCBE2"/><rect x="136" y="96" width="80" height="14" rx="7" fill="#B0B0B0" transform="rotate(25 176 103)"/></svg>',
+      // 9 : Groupe
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><circle cx="100" cy="100" r="28" fill="#B9F6CA"/><circle cx="160" cy="80" r="34" fill="#FDE68A"/><circle cx="220" cy="100" r="28" fill="#ADCBE2"/></svg>',
+      // 10 : Poil
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><ellipse cx="160" cy="80" rx="60" ry="28" fill="#fff" stroke="#A0AEC0" stroke-width="3"/><line x1="100" y1="60" x2="120" y2="30" stroke="#A0AEC0" stroke-width="4"/><line x1="220" y1="60" x2="200" y2="30" stroke="#A0AEC0" stroke-width="4"/><line x1="140" y1="110" x2="120" y2="140" stroke="#A0AEC0" stroke-width="4"/><line x1="180" y1="110" x2="200" y2="140" stroke="#A0AEC0" stroke-width="4"/></svg>',
+      // 11 : Europe
+      'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="320" height="160"><rect x="40" y="40" width="240" height="80" rx="30" fill="#adcbe2"/><ellipse cx="160" cy="80" rx="70" ry="28" fill="#fff" fill-opacity="0.2"/><ellipse cx="160" cy="80" rx="30" ry="16" fill="#8ecae6"/></svg>',
+    ];
+
+    const quizData = [
+      {
+        question: "Combien y-a-t-il d’espèces de bourdon ?",
+        answers: { a: "45", b: "10", c: "100" },
+        correct: "a"
+      },
+      {
+        question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?",
+        answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" },
+        correct: "b"
+      },
+      {
+        question: "Où vit le bourdon ?",
+        answers: { a: "Dans les plaines et les montagnes.", b: "Dans les forêts tropicales.", c: "Dans le désert." },
+        correct: "a"
+      },
+      {
+        question: "Quels sont ses prédateurs naturels ?",
+        answers: { a: "Les oiseaux", b: "La Bondée", c: "Les chats" },
+        correct: "b"
+      },
+      {
+        question: "Quel est le nom scientifique ?",
+        answers: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" },
+        correct: "b"
+      },
+      {
+        question: "Il est de quelle famille ?",
+        answers: { a: "Formicidae", b: "Apidae", c: "Felidae" },
+        correct: "b"
+      },
+      {
+        question: "De quel ordre est-il ?",
+        answers: { a: "Coleoptera", b: "Hymenoptera", c: "Diptera" },
+        correct: "b"
+      },
+      {
+        question: "Quelle taille fait-il ?",
+        answers: { a: "5 mm", b: "10 mm", c: "25 mm" },
+        correct: "c"
+      },
+      {
+        question: "Une colonie peut contenir combien d’individus ?",
+        answers: { a: "300 à 500", b: "10 à 20", c: "1000 à 2000" },
+        correct: "a"
+      },
+      {
+        question: "Qu’est-ce qui recouvre son corps ?",
+        answers: { a: "Des écailles", b: "Beaucoup de poils", c: "Une carapace" },
+        correct: "b"
+      },
+      {
+        question: "Où est-il présent ?",
+        answers: { a: "Dans toute l’Europe", b: "En Asie", c: "En Amérique" },
+        correct: "a"
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let userAnswers = Array(quizData.length).fill(null);
+    let hasFoundCorrect = Array(quizData.length).fill(false);
+
+    const scoreCounter = document.getElementById('score-counter');
+    const questionArea = document.getElementById('question-area');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const finalScore = document.getElementById('final-score');
+
+    function renderQuestion(qIdx) {
+      const q = quizData[qIdx];
+      let imageSrc = questionImages[qIdx] || "";
+      let html = `
+        <img class="question-image" src="${imageSrc}" alt="Illustration question">
+        <div class="question-text">${q.question}</div>
+        <div class="answers">
+      `;
+      for (const key in q.answers) {
+        html += `
+          <label id="label-${key}">
+            <input type="radio" name="answer" value="${key}" ${userAnswers[qIdx] === key ? 'checked' : ''}/>
+            ${q.answers[key]}
+          </label>
+        `;
+      }
+      html += `</div>`;
+      questionArea.innerHTML = html;
+
+      // Sélection visuelle si déjà répondu
+      if (userAnswers[qIdx]) {
+        document.getElementById(`label-${userAnswers[qIdx]}`).classList.add('selected');
+      }
+
+      // Navigation
+      prevBtn.disabled = qIdx === 0;
+      nextBtn.textContent = qIdx === quizData.length - 1 ? "Voir le résultat" : "Suivant";
+
+      // Gestion de la sélection
+      const labels = questionArea.querySelectorAll("label");
+      labels.forEach(label => {
+        label.addEventListener("click", function () {
+          labels.forEach(l => l.classList.remove("selected", "correct", "wrong"));
+          this.classList.add("selected");
+        }, {passive: true});
+      });
+    }
+
+    function updateScore() {
+      scoreCounter.textContent = `Score: ${score}`;
+    }
+
+    function validateAndNext() {
+      const selected = questionArea.querySelector('input[name="answer"]:checked');
+      if (!selected) {
+        alert("Merci de sélectionner une réponse !");
+        return;
+      }
+      const answer = selected.value;
+      userAnswers[currentQuestion] = answer;
+      const correctKey = quizData[currentQuestion].correct;
+      const labels = questionArea.querySelectorAll("label");
+      labels.forEach(l => l.classList.remove("correct", "wrong"));
+
+      if (answer === correctKey) {
+        document.getElementById(`label-${answer}`).classList.add("correct");
+        if (!hasFoundCorrect[currentQuestion]) {
+          hasFoundCorrect[currentQuestion] = true;
+          score += 1;
+          updateScore();
+        }
+        setTimeout(() => {
+          goToNextQuestion();
+        }, 750);
+      } else {
+        document.getElementById(`label-${answer}`).classList.add("wrong");
+        // Vibration si supporté
+        if ("vibrate" in navigator) navigator.vibrate(120);
+        // Score -1 à chaque mauvaise tentative sur cette question
+        score -= 1;
+        updateScore();
+        // Laisse l'utilisateur réessayer
+      }
+    }
+
+    function goToNextQuestion() {
+      if (currentQuestion < quizData.length - 1) {
+        currentQuestion++;
+        renderQuestion(currentQuestion);
+      } else {
+        showFinalScore();
+      }
+    }
+    function goToPrevQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion(currentQuestion);
+      }
+    }
+
+    function showFinalScore() {
+      questionArea.style.display = "none";
+      prevBtn.style.display = "none";
+      nextBtn.style.display = "none";
+      finalScore.style.display = "flex";
+      updateScore();
+
+      // Page finale inspirée de tes dessins manuscrits
+      let html = "";
+      if (score >= 5) {
+        html = `
+          <div class="final-manuscrit heart">
+            <div class="msg-title">Félicitations !</div>
+            <div class="msg-sub">(Tu as gagné)</div>
+            <div class="score-big">Score : ${score} sur 11</div>
+            <div style="margin-top:14px;">Bravo, tu as réussi le quiz sur le bourdon !</div>
+            <div style="margin-top:22px;"><a href="#" onclick="window.location.reload()" style="color:#e84393;text-decoration:underline;font-weight:bold;">Rejouer</a></div>
+          </div>
+        `;
+      } else {
+        html = `
+          <div class="final-manuscrit">
+            <div class="msg-title">Dommage !</div>
+            <div class="msg-sub">Tu peux réessayer !</div>
+            <div class="score-big">Score : ${score} sur 11</div>
+            <div class="tryagain">Courage, tu finiras par y arriver !</div>
+            <div style="margin-top:22px;"><a href="#" onclick="window.location.reload()" style="color:#e84393;text-decoration:underline;font-weight:bold;">Retenter</a></div>
+          </div>
+        `;
+      }
+      finalScore.innerHTML = html;
+    }
+
+    prevBtn.onclick = goToPrevQuestion;
+    nextBtn.onclick = validateAndNext;
+
+    // Initialisation
+    renderQuestion(currentQuestion);
+    updateScore();
+  </script>
+</body>
+</html>
