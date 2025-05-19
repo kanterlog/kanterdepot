@@ -12,29 +12,16 @@
       background: #eafbe7;
       min-height: 100vh;
       color: #235027;
-      position: relative;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
       overflow-x: hidden;
     }
-    .nature-overlay {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(220, 255, 220, 0.35);
-      z-index: 0;
-      pointer-events: none;
-    }
     #quiz-container {
-      position: relative;
       background: rgba(255,255,255,0.93);
       max-width: 520px;
-      margin: 4vh auto 0 auto;
+      margin: 4vh auto;
       border-radius: 24px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.16);
-      padding: 3.5vh 4vw 3vh 4vw;
-      z-index: 1;
-      min-height: 50vh;
-      transition: box-shadow 0.2s;
+      padding: 3.5vh 4vw;
+      position: relative;
     }
     #score-counter {
       position: absolute;
@@ -47,21 +34,18 @@
       box-shadow: 0 2px 8px rgba(0,80,30,0.08);
       font-weight: bold;
       color: #39753e;
-      letter-spacing: 1px;
-      z-index: 2;
     }
     .question-image {
       display: block;
       width: 100%;
       max-width: 480px;
-      margin: 0 auto 22px auto;
+      margin: 0 auto 22px;
       border-radius: 15px;
       box-shadow: 0 3px 16px #0001;
       background: #fdf6e3;
     }
     .question-text {
       font-size: 1.25em;
-      margin-bottom: 2vh;
       font-weight: 600;
       text-align: center;
       color: #2e5c28;
@@ -73,7 +57,6 @@
       margin: 2vh 0;
       padding: 16px;
       cursor: pointer;
-      transition: background 0.2s, transform 0.2s, border 0.2s;
       border: 3px solid transparent;
       font-size: 1.1em;
     }
@@ -99,10 +82,6 @@
       75% { transform: translateX(-5px); }
       100% { transform: translateX(0); }
     }
-    .nav-buttons button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   </style>
 </head>
 <body>
@@ -112,12 +91,20 @@
     <div class="nav-buttons">
       <button id="prev-btn">Précédent</button>
     </div>
-    <div id="final-score" style="display:none;"></div>
   </div>
   <script>
     const quizData = [
-      { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160'><ellipse cx='160' cy='80' rx='60' ry='28' fill='gold'/></svg>", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
-      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160'><circle cx='160' cy='80' r='34' fill='#FDE68A'/></svg>", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
+      { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "images/q1.jpg", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
+      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "images/q2.jpg", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
+      { question: "Où vit le bourdon ?", image: "images/q3.jpg", answers: { a: "Plaines et montagnes", b: "Déserts", c: "Villes" }, correct: "a" },
+      { question: "Quels sont ses prédateurs naturels ?", image: "images/q4.jpg", answers: { a: "Chats", b: "Bondrée", c: "Serpents" }, correct: "b" },
+      { question: "Quel est le nom scientifique ?", image: "images/q5.jpg", answers: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" }, correct: "b" },
+      { question: "Il est de quelle famille ?", image: "images/q6.png", answers: { a: "Apidae", b: "Formicidae", c: "Culicidae" }, correct: "a" },
+      { question: "De quel ordre est-il ?", image: "images/q7.jpg", answers: { a: "Hymenoptera", b: "Coleoptera", c: "Lepidoptera" }, correct: "a" },
+      { question: "Quelle taille fait-il ?", image: "images/q8.jpg", answers: { a: "12 mm", b: "25 mm", c: "50 mm" }, correct: "b" },
+      { question: "Une colonie peut contenir combien d’individus ?", image: "images/q9.jpg", answers: { a: "100 à 200", b: "300 à 500", c: "4000 à 6000" }, correct: "b" },
+      { question: "Qu’est-ce qui recouvre son corps ?", image: "images/q10.jpg", answers: { a: "Poils", b: "Carapace", c: "Écailles" }, correct: "a" },
+      { question: "Où est-il présent ?", image: "images/q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" },
     ];
     let currentQuestion = 0;
     let score = 0;
@@ -125,20 +112,17 @@
     const scoreCounter = document.getElementById("score-counter");
     const questionArea = document.getElementById("question-area");
     const prevBtn = document.getElementById("prev-btn");
-
     function updateScore() {
       scoreCounter.textContent = `Score: ${score}`;
     }
-
     function renderQuestion(index) {
       const q = quizData[index];
-      let html = `<div class="question-image">${q.image}</div><div class="question-text">${q.question}</div><div class="answers">`;
+      let html = `<img class="question-image" src="${q.image}" alt="Illustration question"><div class="question-text">${q.question}</div><div class="answers">`;
       for (let key in q.answers) {
         html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}"> ${q.answers[key]}</label>`;
       }
       html += `</div>`;
       questionArea.innerHTML = html;
-
       document.querySelectorAll(".answers label").forEach(label => {
         label.addEventListener("click", () => {
           const selected = label.getAttribute("data-key");
@@ -156,9 +140,10 @@
                   currentQuestion++;
                   renderQuestion(currentQuestion);
                 } else {
-                  showFinal();
+                  questionArea.innerHTML = `<div class='question-text'>Quiz terminé !<br>Score final : ${score}</div>`;
+                  document.querySelector(".nav-buttons").style.display = "none";
                 }
-              }, 700);
+              }, 800);
             }
           } else {
             label.classList.add("wrong");
@@ -169,19 +154,12 @@
       });
       prevBtn.disabled = index === 0;
     }
-
-    function showFinal() {
-      questionArea.innerHTML = `<div class="question-text">Quiz terminé !<br>Score final : ${score}</div>`;
-      document.querySelector(".nav-buttons").style.display = "none";
-    }
-
     prevBtn.onclick = () => {
       if (currentQuestion > 0) {
         currentQuestion--;
         renderQuestion(currentQuestion);
       }
-    }
-
+    };
     renderQuestion(currentQuestion);
     updateScore();
   </script>
