@@ -50,6 +50,15 @@
       letter-spacing: 1px;
       z-index: 2;
     }
+    .question-image {
+      display: block;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto 22px auto;
+      border-radius: 15px;
+      box-shadow: 0 3px 16px #0001;
+      background: #fdf6e3;
+    }
     .question-text {
       font-size: 1.25em;
       margin-bottom: 2vh;
@@ -102,14 +111,13 @@
     <div id="question-area"></div>
     <div class="nav-buttons">
       <button id="prev-btn">Précédent</button>
-      <button id="next-btn">Suivant</button>
     </div>
     <div id="final-score" style="display:none;"></div>
   </div>
   <script>
     const quizData = [
-      { question: "Combien y-a-t-il d’espèces de bourdon ?", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
-      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
+      { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160'><ellipse cx='160' cy='80' rx='60' ry='28' fill='gold'/></svg>", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
+      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "<svg xmlns='http://www.w3.org/2000/svg' width='320' height='160'><circle cx='160' cy='80' r='34' fill='#FDE68A'/></svg>", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
     ];
     let currentQuestion = 0;
     let score = 0;
@@ -117,7 +125,6 @@
     const scoreCounter = document.getElementById("score-counter");
     const questionArea = document.getElementById("question-area");
     const prevBtn = document.getElementById("prev-btn");
-    const nextBtn = document.getElementById("next-btn");
 
     function updateScore() {
       scoreCounter.textContent = `Score: ${score}`;
@@ -125,7 +132,7 @@
 
     function renderQuestion(index) {
       const q = quizData[index];
-      let html = `<div class="question-text">${q.question}</div><div class="answers">`;
+      let html = `<div class="question-image">${q.image}</div><div class="question-text">${q.question}</div><div class="answers">`;
       for (let key in q.answers) {
         html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}"> ${q.answers[key]}</label>`;
       }
@@ -161,7 +168,6 @@
         });
       });
       prevBtn.disabled = index === 0;
-      nextBtn.disabled = true;
     }
 
     function showFinal() {
@@ -176,7 +182,6 @@
       }
     }
 
-    nextBtn.style.display = "none";
     renderQuestion(currentQuestion);
     updateScore();
   </script>
