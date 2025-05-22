@@ -211,7 +211,7 @@
       document.getElementById("quiz").innerHTML = `
         <div id="final-screen">
           <img src="${image}" style="width:100%; border-radius:12px;">
-          <div id="final-score">Score : ${score} / ${quizData.length}</div>
+          <div id="final-score"><strong>Ton score :</strong><br><span style='font-size:3rem;'>${score} / ${quizData.length}</span></div>
           <button onclick=\"restartQuiz(); this.classList.add('clicked');\" style=\"position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:1.5rem; padding:1rem 2rem; background:#4CAF50; color:white; border:none; border-radius:12px; cursor:pointer;\">Rejouer</button>
         </div>
       `;
