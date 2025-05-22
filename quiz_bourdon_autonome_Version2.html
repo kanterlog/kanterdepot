@@ -84,12 +84,10 @@ function renderQuestion(index) {
   }
   html += `</div>`;
   document.getElementById("question-area").innerHTML = html;
-  // On gère la validation directe
   document.querySelectorAll(".answers label").forEach(label => {
     label.onclick = () => {
       const selected = label.getAttribute("data-key");
       const isGood = selected === q.correct;
-      // Animation feedback
       document.querySelectorAll(".answers label").forEach(lab => lab.classList.remove("correct", "wrong"));
       if(isGood) {
         label.classList.add("correct");
