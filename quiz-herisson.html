@@ -175,8 +175,6 @@
   </div>
 
   <script>
-    console.log("Script principal en cours d'exécution.");
-
     let currentQuestionIndex = 0;
     let score = 0;
 
@@ -190,49 +188,40 @@
     ];
 
     const quizElement = document.getElementById("quiz");
-    console.log("quizElement:", quizElement);
-
     const startButton = document.getElementById('start-button');
-    console.log("startButton:", startButton);
 
     if (startButton) {
-      startButton.addEventListener('click', () => {
-        console.log("Bouton Démarrer cliqué !");
-        startButton.classList.add('feedback-click-transform');
-        setTimeout(() => {
-            startQuiz();
-        }, 100);
-      });
-      startButton.addEventListener('touchstart', (event) => {
-        console.log("Bouton Démarrer touché !");
-        event.preventDefault(); 
-        startButton.classList.add('feedback-click-transform');
-        setTimeout(() => { 
-            startQuiz(); 
-        }, 100);
-      }, { passive: false }); 
+      startButton.addEventListener('click', handleStartButtonClick);
+      startButton.addEventListener('touchstart', handleStartButtonTouch, { passive: false }); 
     } else {
       console.error("ERREUR : Le bouton Démarrer (#start-button) n'a pas été trouvé !");
     }
 
-    function startQuiz() {
-      console.log("Fonction startQuiz appelée.");
-      if (startButton) startButton.classList.remove('feedback-click-transform');
+    function handleStartButtonClick() {
+        startButton.classList.add('feedback-click-transform');
+        setTimeout(() => { startQuiz(); }, 100);
+    }
 
+    function handleStartButtonTouch(event) {
+        event.preventDefault(); 
+        startButton.classList.add('feedback-click-transform');
+        setTimeout(() => { startQuiz(); }, 100);
+    }
+
+    function startQuiz() {
+      if (startButton) startButton.classList.remove('feedback-click-transform');
       currentQuestionIndex = 0;
       score = 0;
       loadQuestion();
     }
 
     function loadQuestion() {
-      console.log(`Fonction loadQuestion - Index: ${currentQuestionIndex}`);
       if (!quizElement) {
         console.error("ERREUR : quizElement est null dans loadQuestion !");
         return;
       }
       if (currentQuestionIndex < quizData.length) {
         const q = quizData[currentQuestionIndex];
-        console.log("Chargement de la question:", q.question);
         quizElement.innerHTML = `
           <div class="question">
             <img src="${q.image}" class="image-question" alt="Illustration pour la question ${currentQuestionIndex + 1}">
@@ -242,9 +231,7 @@
             </div>
           </div>
         `;
-        console.log("Contenu de la question chargé dans quizElement.");
       } else {
-        console.log("Toutes les questions répondues, affichage de l'écran final.");
         showFinalScreen();
       }
     }
@@ -255,7 +242,6 @@
       if (answerCheckedInProgress) return; 
       answerCheckedInProgress = true;
 
-      console.log(`Fonction checkAnswer - Réponse sélectionnée index: ${selectedIndex}`);
       const q = quizData[currentQuestionIndex];
       const answerButtons = quizElement.querySelectorAll('.answers .answer-button');
 
@@ -268,12 +254,10 @@
       if (selectedIndex === correctIndex) {
         answerButtons[selectedIndex].classList.add("correct");
         score++;
-        console.log("Bonne réponse ! Score:", score);
         if (typeof confetti === "function") launchConfetti();
       } else {
         answerButtons[selectedIndex].classList.add("wrong");
         if (answerButtons[correctIndex]) answerButtons[correctIndex].classList.add("correct");
-        console.log("Mauvaise réponse.");
       }
 
       setTimeout(() => {
@@ -288,7 +272,6 @@
     }
 
     function showFinalScreen() {
-      console.log("Fonction showFinalScreen appelée. Score final:", score);
       if (!quizElement) {
         console.error("ERREUR : quizElement est null dans showFinalScreen !");
         return;
@@ -296,10 +279,9 @@
 
       const isSuccess = score >= 4; 
       
-      // MODIFICATION DU NOM DE FICHIER ICI :
+      // NOMS DE FICHIERS IMAGES CORRECTS ICI :
       const imageFileName = isSuccess ? "image de fin quizz herisson .png" : "fin.png"; 
-      // MODIFICATION DU TEXTE ALT ICI (si vous voulez qu'il corresponde au nom du fichier) :
-      const altText = isSuccess ? 'Image de succès du quiz hérisson' : 'fin.png'; 
+      const altText = isSuccess ? 'Image de succès du quiz hérisson' : 'Image de fin de quiz (score bas)';
 
       quizElement.innerHTML = `
         <div id="final-screen">
@@ -311,34 +293,31 @@
       
       const restartButton = document.getElementById('restart-button');
       if (restartButton) {
-        restartButton.addEventListener('click', () => {
-            console.log("Bouton Rejouer cliqué !");
-            restartButton.classList.add('feedback-click-scale');
-             setTimeout(() => {
-                restartQuiz();
-            }, 100);
-        });
-        restartButton.addEventListener('touchstart', (event) => {
-            console.log("Bouton Rejouer touché !");
-            event.preventDefault();
-            restartButton.classList.add('feedback-click-scale');
-            setTimeout(() => {
-                restartQuiz();
-            }, 100);
-        }, { passive: false });
+        restartButton.addEventListener('click', handleRestartButtonClick);
+        restartButton.addEventListener('touchstart', handleRestartButtonTouch, { passive: false });
       }
-      console.log("Écran final affiché.");
+    }
+    
+    function handleRestartButtonClick() {
+        const restartButton = document.getElementById('restart-button');
+        if(restartButton) restartButton.classList.add('feedback-click-scale');
+         setTimeout(() => { restartQuiz(); }, 100);
+    }
+
+    function handleRestartButtonTouch(event) {
+        const restartButton = document.getElementById('restart-button');
+        event.preventDefault();
+        if(restartButton) restartButton.classList.add('feedback-click-scale');
+        setTimeout(() => { restartQuiz(); }, 100);
     }
 
     function restartQuiz() {
-      console.log("Fonction restartQuiz appelée.");
-      const restartBtnElem = quizElement.querySelector('#restart-button'); 
+      const restartBtnElem = document.getElementById('restart-button'); 
       if (restartBtnElem) restartBtnElem.classList.remove('feedback-click-scale');
       startQuiz();
     }
 
     function launchConfetti() {
-      console.log("Lancement des confettis !");
       const duration = 1 * 1000;
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
@@ -353,39 +332,29 @@
       }, 250);
     }
 
-    console.log("Tentative de chargement du script confetti.");
     if (!document.querySelector('script[src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"]')) {
         const confettiScript = document.createElement('script');
         confettiScript.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
-        confettiScript.onload = () => console.log("Script Confetti chargé avec succès.");
         confettiScript.onerror = () => console.error("ERREUR : Échec du chargement du script confetti.");
         document.head.appendChild(confettiScript);
-    } else {
-        console.log("Script Confetti déjà présent ou en cours de chargement.");
     }
 
     function preloadImages() {
-        console.log("Fonction preloadImages appelée.");
         const imagesToPreload = [
             'fond.jpg', 
             'page de demarrage.jpg', 
-            'image de fin quizz herisson .png', 
-            'fin.png' // MODIFICATION DU NOM DE FICHIER POUR LE PRECHARGEMENT
+            'image de fin quizz herisson .png', // Image pour succès (score >= 4)
+            'fin.png'                         // Image pour échec (score < 4)
         ];
         quizData.forEach(q => { if(q.image) imagesToPreload.push(q.image); });
         imagesToPreload.forEach(src => {
             if (src) {
                 const img = new Image();
                 img.src = src;
-            } else {
-                console.warn("Tentative de préchargement d'une image avec source vide/nulle.");
             }
         });
-        console.log("Préchargement des images terminé (ou en cours en arrière-plan).");
     }
     window.addEventListener('load', preloadImages);
-
-    console.log("Fin de l'exécution du script principal.");
   </script>
 </body>
 </html>
