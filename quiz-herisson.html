@@ -18,23 +18,29 @@
       background-size: cover;
       color: var(--c5);
       margin: 0;
-      padding: 2rem;
+      padding: 0;
       text-align: center;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .question {
-      margin-bottom: 2rem;
+      margin: 0 auto 1rem;
       background-color: var(--c2);
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      max-width: 90vw;
     }
     .answers button {
       background-color: var(--c3);
       color: var(--c5);
       border: none;
-      padding: 1rem;
+      padding: 0.8rem 1.2rem;
       margin: 0.5rem;
-      font-size: 1.2rem;
+      font-size: 1rem;
       cursor: pointer;
       border-radius: 8px;
       transition: transform 0.2s, box-shadow 0.2s;
@@ -59,10 +65,12 @@
       100% { transform: translateX(0); }
     }
     .image-question {
+      max-height: 35vh;
+      width: auto;
       max-width: 90vw;
-      width: 100%;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      margin-bottom: 1rem;
     }
     #final-screen {
       position: relative;
@@ -72,7 +80,7 @@
       top: 25%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2.5rem;
+      font-size: 2rem;
       color: var(--c5);
       background: rgba(255,255,255,0.7);
       padding: 1rem 2rem;
@@ -112,16 +120,6 @@
       transition: transform 0.1s ease, box-shadow 0.1s ease;
     }
   </style>
-  <script>
-    let current = 0;
-    let score = 0;
-
-    function restartQuiz() {
-      current = 0;
-      score = 0;
-      startQuiz();
-    }
-  </script>
 </head>
 <body>
   <div id="quiz">
@@ -130,105 +128,114 @@
       <button id="start-button" ontouchstart="startQuiz()" onclick="startQuiz()">Démarrer le quiz</button>
     </div>
   </div>
-<script>
-const quizData = [
-  {
-    question: "Qu’a-t-il sur le dos ?",
-    image: "IMG_0437.jpg",
-    options: ["Des poils", "Des écailles", "Des piquants"],
-    answer: 2
-  },
-  {
-    question: "Combien pèse-t-il ?",
-    image: "IMG_0438.jpg",
-    options: ["1,4 kg", "1,8 kg", "2,3 kg"],
-    answer: 1
-  },
-  {
-    question: "Où trouve-t-il sa nourriture ?",
-    image: "IMG_0439.jpg",
-    options: ["Dans le sol", "À la chasse", "Dans les arbres"],
-    answer: 0
-  },
-  {
-    question: "Combien a-t-il de poils ?",
-    image: "IMG_0440.jpg",
-    options: ["5 000", "6 000", "5 600"],
-    answer: 2
-  },
-  {
-    question: "Quel est son abri ?",
-    image: "IMG_0441.jpg",
-    options: ["Dans un terrier", "Dans les poils (fille)", "Sous une feuille"],
-    answer: 1
-  },
-  {
-    question: "Quand ses poils se renouvellent-ils ?",
-    image: "IMG_0442.jpg",
-    options: ["Le 17 mars", "Le 18 mars", "Le 21 mars"],
-    answer: 1
-  }
-];
+  <script>
+    let current = 0;
+    let score = 0;
 
-function startQuiz() {
-  loadQuestion();
-}
+    const quizData = [
+      {
+        question: "Qu’a-t-il sur le dos ?",
+        image: "IMG_0437.jpg",
+        options: ["Des poils", "Des écailles", "Des piquants"],
+        answer: 2
+      },
+      {
+        question: "Combien pèse-t-il ?",
+        image: "IMG_0438.jpg",
+        options: ["1,4 kg", "1,8 kg", "2,3 kg"],
+        answer: 1
+      },
+      {
+        question: "Où trouve-t-il sa nourriture ?",
+        image: "IMG_0439.jpg",
+        options: ["Dans le sol", "À la chasse", "Dans les arbres"],
+        answer: 0
+      },
+      {
+        question: "Combien a-t-il de poils ?",
+        image: "IMG_0440.jpg",
+        options: ["5 000", "6 000", "5 600"],
+        answer: 2
+      },
+      {
+        question: "Quel est son abri ?",
+        image: "IMG_0441.jpg",
+        options: ["Dans un terrier", "Sous une feuille", "Dans un tas de feuilles"],
+        answer: 2
+      },
+      {
+        question: "Quand hiberne-t-il ?",
+        image: "IMG_0442.jpg",
+        options: ["En été", "En hiver", "Au printemps"],
+        answer: 1
+      }
+    ];
 
-function loadQuestion() {
-  const q = quizData[current];
-  document.getElementById("quiz").innerHTML = `
-    <div class="question">
-      <img src="${q.image}" class="image-question" alt="illustration">
-      <h2>${q.question}</h2>
-      <div class="answers">
-        ${q.options.map((opt, i) => `<button ontouchstart=\"checkAnswer(${i})\" onclick=\"checkAnswer(${i})\">${opt}</button>`).join('')}
-      </div>
-    </div>
-  `;
-}
+    function startQuiz() {
+      loadQuestion();
+    }
 
-function checkAnswer(selected) {
-  const buttons = document.querySelectorAll('button');
-  const correct = quizData[current].answer;
-  if (selected === correct) {
-    buttons[selected].classList.add("correct");
-    score++;
-    launchConfetti();
-    setTimeout(() => {
-      current++;
-      if (current < quizData.length) loadQuestion();
-      else showFinalScreen();
-    }, 1500);
-  } else {
-    buttons[selected].classList.add("wrong");
-  }
-}
+    function loadQuestion() {
+      const q = quizData[current];
+      document.getElementById("quiz").innerHTML = `
+        <div class="question">
+          <img src="${q.image}" class="image-question" alt="illustration">
+          <h2>${q.question}</h2>
+          <div class="answers">
+            ${q.options.map((opt, i) => `<button ontouchstart=\"checkAnswer(${i})\" onclick=\"checkAnswer(${i})\">${opt}</button>`).join('')}
+          </div>
+        </div>
+      `;
+    }
 
-function showFinalScreen() {
-  const isSuccess = score >= 4;
-  const image = isSuccess ? "image de fin quizz herisson .png" : "score de fin .png";
-  document.getElementById("quiz").innerHTML = `
-    <div id="final-screen">
-      <img src="${image}" style="width:100%; border-radius:12px;">
-      <div id="final-score">Score : ${score} / ${quizData.length}</div>
-      <button onclick=\"restartQuiz(); this.classList.add('clicked');\" style=\"position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:1.5rem; padding:1rem 2rem; background:#4CAF50; color:white; border:none; border-radius:12px; cursor:pointer;\">Rejouer</button>
-    </div>
-  `;
-}
+    function checkAnswer(selected) {
+      const buttons = document.querySelectorAll('button');
+      const correct = quizData[current].answer;
+      if (selected === correct) {
+        buttons[selected].classList.add("correct");
+        score++;
+        launchConfetti();
+        setTimeout(() => {
+          current++;
+          if (current < quizData.length) loadQuestion();
+          else showFinalScreen();
+        }, 1200);
+      } else {
+        buttons[selected].classList.add("wrong");
+      }
+    }
 
-function launchConfetti() {
-  const duration = 1 * 1000;
-  const animationEnd = Date.now() + duration;
-  const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
-  const interval = setInterval(() => {
-    if (Date.now() > animationEnd) return clearInterval(interval);
-    confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-  }, 200);
-}
+    function showFinalScreen() {
+      const isSuccess = score >= 4;
+      const image = isSuccess ? "image de fin quizz herisson .png" : "score de fin .png";
+      document.getElementById("quiz").innerHTML = `
+        <div id="final-screen">
+          <img src="${image}" style="width:100%; border-radius:12px;">
+          <div id="final-score">Score : ${score} / ${quizData.length}</div>
+          <button onclick=\"restartQuiz(); this.classList.add('clicked');\" style=\"position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:1.5rem; padding:1rem 2rem; background:#4CAF50; color:white; border:none; border-radius:12px; cursor:pointer;\">Rejouer</button>
+        </div>
+      `;
+    }
 
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
-document.head.appendChild(script);
-</script>
+    function restartQuiz() {
+      current = 0;
+      score = 0;
+      startQuiz();
+    }
+
+    function launchConfetti() {
+      const duration = 1 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+      const interval = setInterval(() => {
+        if (Date.now() > animationEnd) return clearInterval(interval);
+        confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
+      }, 200);
+    }
+
+    const confettiScript = document.createElement('script');
+    confettiScript.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
+    document.head.appendChild(confettiScript);
+  </script>
 </body>
 </html>
