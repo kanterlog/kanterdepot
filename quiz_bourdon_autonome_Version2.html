@@ -13,6 +13,7 @@
       box-shadow: 0 8px 32px rgba(0,0,0,0.16);
       padding: 32px 18px 24px 18px; position: relative;
     }
+    #progress-indicator { font-size: 0.9em; color: #555; margin-bottom: 10px; text-align: center; }
     #score-counter { font-size: 1.3em; font-weight: bold; color: #39753e; margin-bottom: 18px; text-align:right;}
     .question-image { display:block; width:100%; max-width: 480px; margin:0 auto 18px auto; border-radius: 14px; background: #fdf6e3;}
     .question-text { font-size: 1.25em; font-weight: 600; text-align:center; margin-bottom:14px; color: #2e5c28; }
@@ -23,6 +24,12 @@
     }
     .answers label.correct { background: #d0ffd8; border-color: #25c211; animation: pulse-green 0.4s; }
     .answers label.wrong { background: #ffd6d6; border-color: #e74c3c; animation: shake-red 0.2s; }
+    /* Style pour quand une réponse est désactivée mais n'est ni correcte ni fausse (si on veut griser les non-sélectionnées) */
+    .answers label.disabled-option {
+        background: #f0f0f0;
+        color: #999;
+        cursor: default;
+    }
     @keyframes pulse-green { 0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);} }
     @keyframes shake-red { 0%{transform:translateX(0);}25%{transform:translateX(-4px);}50%{transform:translateX(4px);}75%{transform:translateX(-2px);}100%{transform:translateX(0);} }
     .next-btn {
@@ -48,6 +55,7 @@
 </head>
 <body>
   <div id="quiz-container">
+    <div id="progress-indicator"></div>
     <div id="score-counter">Score : 0</div>
     <div id="question-area"></div>
     <div id="final-score" style="display:none"></div>
@@ -70,44 +78,83 @@ const quizData = [
 let currentQuestion = 0;
 let score = 0;
 
+const scoreCounterEl = document.getElementById("score-counter");
+const questionAreaEl = document.getElementById("question-area");
+const finalScoreEl = document.getElementById("final-score");
+const progressIndicatorEl = document.getElementById("progress-indicator");
+
 function updateScore() {
-  document.getElementById("score-counter").textContent = "Score : " + score;
+  scoreCounterEl.textContent = "Score : " + score;
+}
+
+function updateProgressIndicator() {
+  progressIndicatorEl.textContent = `Question ${currentQuestion + 1} / ${quizData.length}`;
 }
 
 function renderQuestion(index) {
+  updateProgressIndicator();
   const q = quizData[index];
-  let html = `<img class="question-image" src="${q.image}" alt="Illustration question">
+  let html = `<img class="question-image" src="${q.image}" alt="Illustration pour la question ${index + 1}">
     <div class="question-text">${q.question}</div>
     <div class="answers">`;
   for (let key in q.answers) {
-    html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}" style="margin-right:10px;">${q.answers[key]}</label>`;
+    const inputId = `answer-${index}-${key}`; // ID unique pour l'input
+    html += `<label for="${inputId}" data-key="${key}">
+               <input type="radio" name="answer" id="${inputId}" value="${key}" style="margin-right:10px; vertical-align: middle;">
+               <span style="vertical-align: middle;">${q.answers[key]}</span>
+             </label>`;
   }
   html += `</div>`;
-  document.getElementById("question-area").innerHTML = html;
-  document.querySelectorAll(".answers label").forEach(label => {
-    label.onclick = () => {
-      const selected = label.getAttribute("data-key");
-      const isGood = selected === q.correct;
-      document.querySelectorAll(".answers label").forEach(lab => lab.classList.remove("correct", "wrong"));
-      if(isGood) {
+  questionAreaEl.innerHTML = html;
+
+  const answerLabels = questionAreaEl.querySelectorAll(".answers label");
+
+  answerLabels.forEach(label => {
+    label.addEventListener('click', () => {
+      const selectedKey = label.getAttribute("data-key");
+      const isGood = selectedKey === q.correct;
+
+      // Désactiver toutes les options de réponse pour cette question
+      answerLabels.forEach(lab => {
+        lab.style.pointerEvents = "none"; // Empêche d'autres clics
+        const input = lab.querySelector('input[type="radio"]');
+        if (input) input.disabled = true; // Désactive l'input radio
+        
+        // Optionnel: griser les options non choisies et non correctes
+        // if (lab.getAttribute("data-key") !== selectedKey && lab.getAttribute("data-key") !== q.correct) {
+        //   lab.classList.add("disabled-option");
+        // }
+      });
+
+      if (isGood) {
         label.classList.add("correct");
         score += 1;
         updateScore();
         setTimeout(() => {
           nextQuestion();
-        }, 700);
+        }, 1000); // Délai pour voir le feedback vert (1 seconde)
       } else {
         label.classList.add("wrong");
-        score -= 1;
-        updateScore();
+        const correctLabel = questionAreaEl.querySelector(`.answers label[data-key="${q.correct}"]`);
+        if (correctLabel) {
+          correctLabel.classList.add("correct"); // Met en évidence la bonne réponse
+        }
+        // Pas de pénalité de score pour une mauvaise réponse
+        // score -= 1; // Si vous voulez pénaliser
+        // if (score < 0) score = 0; // Évite score négatif
+        // updateScore();
+
+        setTimeout(() => {
+          nextQuestion();
+        }, 2000); // Délai plus long pour voir la mauvaise réponse ET la bonne (2 secondes)
       }
-    }
+    }, { once: true }); // L'event listener ne se déclenchera qu'une fois par label
   });
 }
 
 function nextQuestion() {
   currentQuestion++;
-  if(currentQuestion < quizData.length) {
+  if (currentQuestion < quizData.length) {
     renderQuestion(currentQuestion);
   } else {
     showFinal();
@@ -115,22 +162,28 @@ function nextQuestion() {
 }
 
 function showFinal() {
-  document.getElementById("question-area").style.display = "none";
-  document.getElementById("score-counter").style.display = "none";
-  const div = document.getElementById("final-score");
-  div.style.display = "flex";
-  let img = (score >= 8) ? "felicitation.png" : "dommage.png";
-  div.innerHTML = `
+  questionAreaEl.style.display = "none";
+  scoreCounterEl.style.display = "none";
+  progressIndicatorEl.style.display = "none";
+
+  finalScoreEl.style.display = "flex";
+  let imgFilename = (score >= 8) ? "felicitation.png" : "dommage.png";
+  // Assurez-vous que ces images existent ou adaptez les noms de fichiers/chemins
+  finalScoreEl.innerHTML = `
     <div style="position:relative;width:100%;max-width:350px;">
-      <img src="${img}" class="final-img" alt="fin">
-      <div class="score-over">${score} / 11</div>
+      <img src="${imgFilename}" class="final-img" alt="Résultat du quiz">
+      <div class="score-over">${score} / ${quizData.length}</div>
     </div>
     <div style="margin-top:22px;">
-      <button onclick="window.location.reload()" class="next-btn">Rejouer</button>
+      <button id="replayButton" class="next-btn">Rejouer</button>
     </div>
   `;
+  document.getElementById("replayButton").addEventListener('click', () => {
+    window.location.reload();
+  });
 }
 
+// Démarrage du quiz
 renderQuestion(currentQuestion);
 updateScore();
 </script>
