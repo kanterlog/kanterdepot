@@ -11,20 +11,30 @@
       --c3: #aeb7a6;
       --c4: #5d6757;
       --c5: #3f403d;
+      --correct-color: #4CAF50;
+      --wrong-color: #ff4d4d;
     }
     body {
       font-family: sans-serif;
       background-image: url('fond.jpg');
       background-size: cover;
+      background-position: center; /* Ajout pour mieux centrer le fond */
+      background-repeat: no-repeat; /* Éviter la répétition si l'image est petite */
       color: var(--c5);
       margin: 0;
-      padding: 0;
+      padding: 20px; /* Un peu de padding pour ne pas coller aux bords */
+      box-sizing: border-box; /* Inclure padding et border dans la taille de l'élément */
       text-align: center;
       overflow: hidden;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      align-items: center; /* Pour mieux centrer le quiz container */
+    }
+    #quiz-container { /* Un conteneur pour mieux gérer la largeur max et le centrage */
+      max-width: 600px; /* Limiter la largeur du quiz pour les grands écrans */
+      width: 100%;
     }
     .question {
       margin: 0 auto 1rem;
@@ -32,7 +42,7 @@
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      max-width: 90vw;
+      max-width: 90vw; /* Gardé pour les petits écrans */
     }
     .answers button {
       background-color: var(--c3);
@@ -43,48 +53,63 @@
       font-size: 1rem;
       cursor: pointer;
       border-radius: 8px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s; /* Ajout transition pour couleur */
     }
-    .answers button:hover,
-    .answers button:active {
+    .answers button:hover:not(:disabled), /* Ne pas appliquer hover si désactivé */
+    .answers button:active:not(:disabled) {
       transform: scale(1.05);
       box-shadow: 0 0 10px var(--c1);
     }
+    .answers button:disabled { /* Style pour les boutons désactivés */
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
     .wrong {
-      background-color: #ff4d4d !important;
+      background-color: var(--wrong-color) !important;
+      color: white !important; /* Pour la lisibilité */
       animation: shake 0.3s;
     }
     .correct {
-      background-color: #4CAF50 !important;
+      background-color: var(--correct-color) !important;
+      color: white !important; /* Pour la lisibilité */
     }
     @keyframes shake {
       0% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
       50% { transform: translateX(5px); }
       75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
+      100% { translateX(0); }
     }
     .image-question {
       max-height: 35vh;
       width: auto;
-      max-width: 90vw;
+      max-width: 100%; /* S'assure que l'image ne dépasse pas son conteneur */
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
       margin-bottom: 1rem;
+      object-fit: contain; /* Pour s'assurer que l'image s'adapte bien */
     }
     #final-screen {
       position: relative;
+      background-color: rgba(255,255,255,0.1); /* Léger fond pour l'écran final si l'image est transparente */
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    #final-screen img {
+      width: 100%;
+      max-height: 60vh; /* Limiter la hauteur de l'image finale */
+      object-fit: contain;
+      border-radius: 12px;
+      margin-bottom: 1rem;
     }
     #final-score {
-      position: absolute;
-      top: 25%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 4vw, 2rem); /* Taille de police responsive */
       color: var(--c5);
-      background: rgba(255,255,255,0.7);
-      padding: 1rem 2rem;
+      background: rgba(255,255,255,0.8);
+      padding: 1rem 1.5rem;
       border-radius: 12px;
+      margin-bottom: 1.5rem; /* Espace avant le bouton rejouer */
+      display: inline-block; /* Pour que le padding/background s'applique correctement */
     }
     #start-screen {
       position: relative;
@@ -92,6 +117,8 @@
     }
     #start-screen img {
       width: 100%;
+      max-height: 70vh; /* Limiter la hauteur de l'image de démarrage */
+      object-fit: contain;
       border-radius: 12px;
     }
     #start-button {
@@ -99,7 +126,7 @@
       top: 75%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2rem;
+      font-size: clamp(1.5rem, 5vw, 2rem); /* Taille de police responsive */
       padding: 1rem 2rem;
       background-color: var(--c4);
       color: white;
@@ -114,22 +141,36 @@
       50% { transform: translate(-50%, -50%) scale(1.1); }
       100% { transform: translate(-50%, -50%) scale(1); }
     }
-    .clicked {
-      transform: scale(0.95);
-      box-shadow: 0 0 15px var(--c1);
+    .clicked-effect { /* Classe pour l'effet de clic, utilisable sur plusieurs boutons */
+      transform: scale(0.95) !important; /* important pour surcharger le pulse */
+      box-shadow: 0 0 15px var(--c1) !important;
       transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    .restart-button {
+      font-size: clamp(1.2rem, 4vw, 1.5rem); /* Taille de police responsive */
+      padding: 0.8rem 1.5rem;
+      background: var(--correct-color);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: block; /* Pour centrer avec margin auto si besoin ou prendre toute la largeur */
+      margin: 0 auto; /* Centrer le bouton */
     }
   </style>
 </head>
 <body>
-  <div id="quiz">
-    <div id="start-screen">
-      <img src="page de demarrage.jpg" alt="Page de démarrage">
-      <button id="start-button" ontouchstart="startQuiz()" onclick="startQuiz()">Démarrer le quiz</button>
+  <div id="quiz-container">
+    <div id="quiz">
+      <div id="start-screen">
+        <img src="page de demarrage.jpg" alt="Hérisson page de démarrage">
+        <button id="start-button" ontouchstart="this.classList.add('clicked-effect'); startQuiz();" onclick="this.classList.add('clicked-effect'); startQuiz();">Démarrer le quiz</button>
+      </div>
     </div>
   </div>
+
   <script>
-    let current = 0;
+    let currentQuestionIndex = 0;
     let score = 0;
 
     const quizData = [
@@ -137,105 +178,179 @@
         question: "Qu’a-t-il sur le dos ?",
         image: "IMG_0437.jpg",
         options: ["Des poils", "Des écailles", "Des piquants"],
-        answer: 2
+        answer: 2 // Index de la bonne réponse (Des piquants)
       },
       {
-        question: "Combien pèse-t-il ?",
+        question: "Combien pèse-t-il en moyenne ?", // Précision
         image: "IMG_0438.jpg",
-        options: ["1,4 kg", "1,8 kg", "2,3 kg"],
-        answer: 1
+        options: ["Moins de 1 kg", "Entre 1 et 1,5 kg", "Plus de 2 kg"], // Options plus claires
+        answer: 1 // Corrigé si 1.4kg est dans "Entre 1 et 1.5kg"
       },
       {
-        question: "Où trouve-t-il sa nourriture ?",
+        question: "Où trouve-t-il sa nourriture principalement ?", // Précision
         image: "IMG_0439.jpg",
-        options: ["Dans le sol", "À la chasse", "Dans les arbres"],
+        options: ["Dans le sol et la litière de feuilles", "En chassant des proies rapides", "Dans les hautes branches des arbres"], // Options plus distinctes
         answer: 0
       },
       {
-        question: "Combien a-t-il de poils ?",
+        question: "Combien a-t-il de piquants (et non de poils) ?", // Clarification
         image: "IMG_0440.jpg",
-        options: ["5 000", "6 000", "5 600"],
-        answer: 2
+        options: ["Environ 3 000", "Entre 5 000 et 7 000", "Plus de 10 000"], // Options plus réalistes
+        answer: 1 // 5000-7000 est une estimation courante
       },
       {
-        question: "Quel est son abri ?",
+        question: "Quel est son abri typique ?", // Précision
         image: "IMG_0441.jpg",
-        options: ["Dans un terrier", "Sous une feuille", "Dans un tas de feuilles"],
+        options: ["Un terrier profond qu'il creuse", "Sous une simple grande feuille", "Un nid d'herbes et de feuilles, sous des buissons ou un tas de bois"], // Option plus précise
         answer: 2
       },
       {
-        question: "Quand hiberne-t-il ?",
+        question: "Quand hiberne-t-il principalement ?", // Précision
         image: "IMG_0442.jpg",
-        options: ["En été", "En hiver", "Au printemps"],
+        options: ["Pendant les mois d'été les plus chauds", "De la fin de l'automne au début du printemps", "Au printemps, après la naissance des petits"],
         answer: 1
       }
     ];
 
+    const quizElement = document.getElementById("quiz");
+    const confettiScript = document.createElement('script'); // Déplacé ici pour être global
+
     function startQuiz() {
+      // Réinitialiser l'effet de clic sur le bouton démarrer s'il est encore là
+      const startButton = document.getElementById('start-button');
+      if (startButton) startButton.classList.remove('clicked-effect');
+
+      currentQuestionIndex = 0;
+      score = 0;
       loadQuestion();
     }
 
     function loadQuestion() {
-      const q = quizData[current];
-      document.getElementById("quiz").innerHTML = `
-        <div class="question">
-          <img src="${q.image}" class="image-question" alt="illustration">
-          <h2>${q.question}</h2>
-          <div class="answers">
-            ${q.options.map((opt, i) => `<button ontouchstart=\"checkAnswer(${i})\" onclick=\"checkAnswer(${i})\">${opt}</button>`).join('')}
+      if (currentQuestionIndex < quizData.length) {
+        const q = quizData[currentQuestionIndex];
+        quizElement.innerHTML = `
+          <div class="question">
+            <img src="${q.image}" class="image-question" alt="Illustration pour la question ${currentQuestionIndex + 1}">
+            <h2>${q.question}</h2>
+            <div class="answers">
+              ${q.options.map((opt, i) => `<button class="answer-button" ontouchstart="this.classList.add('clicked-effect');" onmouseup="this.classList.remove('clicked-effect');" onclick="checkAnswer(${i})">${opt}</button>`).join('')}
+            </div>
           </div>
-        </div>
-      `;
-    }
-
-    function checkAnswer(selected) {
-      const buttons = document.querySelectorAll('button');
-      const correct = quizData[current].answer;
-      if (selected === correct) {
-        buttons[selected].classList.add("correct");
-        score++;
-        launchConfetti();
-        setTimeout(() => {
-          current++;
-          if (current < quizData.length) loadQuestion();
-          else showFinalScreen();
-        }, 1200);
+        `;
       } else {
-        buttons[selected].classList.add("wrong");
+        showFinalScreen();
       }
     }
 
+    function checkAnswer(selectedIndex) {
+      const q = quizData[currentQuestionIndex];
+      const answerButtons = quizElement.querySelectorAll('.answers button');
+
+      // Désactiver tous les boutons pour éviter les clics multiples
+      answerButtons.forEach(button => {
+        button.disabled = true;
+        button.classList.remove('clicked-effect'); // Retirer l'effet au cas où
+      });
+
+      const correctIndex = q.answer;
+
+      if (selectedIndex === correctIndex) {
+        answerButtons[selectedIndex].classList.add("correct");
+        score++;
+        if (typeof confetti === "function") { // Vérifier si la fonction confetti existe
+            launchConfetti();
+        }
+      } else {
+        answerButtons[selectedIndex].classList.add("wrong");
+        // Optionnel: mettre en évidence la bonne réponse
+        if (answerButtons[correctIndex]) {
+            answerButtons[correctIndex].classList.add("correct");
+        }
+      }
+
+      // Passer à la question suivante ou afficher l'écran final après un délai
+      setTimeout(() => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+          loadQuestion();
+        } else {
+          showFinalScreen();
+        }
+      }, 1500); // Délai pour voir la correction
+    }
+
     function showFinalScreen() {
-      const isSuccess = score >= 4;
+      const isSuccess = score >= quizData.length / 2; // Seuil de succès (ex: 50%)
       const image = isSuccess ? "image de fin quizz herisson .png" : "score de fin .png";
-      document.getElementById("quiz").innerHTML = `
+      quizElement.innerHTML = `
         <div id="final-screen">
-          <img src="${image}" style="width:100%; border-radius:12px;">
-          <div id="final-score">Score : ${score} / ${quizData.length}</div>
-          <button onclick=\"restartQuiz(); this.classList.add('clicked');\" style=\"position:absolute; bottom:20px; left:50%; transform:translateX(-50%); font-size:1.5rem; padding:1rem 2rem; background:#4CAF50; color:white; border:none; border-radius:12px; cursor:pointer;\">Rejouer</button>
+          <img src="${image}" alt="${isSuccess ? 'Image de succès' : 'Image d\'encouragement'}">
+          <div id="final-score">Votre score : ${score} / ${quizData.length}</div>
+          <button class="restart-button" ontouchstart="this.classList.add('clicked-effect');" onmouseup="this.classList.remove('clicked-effect');" onclick="restartQuiz()">Rejouer</button>
         </div>
       `;
     }
 
     function restartQuiz() {
-      current = 0;
-      score = 0;
+      // Réinitialiser l'effet de clic sur le bouton rejouer
+      const restartButton = quizElement.querySelector('.restart-button');
+      if (restartButton) restartButton.classList.remove('clicked-effect');
       startQuiz();
     }
 
     function launchConfetti() {
-      const duration = 1 * 1000;
+      const duration = 1 * 1000; // 1 seconde
       const animationEnd = Date.now() + duration;
       const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+      function randomInRange(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
       const interval = setInterval(() => {
-        if (Date.now() > animationEnd) return clearInterval(interval);
-        confetti(Object.assign({}, defaults, { particleCount: 40, origin: { x: Math.random(), y: Math.random() - 0.2 } }));
-      }, 200);
+        const timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
     }
 
-    const confettiScript = document.createElement('script');
-    confettiScript.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
-    document.head.appendChild(confettiScript);
+    // Charger le script de confettis
+    // S'assurer qu'il n'est chargé qu'une seule fois si le script principal est ré-exécuté
+    if (!document.querySelector('script[src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"]')) {
+        confettiScript.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
+        confettiScript.onload = () => {
+            console.log("Confetti script loaded.");
+            // Vous pourriez vouloir démarrer le quiz seulement après le chargement si c'est critique
+            // Mais ici, on le laisse se charger en arrière-plan.
+        };
+        confettiScript.onerror = () => {
+            console.error("Failed to load confetti script.");
+        };
+        document.head.appendChild(confettiScript);
+    }
+
+    // Optionnel: Précharger les images pour une meilleure expérience
+    function preloadImages() {
+        const imagesToPreload = [
+            'fond.jpg',
+            'page de demarrage.jpg',
+            'image de fin quizz herisson .png',
+            'score de fin .png'
+        ];
+        quizData.forEach(q => imagesToPreload.push(q.image));
+
+        imagesToPreload.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+    }
+
+    // Appeler le préchargement au chargement de la page
+    window.addEventListener('load', preloadImages);
+
   </script>
 </body>
 </html>
