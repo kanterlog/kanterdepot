@@ -6,18 +6,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --c1: #b3c7cc;
-      --c2: #cee4d0;
-      --c3: #aeb7a6;
-      --c4: #5d6757;
-      --c5: #3f403d;
+      --c1: #b3c7cc; /* Bleu-gris clair */
+      --c2: #cee4d0; /* Vert d'eau pâle */
+      --c3: #aeb7a6; /* Gris-vert doux */
+      --c4: #5d6757; /* Vert olive foncé */
+      --c5: #3f403d; /* Gris foncé presque noir (pour le texte) */
       --correct-color: #4CAF50;
       --wrong-color: #ff4d4d;
     }
     body {
       font-family: sans-serif;
-      background-image: url('fond.jpg');
-      background-size: cover;
+      /* MODIFICATION DU FOND ICI */
+      /* Option 1: Couleur unie (décommentez pour utiliser) */
+      /* background-color: var(--c1); */
+
+      /* Option 2: Dégradé (utilisé par défaut ici) */
+      background: linear-gradient(135deg, var(--c1) 0%, var(--c2) 100%);
+      background-size: cover; /* Gardé au cas où, mais moins pertinent pour un dégradé pur */
       background-position: center;
       background-repeat: no-repeat;
       color: var(--c5);
@@ -25,7 +30,7 @@
       padding: 20px;
       box-sizing: border-box;
       text-align: center;
-      overflow: hidden;
+      overflow: hidden; /* Peut-être à retirer si le contenu dépasse légèrement */
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -38,7 +43,7 @@
     }
     .question {
       margin: 0 auto 1rem;
-      background-color: var(--c2);
+      background-color: rgba(206, 228, 208, 0.9); /* var(--c2) avec un peu de transparence */
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
@@ -279,7 +284,6 @@
 
       const isSuccess = score >= 4; 
       
-      // NOMS DE FICHIERS IMAGES CORRECTS ICI :
       const imageFileName = isSuccess ? "image de fin quizz herisson .png" : "fin.png"; 
       const altText = isSuccess ? 'Image de succès du quiz hérisson' : 'Image de fin de quiz (score bas)';
 
@@ -340,11 +344,12 @@
     }
 
     function preloadImages() {
+        // MODIFICATION DE LA LISTE DE PRECHARGEMENT ICI
         const imagesToPreload = [
-            'fond.jpg', 
+            // 'fond.jpg', // RETIRÉ
             'page de demarrage.jpg', 
-            'image de fin quizz herisson .png', // Image pour succès (score >= 4)
-            'fin.png'                         // Image pour échec (score < 4)
+            'image de fin quizz herisson .png',
+            'fin.png'
         ];
         quizData.forEach(q => { if(q.image) imagesToPreload.push(q.image); });
         imagesToPreload.forEach(src => {
