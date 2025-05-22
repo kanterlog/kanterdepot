@@ -279,8 +279,8 @@
 
       const isSuccess = score >= 4; 
       
-      // NOMS DE FICHIERS IMAGES MIS À JOUR ICI :
-      const imageFileName = isSuccess ? "fin1.png" : "fin2.png"; 
+      // NOMS DE FICHIERS IMAGES INVERSÉS ICI :
+      const imageFileName = isSuccess ? "fin2.png" : "fin1.png"; 
       const altText = isSuccess ? 'Image de succès du quiz (score élevé)' : 'Image de fin de quiz (score bas)';
 
       quizElement.innerHTML = `
@@ -340,13 +340,13 @@
     }
 
     function preloadImages() {
-        // LISTE DE PRECHARGEMENT MISE À JOUR ICI
+        // LA LISTE DE PRECHARGEMENT RESTE LA MÊME, SEULE LA LOGIQUE D'AFFICHAGE CHANGE
         const imagesToPreload = [
             'page de demarrage.jpg', 
-            'fin1.png', // Image pour succès (score >= 4)
-            'fin2.png'  // Image pour échec (score < 4)
+            'fin1.png', 
+            'fin2.png'  
         ];
-        quizData.forEach(q => { if(q.image) imagesToPreload.push(q.image); }); // Pour les images des questions
+        quizData.forEach(q => { if(q.image) imagesToPreload.push(q.image); });
         imagesToPreload.forEach(src => {
             if (src) {
                 const img = new Image();
