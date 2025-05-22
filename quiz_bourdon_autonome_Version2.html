@@ -3,91 +3,46 @@
 <head>
   <meta charset="UTF-8">
   <title>Quiz Nature : Le Bourdon</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #eafbe7;
-      color: #235027;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #eafbe7; margin: 0; }
     #quiz-container {
-      max-width: 600px;
-      margin: 5vh auto;
       background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-      padding: 20px;
-      text-align: center;
+      max-width: 520px;
+      margin: 4vh auto; border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+      padding: 32px 18px 24px 18px; position: relative;
     }
-    .question-image {
-      max-width: 100%;
-      border-radius: 10px;
-      box-shadow: 0 3px 16px #0001;
-      margin-bottom: 20px;
-    }
-    .question-text {
-      font-size: 1.3em;
-      font-weight: bold;
-      margin: 10px 0;
-    }
+    #score-counter { font-size: 1.3em; font-weight: bold; color: #39753e; margin-bottom: 18px; text-align:right;}
+    .question-image { display:block; width:100%; max-width: 480px; margin:0 auto 18px auto; border-radius: 14px; background: #fdf6e3;}
+    .question-text { font-size: 1.25em; font-weight: 600; text-align:center; margin-bottom:14px; color: #2e5c28; }
     .answers label {
-      display: block;
-      background: #e8f8ec;
-      border-radius: 10px;
-      margin: 12px auto;
-      padding: 14px;
-      cursor: pointer;
-      border: 2px solid transparent;
-      width: 90%;
-      max-width: 400px;
+      display: block; background: #e8f8ec; border-radius: 13px;
+      margin: 15px 0; padding: 14px; cursor: pointer;
+      border: 2px solid transparent; font-size: 1.08em; transition: background 0.2s, border-color 0.2s;
     }
-    .answers label.correct {
-      background: #d0ffd8;
-      border-color: #25c211;
-      animation: pulse-green 0.4s ease;
+    .answers label.correct { background: #d0ffd8; border-color: #25c211; animation: pulse-green 0.4s; }
+    .answers label.wrong { background: #ffd6d6; border-color: #e74c3c; animation: shake-red 0.2s; }
+    @keyframes pulse-green { 0%{transform:scale(1);}50%{transform:scale(1.06);}100%{transform:scale(1);} }
+    @keyframes shake-red { 0%{transform:translateX(0);}25%{transform:translateX(-4px);}50%{transform:translateX(4px);}75%{transform:translateX(-2px);}100%{transform:translateX(0);} }
+    .next-btn {
+      background: #68be7c; color:#fff; padding:12px 32px; border-radius: 10px; border: none;
+      font-size: 1.12em; font-weight: bold; margin: 20px auto 0 auto; display: block; cursor:pointer;
+      transition: background 0.18s;
     }
-    .answers label.wrong {
-      background: #ffd6d6;
-      border-color: #e74c3c;
-      animation: shake-red 0.3s ease;
+    .next-btn:active { background: #388c53; }
+    #final-score {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: 1.3em; color: #2d5c2b; margin-top: 18px; min-height: 250px;
     }
-    @keyframes pulse-green {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.04); }
+    .final-img {
+      width: 100%; max-width: 350px; border-radius: 18px; box-shadow: 0 4px 24px #0003; margin-bottom: 22px;
+      position:relative;
     }
-    @keyframes shake-red {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-6px); }
-      50% { transform: translateX(6px); }
-      75% { transform: translateX(-3px); }
-    }
-    #score-counter {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-      background: #d9f6d3;
-      display: inline-block;
-      padding: 8px 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px #0002;
-    }
-    .final-container {
-      position: relative;
-    }
-    .final-container img {
-      width: 100%;
-      max-width: 600px;
-      border-radius: 16px;
-    }
-    .final-score-overlay {
-      position: absolute;
-      top: 18%;
-      width: 100%;
-      text-align: center;
-      font-size: 2em;
-      font-weight: bold;
-      color: #e84393;
-      text-shadow: 2px 2px 4px white;
+    .score-over {
+      position: absolute; top: 40%; left: 0; width: 100%; color: #e84393;
+      font-size: 2.5em; font-weight: bold; text-shadow: 1px 2px 12px #fff, 1px 2px 8px #e84393;
+      text-align:center;
     }
   </style>
 </head>
@@ -95,88 +50,91 @@
   <div id="quiz-container">
     <div id="score-counter">Score : 0</div>
     <div id="question-area"></div>
+    <div id="final-score" style="display:none"></div>
   </div>
+<script>
+const quizData = [
+  { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "q1.jpg", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
+  { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "q2.jpg", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
+  { question: "Où vit le bourdon ?", image: "q3.jpg", answers: { a: "Plaines et montagnes", b: "Déserts", c: "Villes" }, correct: "a" },
+  { question: "Quels sont ses prédateurs naturels ?", image: "q4.jpg", answers: { a: "Chats", b: "Bondrée", c: "Serpents" }, correct: "b" },
+  { question: "Quel est le nom scientifique ?", image: "q5.jpg", answers: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" }, correct: "b" },
+  { question: "Il est de quelle famille ?", image: "q6.png", answers: { a: "Apidae", b: "Formicidae", c: "Culicidae" }, correct: "a" },
+  { question: "De quel ordre est-il ?", image: "q7.jpg", answers: { a: "Hymenoptera", b: "Coleoptera", c: "Lepidoptera" }, correct: "a" },
+  { question: "Quelle taille fait-il ?", image: "q8.jpg", answers: { a: "12 mm", b: "25 mm", c: "50 mm" }, correct: "b" },
+  { question: "Une colonie peut contenir combien d’individus ?", image: "q9.jpg", answers: { a: "100 à 200", b: "300 à 500", c: "4000 à 6000" }, correct: "b" },
+  { question: "Qu’est-ce qui recouvre son corps ?", image: "q10.jpg", answers: { a: "Poils", b: "Carapace", c: "Écailles" }, correct: "a" },
+  { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" }
+];
 
-  <script>
-    const quizData = [
-      { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "q1.jpg", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
-      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "q2.jpg", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
-      { question: "Où vit le bourdon ?", image: "q3.jpg", answers: { a: "Dans les plaines et les montagnes.", b: "Dans les forêts tropicales.", c: "Dans le désert." }, correct: "a" },
-      { question: "Quels sont ses prédateurs naturels ?", image: "q4.jpg", answers: { a: "Les oiseaux", b: "La Bondrée", c: "Les chats" }, correct: "b" },
-      { question: "Quel est le nom scientifique ?", image: "q5.jpg", answers: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" }, correct: "b" },
-      { question: "Il est de quelle famille ?", image: "q6.png", answers: { a: "Formicidae", b: "Apidae", c: "Felidae" }, correct: "b" },
-      { question: "De quel ordre est-il ?", image: "q7.jpg", answers: { a: "Coleoptera", b: "Hymenoptera", c: "Diptera" }, correct: "b" },
-      { question: "Quelle taille fait-il ?", image: "q8.jpg", answers: { a: "5 mm", b: "10 mm", c: "25 mm" }, correct: "c" },
-      { question: "Une colonie peut contenir combien d’individus ?", image: "q9.jpg", answers: { a: "300 à 500", b: "10 à 20", c: "1000 à 2000" }, correct: "a" },
-      { question: "Qu’est-ce qui recouvre son corps ?", image: "q10.jpg", answers: { a: "Des écailles", b: "Beaucoup de poils", c: "Une carapace" }, correct: "b" },
-      { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Dans toute l’Europe", b: "En Asie", c: "En Amérique" }, correct: "a" }
-    ];
+let currentQuestion = 0;
+let score = 0;
 
-    let currentQuestion = 0;
-    let score = 0;
-    const scoreDisplay = document.getElementById("score-counter");
-    const questionArea = document.getElementById("question-area");
+function updateScore() {
+  document.getElementById("score-counter").textContent = "Score : " + score;
+}
 
-    function updateScore() {
-      scoreDisplay.textContent = `Score : ${score}`;
-    }
-
-    function showFinal() {
-      let img = score >= 8 ? "felicitation.png" : "dommage.png";
-      questionArea.innerHTML = `
-        <div class="final-container">
-          <div class="final-score-overlay">Score : ${score} / ${quizData.length}</div>
-          <img src="${img}" alt="Résultat final">
-        </div>
-      `;
-    }
-
-    function renderQuestion() {
-      const q = quizData[currentQuestion];
-      let html = `
-        <img class="question-image" src="${q.image}" alt="Illustration question">
-        <div class="question-text">${q.question}</div>
-        <div class="answers">
-      `;
-      for (let key in q.answers) {
-        html += `
-          <label data-key="${key}">
-            <input type="radio" name="answer" value="${key}"> ${q.answers[key]}
-          </label>
-        `;
+function renderQuestion(index) {
+  const q = quizData[index];
+  let html = `<img class="question-image" src="${q.image}" alt="Illustration question">
+    <div class="question-text">${q.question}</div>
+    <div class="answers">`;
+  for (let key in q.answers) {
+    html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}" style="margin-right:10px;">${q.answers[key]}</label>`;
+  }
+  html += `</div>`;
+  document.getElementById("question-area").innerHTML = html;
+  // On gère la validation directe
+  document.querySelectorAll(".answers label").forEach(label => {
+    label.onclick = () => {
+      const selected = label.getAttribute("data-key");
+      const isGood = selected === q.correct;
+      // Animation feedback
+      document.querySelectorAll(".answers label").forEach(lab => lab.classList.remove("correct", "wrong"));
+      if(isGood) {
+        label.classList.add("correct");
+        score += 1;
+        updateScore();
+        setTimeout(() => {
+          nextQuestion();
+        }, 700);
+      } else {
+        label.classList.add("wrong");
+        score -= 1;
+        updateScore();
       }
-      html += `</div>`;
-      questionArea.innerHTML = html;
-
-      document.querySelectorAll(".answers label").forEach(label => {
-        label.addEventListener("click", () => {
-          const selected = label.getAttribute("data-key");
-          const isCorrect = selected === q.correct;
-          document.querySelectorAll(".answers label").forEach(l => l.classList.remove("correct", "wrong"));
-          label.classList.add(isCorrect ? "correct" : "wrong");
-
-          if (isCorrect) {
-            score++;
-            updateScore();
-            setTimeout(() => {
-              currentQuestion++;
-              if (currentQuestion < quizData.length) {
-                renderQuestion();
-              } else {
-                showFinal();
-              }
-            }, 800);
-          } else {
-            score--;
-            updateScore();
-            if ("vibrate" in navigator) navigator.vibrate(100);
-          }
-        });
-      });
     }
+  });
+}
 
-    renderQuestion();
-    updateScore();
-  </script>
+function nextQuestion() {
+  currentQuestion++;
+  if(currentQuestion < quizData.length) {
+    renderQuestion(currentQuestion);
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal() {
+  document.getElementById("question-area").style.display = "none";
+  document.getElementById("score-counter").style.display = "none";
+  const div = document.getElementById("final-score");
+  div.style.display = "flex";
+  let img = (score >= 8) ? "felicitation.png" : "dommage.png";
+  div.innerHTML = `
+    <div style="position:relative;width:100%;max-width:350px;">
+      <img src="${img}" class="final-img" alt="fin">
+      <div class="score-over">${score} / 11</div>
+    </div>
+    <div style="margin-top:22px;">
+      <button onclick="window.location.reload()" class="next-btn">Rejouer</button>
+    </div>
+  `;
+}
+
+renderQuestion(currentQuestion);
+updateScore();
+</script>
 </body>
 </html>
