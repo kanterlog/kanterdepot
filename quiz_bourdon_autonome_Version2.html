@@ -1,114 +1,101 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Quiz Bourdon</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     body {
-      margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #eafbe7;
+      margin: 0;
+      padding: 0;
+      text-align: center;
       color: #235027;
     }
     #quiz-container {
-      max-width: 520px;
-      margin: 40px auto;
+      max-width: 600px;
+      margin: auto;
+      padding: 2em;
       background: #fff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.16);
-      position: relative;
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
     }
     #score-counter {
-      position: absolute;
-      top: 16px;
-      right: 20px;
       font-size: 1.5em;
-      background: #d4fbe0;
-      padding: 10px 16px;
-      border-radius: 12px;
+      margin-bottom: 1em;
       font-weight: bold;
+      background: #d5f5e3;
+      display: inline-block;
+      padding: 0.4em 1em;
+      border-radius: 1em;
       color: #2e7d32;
     }
     .question-image {
-      width: 100%;
-      border-radius: 14px;
+      max-width: 100%;
+      border-radius: 12px;
       box-shadow: 0 3px 12px #0001;
-      margin-bottom: 20px;
+      margin-bottom: 1em;
     }
     .question-text {
       font-size: 1.2em;
-      font-weight: bold;
-      margin-bottom: 16px;
+      margin: 1em 0;
+      font-weight: 600;
     }
     .answers label {
       display: block;
       background: #e8f8ec;
+      padding: 1em;
       border-radius: 12px;
-      padding: 14px;
-      margin: 10px 0;
-      border: 3px solid transparent;
+      margin: 0.5em 0;
       cursor: pointer;
       transition: 0.2s;
+      border: 2px solid transparent;
     }
-    .answers label.correct {
-      background: #d0ffd8;
-      border-color: #25c211;
-      animation: pulse-green 0.6s ease;
+    .answers input {
+      display: none;
     }
-    .answers label.wrong {
-      background: #ffd6d6;
-      border-color: #e74c3c;
-      animation: shake-red 0.3s ease;
+    .correct {
+      background: #c6f7c3 !important;
+      border-color: #2ecc71 !important;
+      animation: pulse-green 0.3s;
+    }
+    .wrong {
+      background: #ffdddd !important;
+      border-color: #e74c3c !important;
+      animation: shake 0.3s;
     }
     @keyframes pulse-green {
       0% { transform: scale(1); }
       50% { transform: scale(1.05); }
       100% { transform: scale(1); }
     }
-    @keyframes shake-red {
-      0% { transform: translateX(0); }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-5px); }
-      50% { transform: translateX(5px); }
-      75% { transform: translateX(-5px); }
-      100% { transform: translateX(0); }
+      75% { transform: translateX(5px); }
     }
-    .nav-buttons {
-      margin-top: 24px;
-      text-align: right;
-    }
-    .nav-buttons button {
-      padding: 12px 24px;
-      border: none;
-      background: #7bcf94;
-      border-radius: 10px;
-      font-weight: bold;
-      font-size: 1em;
-      cursor: pointer;
-    }
-    .final-container {
+    #final {
+      display: none;
       position: relative;
-      width: 100%;
-      max-width: 480px;
-      height: 320px;
-      margin: 30px auto;
-      background-size: cover;
-      background-position: center;
-      border-radius: 16px;
+    }
+    #final img {
+      max-width: 100%;
+      border-radius: 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
-    .final-score {
+    #final-score-overlay {
       position: absolute;
-      bottom: 20px;
-      right: 20px;
-      background: rgba(255,255,255,0.8);
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 1.4em;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2em;
       font-weight: bold;
-      color: #e84393;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      color: #d31c1c;
+      text-shadow: 2px 2px 6px #fff;
+      background: rgba(255,255,255,0.8);
+      padding: 0.5em 1em;
+      border-radius: 12px;
     }
   </style>
 </head>
@@ -116,103 +103,80 @@
   <div id="quiz-container">
     <div id="score-counter">Score: 0</div>
     <div id="question-area"></div>
-    <div class="nav-buttons">
-      <button id="prev-btn">Précédent</button>
-    </div>
+  </div>
+
+  <div id="final">
+    <img id="final-image" src="" alt="Fin">
+    <div id="final-score-overlay"></div>
   </div>
 
   <script>
-    const quizData = [
-      { question: "Combien y-a-t-il d’espèces de bourdon ?", image: "q1.jpg", answers: { a: "45", b: "10", c: "100" }, correct: "a" },
-      { question: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", image: "q2.jpg", answers: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
-      { question: "Où vit le bourdon ?", image: "q3.jpg", answers: { a: "Plaines et montagnes", b: "Déserts", c: "Villes" }, correct: "a" },
-      { question: "Quels sont ses prédateurs naturels ?", image: "q4.jpg", answers: { a: "Chats", b: "Bondrée", c: "Serpents" }, correct: "b" },
-      { question: "Quel est le nom scientifique ?", image: "q5.jpg", answers: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" }, correct: "b" },
-      { question: "Il est de quelle famille ?", image: "q6.png", answers: { a: "Apidae", b: "Formicidae", c: "Culicidae" }, correct: "a" },
-      { question: "De quel ordre est-il ?", image: "q7.jpg", answers: { a: "Hymenoptera", b: "Coleoptera", c: "Lepidoptera" }, correct: "a" },
-      { question: "Quelle taille fait-il ?", image: "q8.jpg", answers: { a: "12 mm", b: "25 mm", c: "50 mm" }, correct: "b" },
-      { question: "Une colonie peut contenir combien d’individus ?", image: "q9.jpg", answers: { a: "100 à 200", b: "300 à 500", c: "4000 à 6000" }, correct: "b" },
-      { question: "Qu’est-ce qui recouvre son corps ?", image: "q10.jpg", answers: { a: "Poils", b: "Carapace", c: "Écailles" }, correct: "a" },
-      { question: "Où est-il présent ?", image: "q11.png", answers: { a: "Europe", b: "Afrique", c: "Asie" }, correct: "a" },
+    const questions = [
+      { q: "Combien y-a-t-il d’espèces de bourdon ?", img: "q1.jpg", a: { a: "45", b: "10", c: "100" }, correct: "a" },
+      { q: "Le bourdon est-il insectivore, nectarivore ou omnivore ?", img: "q2.jpg", a: { a: "Insectivore", b: "Nectarivore", c: "Omnivore" }, correct: "b" },
+      { q: "Où vit le bourdon ?", img: "q3.jpg", a: { a: "Dans les plaines et les montagnes.", b: "Forêts tropicales", c: "Dans le désert" }, correct: "a" },
+      { q: "Quels sont ses prédateurs naturels ?", img: "q4.jpg", a: { a: "Les oiseaux", b: "La Bondrée", c: "Les chats" }, correct: "b" },
+      { q: "Quel est le nom scientifique ?", img: "q5.jpg", a: { a: "Apis mellifera", b: "Bombus terrestris", c: "Vespa crabro" }, correct: "b" },
+      { q: "Il est de quelle famille ?", img: "q6.png", a: { a: "Formicidae", b: "Apidae", c: "Felidae" }, correct: "b" },
+      { q: "De quel ordre est-il ?", img: "q7.jpg", a: { a: "Coleoptera", b: "Hymenoptera", c: "Diptera" }, correct: "b" },
+      { q: "Quelle taille fait-il ?", img: "q8.jpg", a: { a: "5 mm", b: "10 mm", c: "25 mm" }, correct: "c" },
+      { q: "Une colonie peut contenir combien d’individus ?", img: "q9.jpg", a: { a: "300 à 500", b: "10 à 20", c: "1000 à 2000" }, correct: "a" },
+      { q: "Qu’est-ce qui recouvre son corps ?", img: "q10.jpg", a: { a: "Des écailles", b: "Beaucoup de poils", c: "Une carapace" }, correct: "b" },
+      { q: "Où est-il présent ?", img: "q11.png", a: { a: "Europe", b: "Asie", c: "Amérique" }, correct: "a" }
     ];
 
-    let currentQuestion = 0;
+    let current = 0;
     let score = 0;
-    let answeredCorrectly = Array(quizData.length).fill(false);
 
-    const questionArea = document.getElementById("question-area");
-    const scoreCounter = document.getElementById("score-counter");
-    const prevBtn = document.getElementById("prev-btn");
+    const scoreCounter = document.getElementById('score-counter');
+    const questionArea = document.getElementById('question-area');
+    const final = document.getElementById('final');
+    const finalImage = document.getElementById('final-image');
+    const finalOverlay = document.getElementById('final-score-overlay');
 
     function updateScore() {
       scoreCounter.textContent = `Score: ${score}`;
     }
 
-    function renderQuestion(index) {
-      const q = quizData[index];
-      let html = `<img class="question-image" src="${q.image}" alt="Image question">
-        <div class="question-text">${q.question}</div>
-        <div class="answers">`;
-      for (let key in q.answers) {
-        html += `<label data-key="${key}"><input type="radio" name="answer" value="${key}"> ${q.answers[key]}</label>`;
+    function renderQuestion() {
+      const q = questions[current];
+      let html = `<img class="question-image" src="${q.img}">
+        <div class="question-text">${q.q}</div><div class="answers">`;
+      for (let key in q.a) {
+        html += `<label data-key="${key}"><input type="radio" name="q">${q.a[key]}</label>`;
       }
       html += `</div>`;
       questionArea.innerHTML = html;
 
-      document.querySelectorAll(".answers label").forEach(label => {
-        label.addEventListener("click", () => {
-          const selected = label.getAttribute("data-key");
-          const correct = q.correct;
-          const labels = document.querySelectorAll(".answers label");
-          labels.forEach(l => l.classList.remove("correct", "wrong"));
-
-          if (selected === correct) {
-            label.classList.add("correct");
-            if (!answeredCorrectly[index]) {
-              score += 1;
-              answeredCorrectly[index] = true;
-              updateScore();
-            }
+      document.querySelectorAll('.answers label').forEach(label => {
+        label.addEventListener('click', () => {
+          const choice = label.getAttribute('data-key');
+          if (choice === q.correct) {
+            label.classList.add('correct');
+            score++;
+            updateScore();
             setTimeout(() => {
-              if (currentQuestion < quizData.length - 1) {
-                currentQuestion++;
-                renderQuestion(currentQuestion);
-              } else {
-                showFinalScreen();
-              }
-            }, 800);
+              current++;
+              if (current < questions.length) renderQuestion();
+              else showFinal();
+            }, 700);
           } else {
-            label.classList.add("wrong");
-            score -= 1;
+            label.classList.add('wrong');
+            score--;
             updateScore();
           }
         });
       });
-
-      prevBtn.disabled = index === 0;
     }
 
-    function showFinalScreen() {
-      questionArea.innerHTML = '';
-      const image = (score >= 8) ? "felicitation.png" : "dommage.png";
-
-      questionArea.innerHTML = `
-        <div class="final-container" style="background-image: url('${image}');">
-          <div class="final-score">Score : ${score} / 11</div>
-        </div>
-      `;
-
-      document.querySelector(".nav-buttons").style.display = "none";
+    function showFinal() {
+      document.getElementById('quiz-container').style.display = 'none';
+      final.style.display = 'block';
+      finalImage.src = score >= 8 ? 'felicitation.png' : 'dommage.png';
+      finalOverlay.textContent = `Score : ${score} / ${questions.length}`;
     }
 
-    prevBtn.onclick = () => {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        renderQuestion(currentQuestion);
-      }
-    };
-
-    renderQuestion(currentQuestion);
+    renderQuestion();
     updateScore();
   </script>
 </body>
