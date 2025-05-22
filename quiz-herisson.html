@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz sur le hérisson</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --c1: #b3c7cc;
+      --c2: #cee4d0;
+      --c3: #aeb7a6;
+      --c4: #5d6757;
+      --c5: #3f403d;
+    }
+    body {
+      font-family: sans-serif;
+      background-image: url('fond.jpg');
+      background-size: cover;
+      color: var(--c5);
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+    .question {
+      margin-bottom: 2rem;
+      background-color: var(--c2);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+    .answers button {
+      background-color: var(--c3);
+      color: var(--c5);
+      border: none;
+      padding: 1rem;
+      margin: 0.5rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .answers button:hover,
+    .answers button:active {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--c1);
+    }
+    .wrong {
+      background-color: #ff4d4d !important;
+      animation: shake 0.3s;
+    }
+    .correct {
+      background-color: #4CAF50 !important;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      50% { transform: translateX(5px); }
+      75% { transform: translateX(-5px); }
+      100% { transform: translateX(0); }
+    }
+    .image-question {
+      max-width: 90vw;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    #final-screen {
+      position: relative;
+    }
+    #final-score {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.5rem;
+      color: var(--c5);
+      background: rgba(255,255,255,0.7);
+      padding: 1rem 2rem;
+      border-radius: 12px;
+    }
+    #start-screen {
+      position: relative;
+      width: 100%;
+    }
+    #start-screen img {
+      width: 100%;
+      border-radius: 12px;
+    }
+    #start-button {
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      padding: 1rem 2rem;
+      background-color: var(--c4);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 15px rgba(255,255,255,0.4);
+    }
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.1); }
+      100% { transform: translate(-50%, -50%) scale(1); }
+    }
+    .clicked {
+      transform: scale(0.95);
+      box-shadow: 0 0 15px var(--c1);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+  </style>
+  <script>
+    let current = 0;
+    let score = 0;
+
+    function restartQuiz() {
+      current = 0;
+      score = 0;
+      startQuiz();
+    }
+  </script>
+</head>
+<body>
+  <div id="quiz">
+    <div id="start-screen">
+      <img src="page de demarrage.jpg" alt="Page de démarrage">
+      <button id="start-button" ontouchstart="startQuiz()" onclick="startQuiz()">Démarrer le quiz</button>
+    </div>
+  </div>
+</body>
+</html>
