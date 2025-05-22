@@ -294,12 +294,12 @@
         return;
       }
 
-      // MODIFICATION DE LA CONDITION DE SUCCÈS ICI :
-      // Succès si score >= 4. Donc "pas succès" (pour "score de fin .png") si score < 4.
       const isSuccess = score >= 4; 
       
-      const imageFileName = isSuccess ? "image de fin quizz herisson .png" : "score de fin .png";
-      const altText = isSuccess ? 'Image de succès du quiz hérisson' : 'score de fin .png'; // Texte alt désiré
+      // MODIFICATION DU NOM DE FICHIER ICI :
+      const imageFileName = isSuccess ? "image de fin quizz herisson .png" : "fin.png"; 
+      // MODIFICATION DU TEXTE ALT ICI (si vous voulez qu'il corresponde au nom du fichier) :
+      const altText = isSuccess ? 'Image de succès du quiz hérisson' : 'fin.png'; 
 
       quizElement.innerHTML = `
         <div id="final-screen">
@@ -332,7 +332,7 @@
 
     function restartQuiz() {
       console.log("Fonction restartQuiz appelée.");
-      const restartBtnElem = quizElement.querySelector('#restart-button'); // Cible par ID
+      const restartBtnElem = quizElement.querySelector('#restart-button'); 
       if (restartBtnElem) restartBtnElem.classList.remove('feedback-click-scale');
       startQuiz();
     }
@@ -367,7 +367,10 @@
     function preloadImages() {
         console.log("Fonction preloadImages appelée.");
         const imagesToPreload = [
-            'fond.jpg', 'page de demarrage.jpg', 'image de fin quizz herisson .png', 'score de fin .png'
+            'fond.jpg', 
+            'page de demarrage.jpg', 
+            'image de fin quizz herisson .png', 
+            'fin.png' // MODIFICATION DU NOM DE FICHIER POUR LE PRECHARGEMENT
         ];
         quizData.forEach(q => { if(q.image) imagesToPreload.push(q.image); });
         imagesToPreload.forEach(src => {
