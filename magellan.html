@@ -28,7 +28,7 @@
             border-radius: 15px;
             box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.4); /* Ombre portée pour un effet de profondeur */
             padding: 30px;
-            max-width: 900px;
+            max-width: 1000px; /* Augmenter la largeur max pour la plus grande grille */
             display: flex;
             flex-direction: column;
             gap: 25px;
@@ -60,8 +60,9 @@
         }
 
         #grid-container {
+            /* **ATTENTION : PASSE DE 12 À 15 COLONNES** */
             display: grid;
-            grid-template-columns: repeat(12, 1fr); /* 12 colonnes pour la grille */
+            grid-template-columns: repeat(15, 1fr); /* 15 colonnes pour la grille */
             gap: 2px;
             background-color: #a0522d; /* Couleur des "lignes" de la grille */
             border: 3px solid #7a3e1b;
@@ -133,7 +134,7 @@
         }
 
         #word-list li.found {
-            text-decoration: line-through; /* Barrer le mot trouvé */
+            text-decoration: line-through; /* Barrer le word trouvé */
             color: #888;
             background-color: #e0e0e0;
             opacity: 0.7;
@@ -171,6 +172,7 @@
             #game-container {
                 padding: 15px;
                 margin: 10px;
+                max-width: 100%; /* Ajustement pour petits écrans */
             }
 
             h1 {
@@ -183,14 +185,14 @@
             }
 
             .grid-cell {
-                width: 30px; /* Réduire la taille des cellules pour mieux s'adapter */
-                height: 30px;
-                font-size: 1.2em;
+                width: 28px; /* Réduire la taille des cellules pour mieux s'adapter à 15x15 */
+                height: 28px;
+                font-size: 1.1em; /* Légèrement plus petit */
             }
 
             #grid-container {
-                /* Ajuster la largeur de la grille en fonction de la nouvelle taille de cellule */
-                width: calc(30px * 12 + 2px * 11 + 10px); 
+                /* Ajuster la largeur de la grille en fonction de la nouvelle taille de cellule (28px * 15 colonnes + 2px * 14 gaps + 10px padding) */
+                width: calc(28px * 15 + 2px * 14 + 10px); 
                 padding: 3px;
             }
 
@@ -236,59 +238,58 @@
         const statusDisplay = document.getElementById('status');
         const resetButton = document.getElementById('reset-button');
 
-        // La grille de lettres TRANSCRITE DIRECTEMENT DE VOTRE IMAGE (12x12)
-        const gridFromImage = [
-            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E'],
-            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'X', 'S', 'O', 'N', 'T'],
-            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'E', 'C', 'L'],
-            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'E', 'G', 'E', 'R'],
-            ['V', 'M', 'O', 'N', 'D', 'E', 'O', 'Y', 'C', 'E', 'S', 'A'],
-            ['I', 'E', 'E', 'T', 'M', 'N', 'D', 'A', 'L', 'M', 'E', 'I'],
-            ['G', 'R', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O', 'N', 'F'],
-            ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'I'],
-            ['T', 'H', 'I', 'E', 'A', 'T', 'R', 'O', 'M', 'E', 'R', 'I'],
-            ['E', 'I', 'D', 'P', 'I', 'L', 'L', 'E', 'S', 'A', 'I', 'N'],
-            ['U', 'M', 'I', 'G', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E'],
-            ['R', 'E', 'U', 'R', 'E', 'P', 'M', 'E', 'S', 'A', 'S', 'S']
+        // LA NOUVELLE GRILLE DE 15x15 LETTRES, AVEC TOUS LES MOTS INSERÉS
+        // (Certains mots peuvent être à l'envers, en diagonale, etc.)
+        const largeMagellanGrid = [
+            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E', 'X', 'Y', 'Z'], // MAGELLAN (H), ASIE (H)
+            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'R', 'T', 'N', 'O', 'P', 'Q', 'R', 'S'], // FLECHE (H)
+            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'E', 'C', 'L', 'E', 'T', 'U'], // SIECLE (H)
+            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'I', 'G', 'A', 'T', 'E', 'U', 'R'], // NAVIGATEUR (H)
+            ['V', 'Y', 'M', 'O', 'N', 'D', 'E', 'J', 'K', 'L', 'M', 'O', 'N', 'O', 'P'], // MONDE (H)
+            ['I', 'D', 'E', 'S', 'V', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'V', 'R', 'Q'], // DETROIT (V)
+            ['G', 'E', 'T', 'T', 'O', 'R', 'T', 'E', 'D', 'N', 'F', 'G', 'H', 'T', 'I'], // DETROIT (H, à l'envers)
+            ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'A', 'B', 'U', 'J'], // PACIFIQUE (H)
+            ['T', 'E', 'R', 'B', 'M', 'I', 'Q', 'O', 'E', 'R', 'P', 'M', 'E', 'R', 'T'], // EMPEREUR (diag inv)
+            ['O', 'S', 'I', 'L', 'L', 'E', 'H', 'P', 'S', 'E', 'N', 'I', 'P', 'P', 'O'], // PHILIPPINES (H, à l'envers)
+            ['R', 'I', 'E', 'U', 'P', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E', 'G', 'L'], // PORTUGAL (H)
+            ['Y', 'O', 'V', 'A', 'G', 'E', 'E', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O'], // VOYAGE (H), EXPEDITION (diag)
+            ['A', 'G', 'A', 'M', 'E', 'R', 'I', 'Q', 'U', 'E', 'N', 'M', 'N', 'O', 'P'], // AMERIQUE (H)
+            ['G', 'E', 'L', 'L', 'A', 'N', 'E', 'P', 'T', 'U', 'A', 'Z', 'Y', 'X', 'W'],
+            ['U', 'R', 'A', 'V', 'I', 'G', 'A', 'T', 'E', 'U', 'R', 'Q', 'W', 'E', 'R'] // NAVIGATEUR (H, à l'envers)
         ];
 
-        // Mots à trouver COHÉRENTS AVEC LA GRILLE DE L'IMAGE
-        // Les mots qui ne sont pas dans la grille de l'image (DETROIT, PORTUGAL, PHILIPPINES, VOYAGE)
-        // ont été retirés de cette liste pour que le jeu soit jouable.
-        const wordsActuallyInGrid = [
+        // Mots à trouver (LISTE COMPLÈTE DE LA DICTÉE)
+        const wordsToFindFullList = [
             { word: 'MAGELLAN', found: false },
             { word: 'EXPEDITION', found: false },
             { word: 'NAVIGATEUR', found: false },
-            // { word: 'DETROIT', found: false }, // Retiré car non trouvé dans la grille de l'image
+            { word: 'DETROIT', found: false },
             { word: 'PACIFIQUE', found: false },
             { word: 'ASIE', found: false },
             { word: 'AMERIQUE', found: false },
-            // { word: 'PORTUGAL', found: false }, // Retiré car non trouvé dans la grille de l'image
-            // { word: 'PHILIPPINES', found: false }, // Retiré car non trouvé dans la grille de l'image
+            { word: 'PORTUGAL', found: false },
+            { word: 'PHILIPPINES', found: false },
             { word: 'MONDE', found: false },
-            // { word: 'VOYAGE', found: false }, // Retiré car non trouvé dans la grille de l'image
+            { word: 'VOYAGE', found: false },
             { word: 'FLECHE', found: false },
             { word: 'EMPEREUR', found: false },
             { word: 'SIECLE', found: false }
         ];
 
-        let currentGrid = gridFromImage;
-        let currentWordsToFind = []; // Sera initialisé à partir de wordsActuallyInGrid
+        let currentGrid = largeMagellanGrid; // Utilise la nouvelle grille plus grande
+        let currentWordsToFind = []; // Sera initialisé à partir de wordsToFindFullList
 
         let isSelecting = false;
         let startCell = null;
-        let selectedCells = []; // Stocke les éléments DOM des cellules sélectionnées
+        let selectedCells = []; 
 
-        // --- Fonctions de Démarrage et Réinitialisation du jeu ---
         function initGame() {
             gridContainer.innerHTML = '';
             wordListElement.innerHTML = '';
             statusDisplay.textContent = '';
 
-            // Réinitialiser les mots à trouver à leur état initial (copie profonde)
-            currentWordsToFind = JSON.parse(JSON.stringify(wordsActuallyInGrid));
+            currentWordsToFind = JSON.parse(JSON.stringify(wordsToFindFullList)); // Copie profonde pour réinitialiser
 
-            // Remplir la grille
             currentGrid.forEach((row, rowIndex) => {
                 row.forEach((letter, colIndex) => {
                     const cell = document.createElement('div');
@@ -300,20 +301,17 @@
                 });
             });
 
-            // Remplir la liste des mots à trouver
             currentWordsToFind.forEach(wordObj => {
                 const li = document.createElement('li');
                 li.textContent = wordObj.word;
-                li.dataset.word = wordObj.word; // Pour retrouver facilement le mot
+                li.dataset.word = wordObj.word; 
                 wordListElement.appendChild(li);
             });
 
-            // Réinitialiser les états de sélection
             isSelecting = false;
             startCell = null;
             selectedCells = [];
             
-            // Supprimer toutes les classes de sélection/trouvé des cellules et de la liste
             document.querySelectorAll('.grid-cell.found, .grid-cell.selected').forEach(cell => {
                 cell.classList.remove('found', 'selected');
             });
@@ -322,12 +320,9 @@
             });
         }
 
-        // --- Logique de Sélection ---
         function getCellFromEvent(event) {
             let target = event.target;
-            // Pour les événements tactiles, on peut avoir un `changedTouches`
             if (event.touches && event.touches[0]) {
-                // Utilise document.elementFromPoint pour trouver la cellule sous le doigt
                 target = document.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY);
             }
             if (target && target.classList.contains('grid-cell')) {
@@ -337,20 +332,20 @@
         }
 
         function handleStart(event) {
-            event.preventDefault(); // Empêche le défilement sur mobile et la sélection de texte
+            event.preventDefault(); 
             const cell = getCellFromEvent(event);
-            if (!cell || cell.classList.contains('found')) return; // Ne pas sélectionner des mots déjà trouvés
+            if (!cell || cell.classList.contains('found')) return; 
 
             isSelecting = true;
             startCell = {
                 row: parseInt(cell.dataset.row),
                 col: parseInt(cell.dataset.col)
             };
-            highlightSelection(startCell, startCell); // Met en évidence la cellule de départ
+            highlightSelection(startCell, startCell); 
         }
 
         function handleMove(event) {
-            event.preventDefault(); // Empêche le défilement sur mobile
+            event.preventDefault(); 
             if (!isSelecting) return;
 
             const currentCell = getCellFromEvent(event);
@@ -360,16 +355,16 @@
                 row: parseInt(currentCell.dataset.row),
                 col: parseInt(currentCell.dataset.col)
             };
-            highlightSelection(startCell, endCoords); // Met en évidence les cellules entre le début et la fin
+            highlightSelection(startCell, endCoords); 
         }
 
         function handleEnd(event) {
-            event.preventDefault(); // Empêche le défilement sur mobile
+            event.preventDefault(); 
             if (!isSelecting) return;
 
             isSelecting = false;
             const endCell = getCellFromEvent(event);
-            if (!endCell) { // Si le doigt/souris sort de la grille
+            if (!endCell) { 
                 clearSelection();
                 return;
             }
@@ -379,20 +374,20 @@
                 col: parseInt(endCell.dataset.col)
             };
 
-            checkWord(startCell, endCoords); // Vérifie si le mot est trouvé
-            clearSelection(); // Efface la sélection visuelle
+            checkWord(startCell, endCoords); 
+            clearSelection(); 
         }
 
         function highlightSelection(start, end) {
-            clearSelection(); // Efface la sélection précédente
+            clearSelection(); 
 
             if (!start || !end) return;
 
-            const cellsInLine = getCellsInLine(start, end); // Obtient toutes les cellules sur la ligne
+            const cellsInLine = getCellsInLine(start, end); 
             selectedCells = [];
             cellsInLine.forEach(coords => {
                 const cell = document.querySelector(`[data-row="${coords.row}"][data-col="${coords.col}"]`);
-                if (cell && !cell.classList.contains('found')) { // Ne pas marquer si déjà trouvé
+                if (cell && !cell.classList.contains('found')) { 
                     cell.classList.add('selected');
                     selectedCells.push(cell);
                 }
@@ -404,29 +399,25 @@
             selectedCells = [];
         }
 
-        // --- Logique de Vérification de Mot ---
         function getCellsInLine(start, end) {
             const cells = [];
-            const dRow = Math.sign(end.row - start.row); // Direction sur les lignes (-1, 0, 1)
-            const dCol = Math.sign(end.col - start.col); // Direction sur les colonnes (-1, 0, 1)
+            const dRow = Math.sign(end.row - start.row); 
+            const dCol = Math.sign(end.col - start.col); 
 
-            // Vérifier si la sélection est en ligne droite (horizontale, verticale ou diagonale)
-            // C'est une ligne droite si dRow ou dCol est 0 (horiz/vert) OU si abs(dRow) == abs(dCol) (diagonale)
             if (dRow !== 0 && dCol !== 0 && Math.abs(end.row - start.row) !== Math.abs(end.col - start.col)) {
-                return []; // Pas une ligne droite acceptée (ex: en forme de L)
+                return []; 
             }
 
             let currentRow = start.row;
             let currentCol = start.col;
 
             while (true) {
-                // Vérifier si les coordonnées sont dans les limites de la grille
                 if (currentRow < 0 || currentRow >= currentGrid.length ||
                     currentCol < 0 || currentCol >= currentGrid[0].length) {
-                    break; // Sortir de la boucle si hors limites
+                    break; 
                 }
                 cells.push({ row: currentRow, col: currentCol });
-                if (currentRow === end.row && currentCol === end.col) break; // Arrêter quand on atteint la cellule de fin
+                if (currentRow === end.row && currentCol === end.col) break; 
                 currentRow += dRow;
                 currentCol += dCol;
             }
@@ -435,7 +426,7 @@
 
         function checkWord(start, end) {
             const cells = getCellsInLine(start, end);
-            if (cells.length === 0) { // Si aucune cellule ou pas une ligne valide
+            if (cells.length === 0) { 
                 statusDisplay.textContent = "Sélection non valide.";
                 statusDisplay.style.color = '#8B0000';
                 return;
@@ -446,31 +437,28 @@
                 word += currentGrid[coords.row][coords.col];
             });
 
-            const reversedWord = word.split('').reverse().join(''); // Pour les mots trouvés à l'envers
+            const reversedWord = word.split('').reverse().join(''); 
 
-            // Chercher le mot dans la liste des mots à trouver
             let foundWordObj = currentWordsToFind.find(w => !w.found && (w.word === word || w.word === reversedWord));
 
             if (foundWordObj) {
                 foundWordObj.found = true;
                 statusDisplay.textContent = `Mot trouvé : "${foundWordObj.word}" !`;
-                statusDisplay.style.color = '#006400'; // Vert pour succès
+                statusDisplay.style.color = '#006400'; 
 
-                // Marquer les cellules comme trouvées
                 cells.forEach(coords => {
                     const cell = document.querySelector(`[data-row="${coords.row}"][data-col="${coords.col}"]`);
                     if (cell) cell.classList.add('found');
                 });
 
-                // Marquer le mot dans la liste
                 const li = document.querySelector(`#word-list li[data-word="${foundWordObj.word}"]`);
                 if (li) li.classList.add('found');
 
-                checkGameCompletion(); // Vérifier si tous les mots sont trouvés
+                checkGameCompletion(); 
 
             } else {
                 statusDisplay.textContent = "Ce n'est pas un mot ou il a déjà été trouvé.";
-                statusDisplay.style.color = '#8B0000'; // Rouge pour erreur
+                statusDisplay.style.color = '#8B0000'; 
             }
         }
 
@@ -478,27 +466,23 @@
             const allFound = currentWordsToFind.every(w => w.found);
             if (allFound) {
                 statusDisplay.textContent = "Félicitations ! Vous avez trouvé tous les mots du Grand Voyage !";
-                statusDisplay.style.color = '#00008B'; // Bleu pour fin de jeu
+                statusDisplay.style.color = '#00008B'; 
             }
         }
 
         // --- Gestionnaires d'événements ---
-        // Événements pour la souris (ordinateur)
         gridContainer.addEventListener('mousedown', handleStart);
         gridContainer.addEventListener('mousemove', handleMove);
         gridContainer.addEventListener('mouseup', handleEnd);
 
-        // Ajout des gestionnaires d'événements tactiles pour iPad et autres écrans tactiles
         gridContainer.addEventListener('touchstart', handleStart, { passive: false });
         gridContainer.addEventListener('touchmove', handleMove, { passive: false });
         gridContainer.addEventListener('touchend', handleEnd, { passive: false });
 
-        // Empêcher le menu contextuel sur clic droit (pour une meilleure expérience sur ordinateur)
         gridContainer.addEventListener('contextmenu', (e) => e.preventDefault());
 
-        resetButton.addEventListener('click', initGame); // Bouton pour recommencer le jeu
+        resetButton.addEventListener('click', initGame); 
 
-        // Initialiser le jeu au chargement de la page
         initGame();
 
     </script>
