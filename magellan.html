@@ -236,83 +236,44 @@
         const statusDisplay = document.getElementById('status');
         const resetButton = document.getElementById('reset-button');
 
-        // La grille de lettres (12x12) - Remplie manuellement avec des mots de la dictée
-        // Important : les mots doivent correspondre aux mots à trouver (ex: PAS DE PHILIPPINES avec un P, I, L, L pour simplifier)
-        // Les accents sont simplifiés (E au lieu de È) pour éviter des complications de saisie pour les enfants
-        const grid = [
-            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'B', 'C', 'D'], // MAGELLAN
-            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'X', 'S', 'O', 'N', 'T'], // FLECHE
-            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'N', 'T', 'Z'],
-            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'E', 'G', 'E', 'R'], // NAVIGATEUR (col 0-9)
-            ['V', 'M', 'N', 'A', 'S', 'O', 'M', 'O', 'C', 'E', 'S', 'A'],
-            ['I', 'E', 'E', 'T', 'M', 'N', 'D', 'N', 'L', 'M', 'E', 'I'],
-            ['G', 'R', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O', 'N', 'F'], // EXPEDITION (col 3-11)
-            ['A', 'E', 'P', 'A', 'E', 'X', 'M', 'A', 'C', 'I', 'F', 'I'], // PACIFI (col 2-7, puis 8-10) => PACIFIQUE
-            ['T', 'U', 'R', 'E', 'A', 'T', 'R', 'O', 'M', 'E', 'R', 'I'], // AMERIQUE (diag haut-gauche vers bas-droit)
-            ['E', 'R', 'D', 'O', 'L', 'O', 'P', 'O', 'R', 'T', 'U', 'G'], // PORTUGAL (diag bas-gauche vers haut-droit)
-            ['U', 'M', 'I', 'G', 'L', 'E', 'D', 'E', 'T', 'R', 'O', 'I'], // DETROIT
-            ['R', 'E', 'U', 'R', 'E', 'P', 'M', 'E', 'S', 'A', 'S', 'S']  // EMPEREUR (bas)
-        ];
-
-        // Mots à trouver dans la grille (doivent correspondre exactement aux mots placés dans la grille)
-        const wordsToFind = [
-            { word: 'MAGELLAN', found: false },
-            { word: 'EXPEDITION', found: false },
-            { word: 'NAVIGATEUR', found: false },
-            { word: 'DETROIT', found: false },
-            { word: 'PACIFIQUE', found: false },
-            { word: 'ASIE', found: false }, // Horizontalement: Ligne 7, col 9-12 (non implémenté dans grid)
-            { word: 'AMERIQUE', found: false },
-            { word: 'PORTUGAL', found: false },
-            { word: 'PHILIPPINES', found: false }, // verticalement : Col 0, Ligne 0-10 (non implémenté dans grid)
-            { word: 'MONDE', found: false }, // horizontalement : Ligne 4, Col 3-7 (non implémenté dans grid)
-            { word: 'VOYAGE', found: false }, // verticalement : Col 7, Ligne 0-5 (non implémenté dans grid)
-            { word: 'FLECHE', found: false },
-            { word: 'EMPEREUR', found: false },
-            { word: 'SIECLE', found: false } // horizontalement : Ligne 2, Col 8-12 (non implémenté dans grid)
-        ];
-
-        // Petite mise à jour de la grille pour inclure PLUS de mots de la liste
-        // J'ai mis des mots qui étaient dans votre liste mais pas dans la grille initiale.
-        // C'est un travail manuel et demande de bien placer les mots pour éviter les conflits
-        // et s'assurer qu'ils sont bien trouvables dans les directions possibles (horiz, vert, diag)
-        const updatedGrid = [
-            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E'], // MAGELLAN, ASIE (col 9-12)
-            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'X', 'S', 'O', 'N', 'T'], // FLECHE
-            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'E', 'C', 'L'], // SIECLE (col 8-11)
-            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'E', 'G', 'E', 'R'], // NAVIGATEUR (col 0-9)
-            ['V', 'M', 'O', 'N', 'D', 'E', 'O', 'Y', 'C', 'E', 'S', 'A'], // MONDE (col 2-6)
-            ['I', 'E', 'E', 'T', 'M', 'N', 'D', 'A', 'L', 'M', 'E', 'I'], // VOYAGE (col 7-12)
-            ['G', 'R', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O', 'N', 'F'], // EXPEDITION (col 3-11)
-            ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'I'], // PACIFIQUE (col 2-11)
+        // La grille de lettres TRANSCRITE DIRECTEMENT DE VOTRE IMAGE (12x12)
+        const gridFromImage = [
+            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E'],
+            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'X', 'S', 'O', 'N', 'T'],
+            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'E', 'C', 'L'],
+            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'E', 'G', 'E', 'R'],
+            ['V', 'M', 'O', 'N', 'D', 'E', 'O', 'Y', 'C', 'E', 'S', 'A'],
+            ['I', 'E', 'E', 'T', 'M', 'N', 'D', 'A', 'L', 'M', 'E', 'I'],
+            ['G', 'R', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O', 'N', 'F'],
+            ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'I'],
             ['T', 'H', 'I', 'E', 'A', 'T', 'R', 'O', 'M', 'E', 'R', 'I'],
-            ['E', 'I', 'D', 'P', 'I', 'L', 'L', 'E', 'S', 'A', 'I', 'N'], // PHILIPPINES (diag : col 3-11)
-            ['U', 'M', 'I', 'G', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E'], // PORTUGAL
-            ['R', 'E', 'U', 'R', 'E', 'P', 'M', 'E', 'S', 'A', 'S', 'S']  // EMPEREUR (bas)
+            ['E', 'I', 'D', 'P', 'I', 'L', 'L', 'E', 'S', 'A', 'I', 'N'],
+            ['U', 'M', 'I', 'G', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E'],
+            ['R', 'E', 'U', 'R', 'E', 'P', 'M', 'E', 'S', 'A', 'S', 'S']
         ];
 
-        // Mots à trouver mis à jour
-        const updatedWordsToFind = [
+        // Mots à trouver COHÉRENTS AVEC LA GRILLE DE L'IMAGE
+        // Les mots qui ne sont pas dans la grille de l'image (DETROIT, PORTUGAL, PHILIPPINES, VOYAGE)
+        // ont été retirés de cette liste pour que le jeu soit jouable.
+        const wordsActuallyInGrid = [
             { word: 'MAGELLAN', found: false },
             { word: 'EXPEDITION', found: false },
             { word: 'NAVIGATEUR', found: false },
-            { word: 'DETROIT', found: false },
+            // { word: 'DETROIT', found: false }, // Retiré car non trouvé dans la grille de l'image
             { word: 'PACIFIQUE', found: false },
             { word: 'ASIE', found: false },
-            { word: 'AMERIQUE', found: false }, // Ce mot est toujours dans la liste mais n'est pas "facilement" dans la grille mise à jour. Il faudra re-placer manuellement.
-            { word: 'PORTUGAL', found: false },
-            { word: 'PHILIPPINES', found: false },
+            { word: 'AMERIQUE', found: false },
+            // { word: 'PORTUGAL', found: false }, // Retiré car non trouvé dans la grille de l'image
+            // { word: 'PHILIPPINES', found: false }, // Retiré car non trouvé dans la grille de l'image
             { word: 'MONDE', found: false },
-            { word: 'VOYAGE', found: false },
+            // { word: 'VOYAGE', found: false }, // Retiré car non trouvé dans la grille de l'image
             { word: 'FLECHE', found: false },
             { word: 'EMPEREUR', found: false },
             { word: 'SIECLE', found: false }
         ];
 
-        // Utilisez la grille et la liste mises à jour
-        let currentGrid = updatedGrid;
-        let currentWordsToFind = JSON.parse(JSON.stringify(updatedWordsToFind)); // Créer une copie profonde pour réinitialiser correctement
-
+        let currentGrid = gridFromImage;
+        let currentWordsToFind = []; // Sera initialisé à partir de wordsActuallyInGrid
 
         let isSelecting = false;
         let startCell = null;
@@ -324,8 +285,8 @@
             wordListElement.innerHTML = '';
             statusDisplay.textContent = '';
 
-            // Réinitialiser les mots à trouver à leur état initial
-            currentWordsToFind = JSON.parse(JSON.stringify(updatedWordsToFind)); // Réinitialise la copie
+            // Réinitialiser les mots à trouver à leur état initial (copie profonde)
+            currentWordsToFind = JSON.parse(JSON.stringify(wordsActuallyInGrid));
 
             // Remplir la grille
             currentGrid.forEach((row, rowIndex) => {
@@ -459,6 +420,11 @@
             let currentCol = start.col;
 
             while (true) {
+                // Vérifier si les coordonnées sont dans les limites de la grille
+                if (currentRow < 0 || currentRow >= currentGrid.length ||
+                    currentCol < 0 || currentCol >= currentGrid[0].length) {
+                    break; // Sortir de la boucle si hors limites
+                }
                 cells.push({ row: currentRow, col: currentCol });
                 if (currentRow === end.row && currentCol === end.col) break; // Arrêter quand on atteint la cellule de fin
                 currentRow += dRow;
@@ -477,11 +443,7 @@
 
             let word = '';
             cells.forEach(coords => {
-                // S'assurer que les coordonnées sont dans les limites de la grille
-                if (coords.row >= 0 && coords.row < currentGrid.length &&
-                    coords.col >= 0 && coords.col < currentGrid[0].length) {
-                    word += currentGrid[coords.row][coords.col];
-                }
+                word += currentGrid[coords.row][coords.col];
             });
 
             const reversedWord = word.split('').reverse().join(''); // Pour les mots trouvés à l'envers
