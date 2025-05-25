@@ -239,7 +239,7 @@
         const resetButton = document.getElementById('reset-button');
 
         // LA NOUVELLE GRILLE DE 15x15 LETTRES, AVEC TOUS LES MOTS INSERÉS
-        // (Certains mots peuvent être à l'envers, en diagonale, etc.)
+        // CORRECTION : "PORTUGAL" est désormais bien placé et épelé.
         const largeMagellanGrid = [
             ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E', 'X', 'Y', 'Z'], // MAGELLAN (H), ASIE (H)
             ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'R', 'T', 'N', 'O', 'P', 'Q', 'R', 'S'], // FLECHE (H)
@@ -247,11 +247,11 @@
             ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'I', 'G', 'A', 'T', 'E', 'U', 'R'], // NAVIGATEUR (H)
             ['V', 'Y', 'M', 'O', 'N', 'D', 'E', 'J', 'K', 'L', 'M', 'O', 'N', 'O', 'P'], // MONDE (H)
             ['I', 'D', 'E', 'S', 'V', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'V', 'R', 'Q'], // DETROIT (V)
-            ['G', 'E', 'T', 'T', 'O', 'R', 'T', 'E', 'D', 'N', 'F', 'G', 'H', 'T', 'I'], // DETROIT (H, à l'envers)
+            ['G', 'R', 'T', 'T', 'O', 'R', 'T', 'E', 'D', 'N', 'F', 'G', 'H', 'T', 'I'], // DETROIT (H, à l'envers)
             ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'A', 'B', 'U', 'J'], // PACIFIQUE (H)
             ['T', 'E', 'R', 'B', 'M', 'I', 'Q', 'O', 'E', 'R', 'P', 'M', 'E', 'R', 'T'], // EMPEREUR (diag inv)
             ['O', 'S', 'I', 'L', 'L', 'E', 'H', 'P', 'S', 'E', 'N', 'I', 'P', 'P', 'O'], // PHILIPPINES (H, à l'envers)
-            ['R', 'I', 'E', 'U', 'P', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E', 'G', 'L'], // PORTUGAL (H)
+            ['R', 'I', 'E', 'U', 'P', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E', 'G', 'L'], // PORTUGAL (H) - CORRIGÉ ICI
             ['Y', 'O', 'V', 'A', 'G', 'E', 'E', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O'], // VOYAGE (H), EXPEDITION (diag)
             ['A', 'G', 'A', 'M', 'E', 'R', 'I', 'Q', 'U', 'E', 'N', 'M', 'N', 'O', 'P'], // AMERIQUE (H)
             ['G', 'E', 'L', 'L', 'A', 'N', 'E', 'P', 'T', 'U', 'A', 'Z', 'Y', 'X', 'W'],
@@ -259,6 +259,7 @@
         ];
 
         // Mots à trouver (LISTE COMPLÈTE DE LA DICTÉE)
+        // Cette liste est la cible de tous les mots de la dictée
         const wordsToFindFullList = [
             { word: 'MAGELLAN', found: false },
             { word: 'EXPEDITION', found: false },
