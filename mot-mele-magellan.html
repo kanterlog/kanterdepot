@@ -1,59 +1,135 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mot Mêlé – Fernand de Magellan</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
       min-height: 100vh;
       display: flex;
       flex-direction: row;
       justify-content: center;
-      gap: 40px;
+      gap: 20px;
       background: linear-gradient(120deg, #b3e0fc 0%, #53b7e8 50%, #24577a 100%);
     }
-    .left-section {
-      max-width: 70vw;
+    
+    @media (max-width: 767px) {
+      body {
+        flex-direction: column;
+        gap: 15px;
+      }
     }
+    
+    .left-section {
+      flex: 1;
+      max-width: 100%;
+    }
+    
+    @media (min-width: 768px) {
+      .left-section {
+        max-width: 70vw;
+      }
+    }
+    
     h1 {
       color: #0d47a1;
       text-align: center;
       letter-spacing: 1px;
+      font-size: 1.5rem;
+      margin: 0 0 10px 0;
     }
+    
+    @media (min-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+    }
+    
+    .progress {
+      text-align: center;
+      font-size: 16px;
+      color: #0d47a1;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    
     .grid {
       display: grid;
-      grid-template-columns: repeat(15, 35px);
-      grid-gap: 2px;
+      grid-template-columns: repeat(15, 1fr);
+      gap: 1px;
       justify-content: center;
-      margin-top: 20px;
+      margin: 15px auto;
+      max-width: 100%;
+      aspect-ratio: 1;
+      background: #ccc;
+      padding: 2px;
     }
+    
+    @media (min-width: 480px) {
+      .grid {
+        max-width: 450px;
+        gap: 2px;
+      }
+    }
+    
     .cell {
-      width: 35px;
-      height: 35px;
+      aspect-ratio: 1;
       background: #fff;
-      border: 1px solid #ccc;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 0.8rem;
       cursor: pointer;
       user-select: none;
-      transition: background 0.2s, color 0.2s;
+      transition: all 0.2s ease;
+      touch-action: none;
     }
-    .cell.selected {
+    
+    @media (min-width: 480px) {
+      .cell {
+        font-size: 1rem;
+      }
+    }
+    
+    .cell.selecting {
       background-color: #ffcc80;
+      transform: scale(0.95);
     }
+    
     .cell.found {
       background-color: #1996bf;
       color: #fff;
+      animation: foundPulse 0.6s ease;
     }
+    
+    @keyframes foundPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); background-color: #4caf50; }
+      100% { transform: scale(1); }
+    }
+    
     .word-list {
-      max-width: 300px;
+      flex: 0 0 250px;
+      max-width: 250px;
+      margin: 0;
     }
+    
+    @media (max-width: 767px) {
+      .word-list {
+        flex: 1;
+        max-width: 100%;
+        margin-top: 20px;
+      }
+    }
+    
     .word-item {
       padding: 8px 14px;
       margin: 6px;
@@ -62,14 +138,26 @@
       background: #fff;
       font-weight: bold;
       text-align: center;
-      font-size: 16px;
+      font-size: 14px;
+      transition: all 0.3s ease;
     }
+    
+    @media (min-width: 480px) {
+      .word-item {
+        font-size: 16px;
+      }
+    }
+    
     .word-item.found {
-      display: none;
+      background: #4caf50;
+      color: white;
+      transform: scale(0.95);
+      opacity: 0.7;
     }
+    
     button {
       margin-top: 15px;
-      padding: 8px 16px;
+      padding: 12px 20px;
       font-size: 16px;
       background: #0d47a1;
       color: white;
@@ -77,28 +165,51 @@
       border-radius: 6px;
       cursor: pointer;
       transition: background 0.2s;
+      width: 100%;
+      max-width: 300px;
     }
+    
     button:hover {
       background: #1996bf;
     }
+    
     .boat-illu {
       width: 100%;
-      max-width: 370px;
+      max-width: 300px;
       height: auto;
       display: block;
       margin: 20px auto 0 auto;
+    }
+    
+    @media (min-width: 768px) {
+      .boat-illu {
+        max-width: 370px;
+      }
+    }
+    
+    .instruction {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    @media (min-width: 480px) {
+      .instruction {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="left-section">
     <h1>🌊 Mot Mêlé – Fernand de Magellan</h1>
-    <p style="text-align:center">Tape les lettres dans l'ordre, puis appuie sur "Valider le mot".</p>
+    <div class="progress" id="progress">0 / 20 mots trouvés</div>
+    <p class="instruction">Glissez pour sélectionner les mots dans la grille.</p>
     <div id="grid" class="grid"></div>
     <div style="text-align:center">
-      <button onclick="validateWord()">Valider le mot</button>
+      <button onclick="resetSelection()">Annuler sélection</button>
     </div>
-    <!-- Illustration caravelle style BD -->
     <svg class="boat-illu" viewBox="0 0 400 180">
       <ellipse cx="200" cy="170" rx="130" ry="15" fill="#1976d2" opacity="0.22"/>
       <rect x="180" y="60" width="12" height="60" fill="#9e9e9e"/>
@@ -124,44 +235,81 @@
 
     const gridSize = 15;
     const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(''));
+    const wordPositions = {};
     let selectedCells = [];
+    let isSelecting = false;
+    let foundWords = 0;
+
+    // Directions: horizontal, vertical, diagonal (8 directions)
+    const directions = [
+      [1, 0], [0, 1], [1, 1], [1, -1],
+      [-1, 0], [0, -1], [-1, -1], [-1, 1]
+    ];
+
+    function getRandomDirection() {
+      return directions[Math.floor(Math.random() * directions.length)];
+    }
+
+    function canPlaceWord(word, x, y, dx, dy) {
+      for (let i = 0; i < word.length; i++) {
+        const nx = x + i * dx;
+        const ny = y + i * dy;
+        if (nx < 0 || nx >= gridSize || ny < 0 || ny >= gridSize) return false;
+        if (grid[ny][nx] && grid[ny][nx] !== word[i]) return false;
+      }
+      return true;
+    }
 
     function placeWord(word) {
       let placed = false;
-      let tryCount = 0;
-      while (!placed && tryCount < 200) {
-        tryCount++;
-        const dir = Math.floor(Math.random() * 2); // 0 = horiz, 1 = vert
-        const x = Math.floor(Math.random() * (dir ? gridSize : gridSize - word.length));
-        const y = Math.floor(Math.random() * (dir ? gridSize - word.length : gridSize));
-        let fits = true;
-        for (let i = 0; i < word.length; i++) {
-          const cx = dir ? x : x + i;
-          const cy = dir ? y + i : y;
-          if (grid[cy][cx] && grid[cy][cx] !== word[i]) {
-            fits = false;
-            break;
+      let attempts = 0;
+      
+      while (!placed && attempts < 500) {
+        attempts++;
+        const [dx, dy] = getRandomDirection();
+        
+        // Calculate valid starting positions based on direction
+        const maxX = dx >= 0 ? gridSize - word.length : word.length - 1;
+        const maxY = dy >= 0 ? gridSize - word.length : word.length - 1;
+        const minX = dx <= 0 ? word.length - 1 : 0;
+        const minY = dy <= 0 ? word.length - 1 : 0;
+        
+        const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+        
+        if (canPlaceWord(word, x, y, dx, dy)) {
+          const positions = [];
+          for (let i = 0; i < word.length; i++) {
+            const nx = x + i * dx;
+            const ny = y + i * dy;
+            grid[ny][nx] = word[i];
+            positions.push({x: nx, y: ny});
           }
+          wordPositions[word] = positions;
+          placed = true;
         }
-        if (!fits) continue;
-        for (let i = 0; i < word.length; i++) {
-          const cx = dir ? x : x + i;
-          const cy = dir ? y + i : y;
-          grid[cy][cx] = word[i];
-        }
-        placed = true;
+      }
+      
+      if (!placed) {
+        console.warn(`Could not place word: ${word}`);
       }
     }
 
-    words.forEach(placeWord);
+    // Place words with improved algorithm
+    const sortedWords = words.sort((a, b) => b.length - a.length);
+    sortedWords.forEach(placeWord);
 
+    // Fill empty cells
     for (let y = 0; y < gridSize; y++) {
       for (let x = 0; x < gridSize; x++) {
-        if (!grid[y][x]) grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        if (!grid[y][x]) {
+          grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        }
       }
     }
 
     const gridElement = document.getElementById("grid");
+    
     function createCell(x, y, letter) {
       const div = document.createElement("div");
       div.classList.add("cell");
@@ -169,41 +317,166 @@
       div.dataset.x = x;
       div.dataset.y = y;
       div.dataset.letter = letter;
-      div.addEventListener("click", () => {
-        if (!div.classList.contains("selected")) {
-          div.classList.add("selected");
-          selectedCells.push(div);
-        }
-      });
       return div;
     }
 
+    // Create grid
+    const cells = [];
     for (let y = 0; y < gridSize; y++) {
       for (let x = 0; x < gridSize; x++) {
         const cell = createCell(x, y, grid[y][x]);
+        cells.push(cell);
         gridElement.appendChild(cell);
       }
     }
 
-    function validateWord() {
-      if (!selectedCells.length) return;
-      const selectedWord = selectedCells.map(c => c.dataset.letter).join("");
-      const reverseWord = selectedWord.split("").reverse().join("");
-      const match = words.find(w => w === selectedWord || w === reverseWord);
-      if (match) {
-        selectedCells.forEach(c => {
-          c.classList.remove("selected");
-          c.classList.add("found");
-        });
-        document.querySelectorAll(".word-item").forEach(w => {
-          if (w.textContent === match) w.classList.add("found");
-        });
-      } else {
-        selectedCells.forEach(c => c.classList.remove("selected"));
+    function getCellAt(x, y) {
+      return cells[y * gridSize + x];
+    }
+
+    function getCoordinates(e) {
+      const rect = gridElement.getBoundingClientRect();
+      const cellSize = rect.width / gridSize;
+      const x = Math.floor((e.clientX - rect.left) / cellSize);
+      const y = Math.floor((e.clientY - rect.top) / cellSize);
+      return {x, y};
+    }
+
+    function getTouchCoordinates(e) {
+      const touch = e.touches[0] || e.changedTouches[0];
+      const rect = gridElement.getBoundingClientRect();
+      const cellSize = rect.width / gridSize;
+      const x = Math.floor((touch.clientX - rect.left) / cellSize);
+      const y = Math.floor((touch.clientY - rect.top) / cellSize);
+      return {x, y};
+    }
+
+    function startSelection(x, y) {
+      if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+        isSelecting = true;
+        resetSelection();
+        const cell = getCellAt(x, y);
+        cell.classList.add('selecting');
+        selectedCells.push({x, y, cell});
       }
+    }
+
+    function continueSelection(x, y) {
+      if (!isSelecting || x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+      
+      const lastCell = selectedCells[selectedCells.length - 1];
+      if (!lastCell || (lastCell.x === x && lastCell.y === y)) return;
+      
+      // Check if selection is in a straight line
+      if (selectedCells.length > 1) {
+        const dx1 = selectedCells[1].x - selectedCells[0].x;
+        const dy1 = selectedCells[1].y - selectedCells[0].y;
+        const dx2 = x - selectedCells[0].x;
+        const dy2 = y - selectedCells[0].y;
+        
+        // Normalize directions
+        const normalize = (dx, dy) => {
+          if (dx === 0 && dy === 0) return [0, 0];
+          const gcd = Math.abs(dx === 0 ? dy : dy === 0 ? dx : gcd_func(Math.abs(dx), Math.abs(dy)));
+          return [dx / gcd, dy / gcd];
+        };
+        
+        const [ndx1, ndy1] = normalize(dx1, dy1);
+        const [ndx2, ndy2] = normalize(dx2, dy2);
+        
+        if (ndx1 !== ndx2 || ndy1 !== ndy2) return;
+      }
+      
+      const cell = getCellAt(x, y);
+      if (!selectedCells.find(c => c.x === x && c.y === y)) {
+        cell.classList.add('selecting');
+        selectedCells.push({x, y, cell});
+      }
+    }
+
+    function gcd_func(a, b) {
+      return b === 0 ? a : gcd_func(b, a % b);
+    }
+
+    function endSelection() {
+      if (!isSelecting) return;
+      isSelecting = false;
+      validateWord();
+    }
+
+    function resetSelection() {
+      selectedCells.forEach(({cell}) => cell.classList.remove('selecting'));
       selectedCells = [];
     }
 
+    function validateWord() {
+      if (selectedCells.length === 0) return;
+      
+      const selectedWord = selectedCells.map(c => c.cell.dataset.letter).join("");
+      const reverseWord = selectedWord.split("").reverse().join("");
+      const match = words.find(w => w === selectedWord || w === reverseWord);
+      
+      if (match) {
+        selectedCells.forEach(({cell}) => {
+          cell.classList.remove('selecting');
+          cell.classList.add('found');
+        });
+        
+        document.querySelectorAll(".word-item").forEach(w => {
+          if (w.textContent === match && !w.classList.contains('found')) {
+            w.classList.add('found');
+            foundWords++;
+            updateProgress();
+          }
+        });
+      }
+      
+      resetSelection();
+    }
+
+    function updateProgress() {
+      document.getElementById('progress').textContent = `${foundWords} / ${words.length} mots trouvés`;
+      if (foundWords === words.length) {
+        setTimeout(() => alert('Félicitations ! Tous les mots ont été trouvés !'), 300);
+      }
+    }
+
+    // Mouse events
+    gridElement.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const {x, y} = getCoordinates(e);
+      startSelection(x, y);
+    });
+
+    gridElement.addEventListener('mousemove', (e) => {
+      if (!isSelecting) return;
+      const {x, y} = getCoordinates(e);
+      continueSelection(x, y);
+    });
+
+    gridElement.addEventListener('mouseup', endSelection);
+    gridElement.addEventListener('mouseleave', endSelection);
+
+    // Touch events
+    gridElement.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const {x, y} = getTouchCoordinates(e);
+      startSelection(x, y);
+    });
+
+    gridElement.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isSelecting) return;
+      const {x, y} = getTouchCoordinates(e);
+      continueSelection(x, y);
+    });
+
+    gridElement.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      endSelection();
+    });
+
+    // Create word list
     const wordListElement = document.getElementById("wordList");
     words.forEach(w => {
       const item = document.createElement("div");
@@ -211,6 +484,8 @@
       item.textContent = w;
       wordListElement.appendChild(item);
     });
+
+    updateProgress();
   </script>
 </body>
 </html>
