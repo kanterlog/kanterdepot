@@ -3,11 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Jeu de mots mêlés sur le thème d'Anne Bonny, la célèbre pirate. Trouvez tous les mots cachés dans la grille !">
   <title>Mot Mêlé – Anne Bonny</title>
   <style>
-    * { box-sizing: border-box; }
+    :root {
+      --primary-blue: #0d47a1;
+      --secondary-blue: #1996bf;
+      --light-blue: #b3e0fc;
+      --dark-blue: #24577a;
+      --success-green: #4caf50;
+      --warning-orange: #ffa000;
+      --highlight-yellow: #ffeb3b;
+      --selecting-orange: #ffcc80;
+      --text-dark: #333;
+      --border-light: #ccc;
+      --white: #fff;
+      --shadow: rgba(0,0,0,0.1);
+    }
+
+    * { 
+      box-sizing: border-box; 
+    }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 15px;
       min-height: 100vh;
@@ -15,50 +34,329 @@
       flex-direction: row;
       justify-content: center;
       gap: 20px;
-      background: linear-gradient(120deg, #b3e0fc 0%, #53b7e8 50%, #24577a 100%);
+      background: linear-gradient(120deg, var(--light-blue) 0%, var(--secondary-blue) 50%, var(--dark-blue) 100%);
+      background-attachment: fixed;
     }
-    @media (max-width: 767px) { body { flex-direction: column; gap: 15px; } }
-    .left-section { flex: 1; max-width: 100%; }
-    @media (min-width: 768px) { .left-section { max-width: 70vw; } }
-    h1 { color: #0d47a1; text-align: center; letter-spacing: 1px; font-size: 1.5rem; margin: 0 0 10px 0; }
-    @media (min-width: 768px) { h1 { font-size: 2rem; } }
-    .progress { text-align: center; font-size: 16px; color: #0d47a1; font-weight: bold; margin-bottom: 15px; }
-    .grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 1px; justify-content: center; margin: 15px auto; max-width: 100%; aspect-ratio: 1; background: #ccc; padding: 2px; }
-    @media (min-width: 480px) { .grid { max-width: 450px; gap: 2px; } }
-    .cell { aspect-ratio: 1; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; cursor: pointer; user-select: none; transition: all 0.2s ease; touch-action: none; }
-    @media (min-width: 480px) { .cell { font-size: 1rem; } }
-    .cell.selecting { background-color: #ffcc80; transform: scale(0.95); }
-    .cell.found { background-color: #1996bf; color: #fff; animation: foundPulse 0.6s ease; }
+
+    @media (max-width: 767px) { 
+      body { 
+        flex-direction: column; 
+        gap: 15px; 
+        padding: 10px;
+      } 
+    }
+
+    .left-section { 
+      flex: 1; 
+      max-width: 100%; 
+    }
+
+    @media (min-width: 768px) { 
+      .left-section { 
+        max-width: 70vw; 
+      } 
+    }
+
+    h1 { 
+      color: var(--primary-blue); 
+      text-align: center; 
+      letter-spacing: 1px; 
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      margin: 0 0 10px 0; 
+      text-shadow: 1px 1px 2px var(--shadow);
+    }
+
+    .progress { 
+      text-align: center; 
+      font-size: 16px; 
+      color: var(--primary-blue); 
+      font-weight: bold; 
+      margin-bottom: 15px; 
+      padding: 8px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(15, 1fr); 
+      gap: 1px; 
+      justify-content: center; 
+      margin: 15px auto; 
+      max-width: min(450px, 90vw);
+      aspect-ratio: 1; 
+      background: var(--border-light); 
+      padding: 2px; 
+      border-radius: 8px;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    @media (min-width: 480px) { 
+      .grid { 
+        gap: 2px; 
+      } 
+    }
+
+    .cell { 
+      aspect-ratio: 1; 
+      background: var(--white); 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: clamp(0.7rem, 2.5vw, 1rem);
+      font-weight: 600;
+      cursor: pointer; 
+      user-select: none; 
+      transition: all 0.2s ease; 
+      touch-action: none; 
+      border-radius: 2px;
+    }
+
+    .cell:hover {
+      background-color: #f5f5f5;
+      transform: scale(1.05);
+    }
+
+    .cell.selecting { 
+      background-color: var(--selecting-orange); 
+      transform: scale(0.95); 
+      box-shadow: 0 2px 4px var(--shadow);
+    }
+
+    .cell.found { 
+      background-color: var(--secondary-blue); 
+      color: var(--white); 
+      animation: foundPulse 0.6s ease; 
+      font-weight: bold;
+    }
+
     .cell.highlighted {
-      background-color: #ffeb3b !important;
-      color: #333 !important;
-      border: 2px solid #ffa000;
+      background-color: var(--highlight-yellow) !important;
+      color: var(--text-dark) !important;
+      border: 2px solid var(--warning-orange);
       z-index: 1;
+      animation: highlightPulse 1s ease-in-out infinite alternate;
     }
-    @keyframes foundPulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); background-color: #4caf50; } 100% { transform: scale(1); } }
-    .word-list { flex: 0 0 250px; max-width: 250px; margin: 0; }
-    @media (max-width: 767px) { .word-list { flex: 1; max-width: 100%; margin-top: 20px; } }
-    .word-item { padding: 8px 14px; margin: 6px; border: 1px solid #ccc; border-radius: 8px; background: #fff; font-weight: bold; text-align: center; font-size: 14px; transition: all 0.3s ease; }
-    @media (min-width: 480px) { .word-item { font-size: 16px; } }
-    .word-item.found { background: #4caf50; color: white; transform: scale(0.95); opacity: 0.7; }
-    button { margin-top: 15px; padding: 12px 20px; font-size: 16px; background: #0d47a1; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; width: 100%; max-width: 300px; }
-    button:hover { background: #1996bf; }
-    .boat-illu { width: 100%; max-width: 300px; height: auto; display: block; margin: 20px auto 0 auto; }
-    @media (min-width: 768px) { .boat-illu { max-width: 370px; } }
-    .instruction { text-align: center; font-size: 14px; margin-bottom: 15px; color: #333; }
-    @media (min-width: 480px) { .instruction { font-size: 16px; } }
+
+    @keyframes foundPulse { 
+      0% { transform: scale(1); } 
+      50% { transform: scale(1.2); background-color: var(--success-green); } 
+      100% { transform: scale(1); } 
+    }
+
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 5px var(--warning-orange); }
+      100% { box-shadow: 0 0 15px var(--warning-orange); }
+    }
+
+    .word-list { 
+      flex: 0 0 300px; 
+      max-width: 300px; 
+      margin: 0; 
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (max-width: 767px) { 
+      .word-list { 
+        flex: 1; 
+        max-width: 100%; 
+        margin-top: 20px;
+      } 
+    }
+
+    .word-list h3 {
+      color: var(--primary-blue);
+      text-align: center;
+      margin: 0 0 15px 0;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .words-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      height: 100%;
+      max-height: 450px; /* Même hauteur que la grille */
+      overflow: hidden;
+      align-content: start;
+    }
+
+    @media (max-width: 767px) {
+      .words-container {
+        grid-template-columns: repeat(3, 1fr);
+        max-height: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .words-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .word-item { 
+      padding: 6px 8px; 
+      margin: 0; 
+      border: 1px solid var(--border-light); 
+      border-radius: 6px; 
+      background: var(--white); 
+      font-weight: 600; 
+      text-align: center; 
+      font-size: clamp(10px, 1.8vw, 13px);
+      transition: all 0.3s ease; 
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+    }
+
+    .word-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px var(--shadow);
+      background: #f8f9fa;
+    }
+
+    .word-item.found { 
+      background: var(--success-green); 
+      color: white; 
+      transform: scale(0.95); 
+      opacity: 0.8; 
+      cursor: default;
+    }
+
+    .word-item.found::after {
+      content: '✓';
+      position: absolute;
+      right: 4px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    button { 
+      padding: 12px 20px; 
+      font-size: 16px; 
+      background: var(--primary-blue); 
+      color: white; 
+      border: none; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+      width: 100%; 
+      max-width: 300px; 
+      font-weight: 600;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+
+    button:hover { 
+      background: var(--secondary-blue); 
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .boat-illu { 
+      width: 100%; 
+      max-width: 300px; 
+      height: auto; 
+      display: block; 
+      margin: 20px auto 0 auto; 
+      filter: drop-shadow(2px 2px 4px var(--shadow));
+    }
+
+    @media (min-width: 768px) { 
+      .boat-illu { 
+        max-width: 370px; 
+      } 
+    }
+
+    .instruction { 
+      text-align: center; 
+      font-size: clamp(12px, 2.5vw, 16px);
+      margin-bottom: 15px; 
+      color: var(--text-dark); 
+      background: rgba(255,255,255,0.2);
+      padding: 10px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .success-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--success-green);
+      color: white;
+      padding: 20px 30px;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 1000;
+      animation: successPop 0.5s ease;
+      display: none;
+    }
+
+    @keyframes successPop {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    /* Amélioration de l'accessibilité */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Focus indicators pour l'accessibilité */
+    .cell:focus,
+    .word-item:focus,
+    button:focus {
+      outline: 3px solid var(--warning-orange);
+      outline-offset: 2px;
+    }
+
+    /* Scrollbar personnalisée - supprimée car plus de scroll */
   </style>
 </head>
 <body>
   <div class="left-section">
     <h1>🏴‍☠️ Mot Mêlé – Anne Bonny</h1>
-    <div class="progress" id="progress">0 / 32 mots trouvés</div>
-    <p class="instruction">Glissez pour sélectionner les mots dans la grille.<br>Clique sur un mot à droite pour t’aider à démarrer !</p>
-    <div id="grid" class="grid"></div>
-    <div style="text-align:center">
-      <button onclick="resetSelection()">Annuler sélection</button>
+    <div class="progress" id="progress" role="status" aria-live="polite">0 / 32 mots trouvés</div>
+    <p class="instruction">Glissez pour sélectionner les mots dans la grille.<br>Cliquez sur un mot à droite pour révéler ses premières lettres !</p>
+    <div id="grid" class="grid" role="application" aria-label="Grille de mots mêlés" tabindex="0"></div>
+    <div class="controls">
+      <button onclick="resetSelection()" aria-label="Annuler la sélection actuelle">Annuler sélection</button>
     </div>
-    <svg class="boat-illu" viewBox="0 0 400 180">
+    <svg class="boat-illu" viewBox="0 0 400 180" aria-hidden="true">
       <ellipse cx="200" cy="170" rx="130" ry="15" fill="#1976d2" opacity="0.22"/>
       <rect x="180" y="60" width="12" height="60" fill="#9e9e9e"/>
       <polygon points="186,60 186,100 150,95" fill="#fffbe6" stroke="#d4b678" stroke-width="2"/>
@@ -71,43 +369,23 @@
       <text x="200" y="40" text-anchor="middle" font-size="26" fill="#1976d2" opacity="0.18" font-family="Verdana">Anne Bonny</text>
     </svg>
   </div>
-  <div class="word-list" id="wordList"></div>
+  
+  <div class="word-list" id="wordList">
+    <h3>Mots à trouver</h3>
+    <div class="words-container" id="wordsContainer"></div>
+    <div class="sr-only" id="wordListStatus" aria-live="polite"></div>
+  </div>
+
+  <div class="success-message" id="successMessage">
+    🎉 Félicitations ! Tous les mots ont été trouvés ! 🎉
+  </div>
 
   <script>
     const words = [
-      "GARCON",
-      "INFORMATEUR",
-      "PIRATE",
-      "NAVIRE",
-      "REBELLE",
-      "DECU",
-      "BATEAU",
-      "CORSAIRE",
-      "TRESOR",
-      "CAPITAINE",
-      "MARIN",
-      "VOLEUR",
-      "CHEVALIER",
-      "AVENTURIER",
-      "EQUIPAGE",
-      "EQUIPIER",
-      "COMPLICE",
-      "PRISONNIER",
-      "SABRE",
-      "DUEL",
-      "BANDIT",
-      "GOUVERNEUR",
-      "VOILIER",
-      "QUARTIERMAITRE",
-      "CANON",
-      "FLIBUSTIER",
-      "MUTIN",
-      "LIEUTENANT",
-      "MAITRE",
-      "MARCHAND",
-      "COFFRE",
-      "MOUSSE",
-      "BRIGAND"
+      "GARCON", "INFORMATEUR", "PIRATE", "NAVIRE", "REBELLE", "DECU", "BATEAU", "CORSAIRE",
+      "TRESOR", "CAPITAINE", "MARIN", "VOLEUR", "CHEVALIER", "AVENTURIER", "EQUIPAGE", "EQUIPIER",
+      "COMPLICE", "PRISONNIER", "SABRE", "DUEL", "BANDIT", "GOUVERNEUR", "VOILIER", "QUARTIERMAITRE",
+      "CANON", "FLIBUSTIER", "MUTIN", "LIEUTENANT", "MAITRE", "MARCHAND", "COFFRE", "MOUSSE", "BRIGAND"
     ];
 
     const gridSize = 15;
@@ -116,6 +394,7 @@
     let selectedCells = [];
     let isSelecting = false;
     let foundWords = 0;
+    let currentHighlight = [];
 
     // Directions: horizontal, vertical, diagonal (8 directions)
     const directions = [
@@ -140,15 +419,18 @@
     function placeWord(word) {
       let placed = false;
       let attempts = 0;
-      while (!placed && attempts < 500) {
+      
+      while (!placed && attempts < 1000) {
         attempts++;
         const [dx, dy] = getRandomDirection();
         const maxX = dx >= 0 ? gridSize - word.length : word.length - 1;
         const maxY = dy >= 0 ? gridSize - word.length : word.length - 1;
         const minX = dx <= 0 ? word.length - 1 : 0;
         const minY = dy <= 0 ? word.length - 1 : 0;
+        
         const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
         const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+        
         if (canPlaceWord(word, x, y, dx, dy)) {
           const positions = [];
           for (let i = 0; i < word.length; i++) {
@@ -161,22 +443,34 @@
           placed = true;
         }
       }
+      
       if (!placed) {
-        console.warn(`Could not place word: ${word}`);
+        console.warn(`Impossible de placer le mot: ${word}`);
       }
+      return placed;
     }
 
-    // Place words with improved algorithm
-    const sortedWords = words.sort((a, b) => b.length - a.length);
-    sortedWords.forEach(placeWord);
-
-    // Fill empty cells
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
-        if (!grid[y][x]) {
-          grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    // Placement amélioré des mots
+    function initializeGrid() {
+      const sortedWords = [...words].sort((a, b) => b.length - a.length);
+      let placedWords = 0;
+      
+      sortedWords.forEach(word => {
+        if (placeWord(word)) {
+          placedWords++;
+        }
+      });
+      
+      // Remplir les cellules vides avec des lettres aléatoires
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          if (!grid[y][x]) {
+            grid[y][x] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+          }
         }
       }
+      
+      console.log(`${placedWords}/${words.length} mots placés avec succès`);
     }
 
     const gridElement = document.getElementById("grid");
@@ -188,18 +482,28 @@
       div.dataset.x = x;
       div.dataset.y = y;
       div.dataset.letter = letter;
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('role', 'gridcell');
+      div.setAttribute('aria-label', `Cellule ${x},${y}: ${letter}`);
       return div;
     }
 
-    // Create grid
-    const cells = [];
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
-        const cell = createCell(x, y, grid[y][x]);
-        cells.push(cell);
-        gridElement.appendChild(cell);
+    // Création de la grille
+    function createGrid() {
+      const cells = [];
+      gridElement.innerHTML = '';
+      
+      for (let y = 0; y < gridSize; y++) {
+        for (let x = 0; x < gridSize; x++) {
+          const cell = createCell(x, y, grid[y][x]);
+          cells.push(cell);
+          gridElement.appendChild(cell);
+        }
       }
+      return cells;
     }
+
+    let cells = [];
 
     function getCellAt(x, y) {
       return cells[y * gridSize + x];
@@ -235,23 +539,29 @@
 
     function continueSelection(x, y) {
       if (!isSelecting || x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+      
       const lastCell = selectedCells[selectedCells.length - 1];
       if (!lastCell || (lastCell.x === x && lastCell.y === y)) return;
-      // Check if selection is in a straight line
+      
+      // Vérifier que la sélection est en ligne droite
       if (selectedCells.length > 1) {
         const dx1 = selectedCells[1].x - selectedCells[0].x;
         const dy1 = selectedCells[1].y - selectedCells[0].y;
         const dx2 = x - selectedCells[0].x;
         const dy2 = y - selectedCells[0].y;
+        
         const normalize = (dx, dy) => {
           if (dx === 0 && dy === 0) return [0, 0];
-          const gcd = Math.abs(dx === 0 ? dy : dy === 0 ? dx : gcd_func(Math.abs(dx), Math.abs(dy)));
+          const gcd = Math.abs(dx === 0 ? dy : dy === 0 ? dx : gcdFunc(Math.abs(dx), Math.abs(dy)));
           return [dx / gcd, dy / gcd];
         };
+        
         const [ndx1, ndy1] = normalize(dx1, dy1);
         const [ndx2, ndy2] = normalize(dx2, dy2);
+        
         if (ndx1 !== ndx2 || ndy1 !== ndy2) return;
       }
+      
       const cell = getCellAt(x, y);
       if (!selectedCells.find(c => c.x === x && c.y === y)) {
         cell.classList.add('selecting');
@@ -259,8 +569,8 @@
       }
     }
 
-    function gcd_func(a, b) {
-      return b === 0 ? a : gcd_func(b, a % b);
+    function gcdFunc(a, b) {
+      return b === 0 ? a : gcdFunc(b, a % b);
     }
 
     function endSelection() {
@@ -276,34 +586,101 @@
 
     function validateWord() {
       if (selectedCells.length === 0) return;
+      
       const selectedWord = selectedCells.map(c => c.cell.dataset.letter).join("");
       const reverseWord = selectedWord.split("").reverse().join("");
       const match = words.find(w => w === selectedWord || w === reverseWord);
+      
       if (match) {
+        // Animation de succès
         selectedCells.forEach(({cell}) => {
           cell.classList.remove('selecting');
           cell.classList.add('found');
         });
-        document.querySelectorAll(".word-item").forEach(w => {
+        
+        // Marquer le mot comme trouvé
+        const wordItems = document.querySelectorAll(".word-item");
+        wordItems.forEach(w => {
           if (w.textContent === match && !w.classList.contains('found')) {
             w.classList.add('found');
             foundWords++;
             updateProgress();
+            
+            // Feedback audio (si supporté)
+            if ('speechSynthesis' in window) {
+              const utterance = new SpeechSynthesisUtterance(`Mot trouvé: ${match}`);
+              utterance.volume = 0.3;
+              utterance.rate = 1.2;
+              speechSynthesis.speak(utterance);
+            }
           }
         });
       }
+      
       resetSelection();
     }
 
     function updateProgress() {
-      document.getElementById('progress').textContent = `${foundWords} / ${words.length} mots trouvés`;
+      const progressElement = document.getElementById('progress');
+      progressElement.textContent = `${foundWords} / ${words.length} mots trouvés`;
+      
+      // Mise à jour du statut pour les lecteurs d'écran
+      const wordListStatus = document.getElementById('wordListStatus');
+      wordListStatus.textContent = `${foundWords} mots trouvés sur ${words.length}`;
+      
       if (foundWords === words.length) {
-        setTimeout(() => alert('Félicitations ! Tous les mots ont été trouvés !'), 300);
+        setTimeout(() => {
+          showSuccessMessage();
+        }, 500);
       }
     }
 
-    // --- SURBRILLANCE AIDE MOT LISTE ---
-    let currentHighlight = [];
+    function showSuccessMessage() {
+      const successMessage = document.getElementById('successMessage');
+      successMessage.style.display = 'block';
+      
+      setTimeout(() => {
+        successMessage.style.display = 'none';
+      }, 3000);
+      
+      // Confetti effect (simple)
+      createConfetti();
+    }
+
+    function createConfetti() {
+      for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+          const confetti = document.createElement('div');
+          confetti.innerHTML = ['🎉', '⭐', '🏆', '👏'][Math.floor(Math.random() * 4)];
+          confetti.style.position = 'fixed';
+          confetti.style.left = Math.random() * 100 + 'vw';
+          confetti.style.top = '-10px';
+          confetti.style.fontSize = '2rem';
+          confetti.style.zIndex = '9999';
+          confetti.style.pointerEvents = 'none';
+          confetti.style.animation = 'fall 3s linear forwards';
+          
+          document.body.appendChild(confetti);
+          
+          setTimeout(() => {
+            confetti.remove();
+          }, 3000);
+        }, i * 100);
+      }
+    }
+
+    // Animation de chute pour les confettis
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fall {
+        to {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
     function clearHighlight() {
       currentHighlight.forEach(({x, y}) => {
         getCellAt(x, y).classList.remove('highlighted');
@@ -311,71 +688,107 @@
       currentHighlight = [];
     }
 
-    // Create word list
-    const wordListElement = document.getElementById("wordList");
-    words.forEach(w => {
-      const item = document.createElement("div");
-      item.classList.add("word-item");
-      item.textContent = w;
-      wordListElement.appendChild(item);
-    });
-
-    // Quand on clique sur un mot de la liste : highlight les 2 premières lettres
-    wordListElement.querySelectorAll('.word-item').forEach(item => {
-      item.addEventListener('click', () => {
-        clearHighlight();
-        const mot = item.textContent;
-        const positions = wordPositions[mot];
-        if (positions && positions.length >= 2) {
-          for (let i = 0; i < 2; i++) {
-            const {x, y} = positions[i];
-            getCellAt(x, y).classList.add('highlighted');
-            currentHighlight.push({x, y});
+    // Création de la liste de mots
+    function createWordList() {
+      const wordsContainer = document.getElementById("wordsContainer");
+      
+      words.forEach(word => {
+        const item = document.createElement("div");
+        item.classList.add("word-item");
+        item.textContent = word;
+        item.setAttribute('tabindex', '0');
+        item.setAttribute('role', 'button');
+        item.setAttribute('aria-label', `Mot à trouver: ${word}. Cliquez pour voir un indice.`);
+        
+        // Gestionnaire de clic pour l'aide
+        item.addEventListener('click', () => highlightWordHint(word));
+        item.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            highlightWordHint(word);
           }
+        });
+        
+        wordsContainer.appendChild(item);
+      });
+    }
+
+    function highlightWordHint(word) {
+      clearHighlight();
+      const positions = wordPositions[word];
+      
+      if (positions && positions.length >= 2) {
+        // Montrer les 2 premières lettres
+        for (let i = 0; i < Math.min(2, positions.length); i++) {
+          const {x, y} = positions[i];
+          getCellAt(x, y).classList.add('highlighted');
+          currentHighlight.push({x, y});
+        }
+        
+        // Effacer l'indice après 3 secondes
+        setTimeout(clearHighlight, 3000);
+      }
+    }
+
+    // Gestion des événements
+    function setupEventListeners() {
+      // Événements souris
+      gridElement.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        clearHighlight();
+        const {x, y} = getCoordinates(e);
+        startSelection(x, y);
+      });
+
+      gridElement.addEventListener('mousemove', (e) => {
+        if (!isSelecting) return;
+        const {x, y} = getCoordinates(e);
+        continueSelection(x, y);
+      });
+
+      gridElement.addEventListener('mouseup', endSelection);
+      gridElement.addEventListener('mouseleave', endSelection);
+
+      // Événements tactiles
+      gridElement.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        clearHighlight();
+        const {x, y} = getTouchCoordinates(e);
+        startSelection(x, y);
+      });
+
+      gridElement.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        if (!isSelecting) return;
+        const {x, y} = getTouchCoordinates(e);
+        continueSelection(x, y);
+      });
+
+      gridElement.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        endSelection();
+      });
+
+      // Support clavier pour l'accessibilité
+      gridElement.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          resetSelection();
+          clearHighlight();
         }
       });
-    });
+    }
 
-    // Quand tu cliques dans la grille ou tu sélectionnes, l’aide s’efface
-    gridElement.addEventListener('mousedown', clearHighlight);
-    gridElement.addEventListener('touchstart', clearHighlight);
+    // Initialisation du jeu
+    function initGame() {
+      initializeGrid();
+      cells = createGrid();
+      createWordList();
+      setupEventListeners();
+      updateProgress();
+    }
 
-    updateProgress();
-
-    // Mouse events
-    gridElement.addEventListener('mousedown', (e) => {
-      e.preventDefault();
-      const {x, y} = getCoordinates(e);
-      startSelection(x, y);
-    });
-
-    gridElement.addEventListener('mousemove', (e) => {
-      if (!isSelecting) return;
-      const {x, y} = getCoordinates(e);
-      continueSelection(x, y);
-    });
-
-    gridElement.addEventListener('mouseup', endSelection);
-    gridElement.addEventListener('mouseleave', endSelection);
-
-    // Touch events
-    gridElement.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const {x, y} = getTouchCoordinates(e);
-      startSelection(x, y);
-    });
-
-    gridElement.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      if (!isSelecting) return;
-      const {x, y} = getTouchCoordinates(e);
-      continueSelection(x, y);
-    });
-
-    gridElement.addEventListener('touchend', (e) => {
-      e.preventDefault();
-      endSelection();
-    });
+    // Démarrer le jeu
+    initGame();
   </script>
 </body>
 </html>
