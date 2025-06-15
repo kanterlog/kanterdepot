@@ -1,536 +1,770 @@
-/* ... (your existing HTML and CSS code, with the HTML change above) ... */
-
-<script>
-    let autoSaveTimer;
-    let saveTimeout; // For debouncing auto-save
-
-    // Initialisation
-    document.addEventListener('DOMContentLoaded', function() {
-        loadForm(); // Load saved data on page load
-        updateProgress();
-        setupAutoSave();
-        setupValidation();
-        setupCheckboxGroups();
-    });
-
-    // --- Utility Functions ---
-
-    function showMessage(message, type = 'validation') {
-        const validationMessage = document.getElementById('validationMessage');
-        const successMessage = document.getElementById('successMessage');
-
-        if (type === 'validation') {
-            validationMessage.textContent = message;
-            validationMessage.style.display = 'block';
-            successMessage.style.display = 'none';
-        } else if (type === 'success') {
-            successMessage.textContent = message;
-            successMessage.style.display = 'block';
-            validationMessage.style.display = 'none';
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de demande d'autorisation de sortie scolaire sans nuitée</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a; /* Bleu marine du logo */
+            --primary-hover: #1e40af;
+            --secondary-color: #8b5cf6; /* Violet du logo */
+            --secondary-hover: #7c3aed;
+            --accent-green: #22c55e; /* Vert du logo */
+            --accent-green-hover: #16a34a;
+            --accent-orange: #f97316; /* Orange du logo */
+            --accent-orange-hover: #ea580c;
+            --success-color: #22c55e;
+            --success-hover: #16a34a;
+            --warning-color: #f97316;
+            --danger-color: #dc2626;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        // Hide after 5 seconds
-        setTimeout(() => {
-            validationMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-        }, 5000);
-    }
 
-    function showAutoSaveIndicator() {
-        const indicator = document.getElementById('autoSaveIndicator');
-        indicator.classList.add('show');
-        setTimeout(() => {
-            indicator.classList.remove('show');
-        }, 2000); // Hide after 2 seconds
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    function updateProgress() {
-        const formElements = document.querySelectorAll('.form-input, input[type="date"], input[type="time"], input[type="checkbox"]');
-        let filledFields = 0;
-        let totalFields = 0;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 50%, var(--accent-green) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
 
-        formElements.forEach(element => {
-            // Exclude the decision checkboxes from the progress calculation
-            if (element.name === 'decision') {
-                return;
+        .form-container {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+
+        .logo-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(34, 197, 94, 0.1));
+            border-radius: 12px;
+            border: 2px solid rgba(30, 58, 138, 0.2);
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-right: 20px;
+        }
+
+        .logo-text {
+            flex: 1;
+        }
+
+        .logo-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-green), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .logo-subtitle {
+            font-size: 14px;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 5px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header {
+            text-align: center;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin: 30px 0 20px 0;
+            color: var(--primary-color);
+            padding: 12px 0 8px 0;
+            border-bottom: 2px solid #e5e7eb;
+            position: relative;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: linear-gradient(45deg, var(--secondary-color), var(--accent-green));
+        }
+
+        .form-row {
+            margin: 16px 0;
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .form-row label {
+            min-width: 220px;
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checkbox-group-inline {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .checkbox-group label, .checkbox-group-inline label {
+            font-weight: 400;
+            min-width: auto;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 4px 0;
+            transition: color 0.2s ease;
+        }
+
+        .checkbox-group label:hover, .checkbox-group-inline label:hover {
+            color: var(--secondary-color);
+        }
+
+        .checkbox-group input[type="checkbox"], .checkbox-group-inline input[type="checkbox"] {
+            margin-right: 8px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--secondary-color);
+        }
+
+        .form-input {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 12px 16px;
+            font-family: inherit;
+            font-size: 14px;
+            min-width: 200px;
+            transition: all 0.2s ease;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-input:invalid {
+            border-color: var(--danger-color);
+        }
+
+        .form-input-short {
+            min-width: 100px;
+            max-width: 120px;
+        }
+
+        .form-input-medium {
+            min-width: 180px;
+            max-width: 220px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th, .table td {
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.1), rgba(139, 92, 246, 0.1));
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .table input {
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            background: #ffffff;
+            width: 100%;
+            padding: 8px;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+
+        .table input:focus {
+            outline: none;
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.1);
+        }
+
+        .visa-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .decision-section {
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(34, 197, 94, 0.05));
+            border-radius: 8px;
+            border: 1px solid rgba(30, 58, 138, 0.2);
+        }
+
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .signature-area {
+            display: inline-block;
+            width: 200px;
+            height: 30px;
+            border-bottom: 2px dotted var(--primary-color);
+            position: relative;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .toolbar {
+            position: sticky;
+            top: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 100;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 0 6px 6px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--secondary-hover);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: var(--success-hover);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background: var(--accent-orange-hover);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .row-inline {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .validation-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--accent-green), var(--accent-orange));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .required {
+            color: var(--danger-color);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
             }
 
-            if (element.type === 'checkbox') {
-                // For checkbox groups where at least one must be checked
-                if (element.closest('.checkbox-group') || element.closest('.checkbox-group-inline')) {
-                    const groupName = element.name || element.id; // Use name or ID for unique group identification
-                    const groupCheckboxes = document.querySelectorAll(`input[name="${groupName}"], input[id="${groupName}"]`);
-                    if (!element._countedGroup) { // Ensure group is only counted once
-                         totalFields++;
-                         if (Array.from(groupCheckboxes).some(cb => cb.checked)) {
-                             filledFields++;
-                         }
-                         groupCheckboxes.forEach(cb => cb._countedGroup = true); // Mark as counted
-                    }
-                } else { // Individual checkboxes
-                    totalFields++;
-                    if (element.checked) {
-                        filledFields++;
-                    }
-                }
-            } else if (element.type === 'text' || element.type === 'number' || element.type === 'tel' || element.type === 'date' || element.type === 'time') {
-                totalFields++;
-                if (element.value.trim() !== '') {
-                    filledFields++;
-                }
-            } else if (element.tagName === 'SELECT') { // Handle select elements
-                totalFields++;
-                if (element.value !== '') { // A value has been selected
-                    filledFields++;
-                }
-            }
-        });
-
-        // Handle the dynamic table rows (equipe d'encadrement)
-        const equipeRows = document.querySelectorAll('#equipe-tbody tr');
-        equipeRows.forEach(row => {
-            const qualite = row.querySelector('.equipe-qualite'); // This is now a <select>
-            const nom = row.querySelector('.equipe-nom');
-            const prenom = row.querySelector('.equipe-prenom');
-
-            // Only count fields if the row isn't completely empty
-            // For <select>, an empty value "" means not selected
-            if (qualite.value !== '' || nom.value.trim() !== '' || prenom.value.trim() !== '') {
-                totalFields += 3; // Qualité, Nom, Prénom
-                if (qualite.value !== '') filledFields++; // Check value for select
-                if (nom.value.trim() !== '') filledFields++;
-                if (prenom.value.trim() !== '') filledFields++;
-            }
-        });
-
-        const progressBar = document.getElementById('progressBar');
-        const progressPercentage = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
-        progressBar.style.width = progressPercentage + '%';
-    }
-
-
-    // --- Auto-Save and Manual Save/Load ---
-
-    function setupAutoSave() {
-        document.querySelectorAll('.form-container input, .form-container select, .form-container textarea').forEach(input => {
-            input.addEventListener('input', () => { // Works for text, number, select
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    saveForm();
-                    showAutoSaveIndicator();
-                }, 1000); // Save 1 second after last input
-                updateProgress();
-            });
-            input.addEventListener('change', () => { // For checkboxes, radios, dates, select
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    saveForm();
-                    showAutoSaveIndicator();
-                }, 1000);
-                updateProgress();
-            });
-        });
-    }
-
-    function saveForm() {
-        const formData = {};
-
-        // General Information
-        formData['maternelle'] = document.getElementById('maternelle').checked;
-        formData['elementaire'] = document.getElementById('elementaire').checked;
-
-        formData['type-sortie'] = Array.from(document.querySelectorAll('input[name="type-sortie"]:checked')).map(cb => cb.id);
-
-        formData['nom-ecole'] = document.getElementById('nom-ecole').value;
-        formData['adresse'] = document.getElementById('adresse').value;
-        formData['code-postal'] = document.getElementById('code-postal').value;
-        formData['commune'] = document.getElementById('commune').value;
-        formData['enseignant'] = document.getElementById('enseignant').value;
-        formData['telephone'] = document.getElementById('telephone').value;
-        formData['date-sortie'] = document.getElementById('date-sortie').value;
-        formData['nb-seances'] = document.getElementById('nb-seances').value;
-        formData['heure-depart'] = document.getElementById('heure-depart').value;
-        formData['heure-retour'] = document.getElementById('heure-retour').value;
-        formData['lieu-rassemblement'] = document.getElementById('lieu-rassemblement').value;
-        formData['lieu-sortie'] = document.getElementById('lieu-sortie').value;
-        formData['restauration'] = document.getElementById('restauration').value;
-        formData['classes'] = document.getElementById('classes').value;
-        formData['nb-eleves'] = document.getElementById('nb-eleves').value;
-        formData['nb-accompagnateurs'] = document.getElementById('nb-accompagnateurs').value;
-
-        // Equipe d'encadrement
-        const equipe = [];
-        document.querySelectorAll('#equipe-tbody tr').forEach(row => {
-            const qualite = row.querySelector('.equipe-qualite').value; // Get value from select
-            const nom = row.querySelector('.equipe-nom').value;
-            const prenom = row.querySelector('.equipe-prenom').value;
-            equipe.push({ qualite, nom, prenom });
-        });
-        formData['equipe'] = equipe;
-
-        // Visa Section
-        formData['date-transmission'] = document.getElementById('date-transmission').value;
-        formData['decision'] = Array.from(document.querySelectorAll('input[name="decision"]:checked')).map(cb => cb.id);
-        formData['date-decision'] = document.getElementById('date-decision').value;
-
-        localStorage.setItem('schoolTripForm', JSON.stringify(formData));
-        updateProgress();
-    }
-
-    function loadForm() {
-        const savedData = localStorage.getItem('schoolTripForm');
-        if (savedData) {
-            const formData = JSON.parse(savedData);
-
-            // General Information
-            document.getElementById('maternelle').checked = formData['maternelle'] || false;
-            document.getElementById('elementaire').checked = formData['elementaire'] || false;
-
-            document.querySelectorAll('input[name="type-sortie"]').forEach(cb => {
-                cb.checked = formData['type-sortie'] && formData['type-sortie'].includes(cb.id);
-            });
-
-            document.getElementById('nom-ecole').value = formData['nom-ecole'] || '';
-            document.getElementById('adresse').value = formData['adresse'] || '';
-            document.getElementById('code-postal').value = formData['code-postal'] || '';
-            document.getElementById('commune').value = formData['commune'] || '';
-            document.getElementById('enseignant').value = formData['enseignant'] || '';
-            document.getElementById('telephone').value = formData['telephone'] || '';
-            document.getElementById('date-sortie').value = formData['date-sortie'] || '';
-            document.getElementById('nb-seances').value = formData['nb-seances'] || '';
-            document.getElementById('heure-depart').value = formData['heure-depart'] || '';
-            document.getElementById('heure-retour').value = formData['heure-retour'] || '';
-            document.getElementById('lieu-rassemblement').value = formData['lieu-rassemblement'] || '';
-            document.getElementById('lieu-sortie').value = formData['lieu-sortie'] || '';
-            document.getElementById('restauration').value = formData['restauration'] || '';
-            document.getElementById('classes').value = formData['classes'] || '';
-            document.getElementById('nb-eleves').value = formData['nb-eleves'] || '';
-            document.getElementById('nb-accompagnateurs').value = formData['nb-accompagnateurs'] || '';
-
-            // Equipe d'encadrement
-            const equipeTbody = document.getElementById('equipe-tbody');
-            equipeTbody.innerHTML = ''; // Clear existing rows
-            if (formData['equipe'] && formData['equipe'].length > 0) {
-                formData['equipe'].forEach(person => {
-                    addRow(person.qualite, person.nom, person.prenom);
-                });
-            } else {
-                addRow(); // Add at least one empty row if no data
+            .form-container {
+                padding: 20px;
             }
 
+            .logo-header {
+                flex-direction: column;
+                text-align: center;
+            }
 
-            // Visa Section
-            document.getElementById('date-transmission').value = formData['date-transmission'] || '';
-            document.querySelectorAll('input[name="decision"]').forEach(cb => {
-                cb.checked = formData['decision'] && formData['decision'].includes(cb.id);
-            });
-            document.getElementById('date-decision').value = formData['date-decision'] || '';
+            .logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
 
-            showMessage('Formulaire chargé avec succès !', 'success');
-        } else {
-            showMessage('Aucune donnée sauvegardée trouvée.', 'validation');
-            // Ensure at least one row exists if no data was loaded
-            if (document.querySelectorAll('#equipe-tbody tr').length === 0) {
-                addRow();
+            .form-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .form-row label {
+                min-width: auto;
+                margin-bottom: 8px;
+            }
+
+            .row-inline {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .signature-row {
+                flex-direction: column;
+            }
+
+            .toolbar {
+                position: static;
+            }
+
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+                justify-content: center;
             }
         }
-        updateProgress();
-    }
 
-    function clearForm() {
-        if (confirm('Voulez-vous vraiment effacer toutes les données du formulaire ?')) {
-            document.querySelectorAll('.form-container input, .form-container select').forEach(element => { // Include select
-                if (element.type === 'checkbox' || element.type === 'radio') {
-                    element.checked = false;
-                } else if (element.tagName === 'SELECT') {
-                    element.value = ''; // Reset select to its first option (empty value)
-                }
-                else {
-                    element.value = '';
-                }
-            });
-            document.getElementById('equipe-tbody').innerHTML = ''; // Clear table rows
-            addRow(); // Add one empty row back
-            localStorage.removeItem('schoolTripForm');
-            showMessage('Formulaire effacé avec succès !', 'success');
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .toolbar {
+                display: none !important;
+            }
+
+            .form-container {
+                box-shadow: none;
+                border: 2px solid #000;
+                border-radius: 0;
+            }
+
+            .btn {
+                display: none !important;
+            }
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            transform: translateY(-100px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .auto-save-indicator.show {
+            transform: translateY(0);
+        }
+
+        /* Style pour le logo SVG intégré */
+        .integrated-logo {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        ✓ Sauvegardé automatiquement
+    </div>
+
+    <div class="toolbar">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <button class="btn" onclick="clearForm()">
+            <span>🆕</span> Nouveau formulaire
+        </button>
+        <button class="btn btn-secondary" onclick="saveForm()">
+            <span>💾</span> Sauvegarder
+        </button>
+        <button class="btn btn-secondary" onclick="loadForm()">
+            <span>📂</span> Charger
+        </button>
+        <button class="btn btn-warning" onclick="exportToPDF()">
+            <span>📄</span> Exporter PDF
+        </button>
+        <button class="btn btn-success" onclick="window.print()">
+            <span>🖨️</span> Imprimer
+        </button>
+    </div>
+
+    <div class="validation-message" id="validationMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+
+    <div class="form-container">
+        <div class="logo-header">
+            <svg class="integrated-logo" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+                <!-- Reproduction du logo Saint-Jean-de-la-Barre -->
+                <!-- Lignes courbes bleues -->
+                <path d="M50 100 Q200 50 350 100 L340 120 Q200 70 60 120 Z" fill="#1e3a8a"/>
+                <path d="M50 500 Q200 450 350 500 L340 520 Q200 470 60 520 Z" fill="#1e3a8a"/>
+                
+                <!-- Lignes horizontales -->
+                <rect x="80" y="350" width="60" height="8" fill="#1e3a8a"/>
+                <rect x="80" y="370" width="80" height="8" fill="#1e3a8a"/>
+                <rect x="80" y="390" width="100" height="8" fill="#1e3a8a"/>
+                
+                <!-- Personnages stylisés -->
+                <g transform="translate(120, 150)">
+                    <!-- Personnage violet -->
+                    <circle cx="0" cy="0" r="25" fill="#8b5cf6"/>
+                    <path d="M-30 20 Q0 -10 30 20 Q20 60 -20 60 Z" fill="#8b5cf6"/>
+                </g>
+                
+                <g transform="translate(200, 130)">
+                    <!-- Personnage vert -->
+                    <circle cx="0" cy="0" r="20" fill="#22c55e"/>
+                    <path d="M-25 15 Q0 -5 25 15 Q20 45 -20 45 Z" fill="#22c55e"/>
+                </g>
+                
+                <g transform="translate(280, 150)">
+                    <!-- Personnage orange -->
+                    <circle cx="0" cy="0" r="25" fill="#f97316"/>
+                    <path d="M-30 20 Q0 -10 30 20 Q25 65 -25 65 Z" fill="#f97316"/>
+                </g>
+                
+                <!-- Texte "DEVENIR MEILLEUR... ENSEMBLE" -->
+                <text x="200" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e3a8a">DEVENIR</text>
+                <text x="200" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e3a8a">MEILLEUR...</text>
+                <text x="200" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#1e3a8a">ENSEMBLE</text>
+                
+                <!-- Texte Saint Jean de la Barre -->
+                <text x="60" y="450" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#8b5cf6">Saint</text>
+                <text x="160" y="450" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#22c55e">Jean</text>
+                <text x="60" y="480" font-family="Arial, sans-serif" font-size="20" font-weight="normal" fill="#1e3a8a">de la</text>
+                <text x="140" y="480" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#f97316">Barre</text>
+            </svg>
+            
+            <div class="logo-text">
+                <h1 class="logo-title">Saint-Jean-de-la-Barre</h1>
+                <p class="logo-subtitle">Devenir meilleur... ensemble</p>
+            </div>
+        </div>
+
+        <div class="header">
+            Formulaire de demande d'autorisation d'une sortie scolaire<br>
+            sans nuitée
+        </div>
+
+        <div class="section-title">📋 Informations générales</div>
+
+        <div class="form-row">
+            <label>Sortie impliquant des élèves de <span class="required">*</span> :</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="maternelle" required> Maternelle</label>
+                <label><input type="checkbox" id="elementaire" required> Élémentaire</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Type de sortie <span class="required">*</span> :</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="obligatoire-rec" name="type-sortie"> Sortie scolaire obligatoire récurrente</label>
+                <label><input type="checkbox" id="obligatoire-occ" name="type-sortie"> Sortie scolaire obligatoire occasionnelle</label>
+                <label><input type="checkbox" id="facultative" name="type-sortie"> Sortie scolaire facultative</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Nom de l'école <span class="required">*</span> :</label>
+            <input type="text" class="form-input" id="nom-ecole" placeholder="École de Saint-Jean-de-la-Barre" required>
+        </div>
+
+        <div class="form-row">
+            <label>Adresse <span class="required">*</span> :</label>
+            <input type="text" class="form-input" id="adresse" placeholder="Adresse complète" required>
+        </div>
+
+        <div class="row-inline">
+            <div class="form-row">
+                <label>Code postal <span class="required">*</span> :</label>
+                <input type="text" class="form-input form-input-short" id="code-postal" placeholder="75000" pattern="[0-9]{5}" required>
+            </div>
+            <div class="form-row">
+                <label>Commune <span class="required">*</span> :</label>
+                <input type="text" class="form-input form-input-medium" id="commune" placeholder="Saint-Jean-de-la-Barre" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Enseignant référent <span class="required">*</span> :</label>
+            <input type="text" class="form-input" id="enseignant" placeholder="Nom et prénom de l'enseignant référent" required>
+        </div>
+
+        <div class="form-row">
+            <label>Téléphone d'urgence <span class="required">*</span> :</label>
+            <input type="tel" class="form-input" id="telephone" placeholder="06 12 34 56 78" pattern="[0-9\s\-\.\+]+" required>
+        </div>
+
+        <div class="form-row">
+            <label>Date(s) de la sortie <span class="required">*</span> :</label>
+            <input type="date" class="form-input form-input-medium" id="date-sortie" required>
+        </div>
+
+        <div class="form-row">
+            <label>Si sortie récurrente, nombre de séances :</label>
+            <input type="number" class="form-input form-input-short" id="nb-seances" placeholder="1" min="1" max="50">
+        </div>
+
+        <div class="row-inline">
+            <div class="form-row">
+                <label>Heure de départ <span class="required">*</span> :</label>
+                <input type="time" class="form-input form-input-short" id="heure-depart" required>
+            </div>
+            <div class="form-row">
+                <label>Heure de retour <span class="required">*</span> :</label>
+                <input type="time" class="form-input form-input-short" id="heure-retour" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Lieu de rassemblement <span class="required">*</span> :</label>
+            <input type="text" class="form-input" id="lieu-rassemblement" placeholder="École, cour de récréation..." required>
+        </div>
+
+        <div class="form-row">
+            <label>Lieu(x) de la sortie <span class="required">*</span> :</label>
+            <input type="text" class="form-input" id="lieu-sortie" placeholder="Destination de la sortie" required>
+        </div>
+
+        <div class="form-row">
+            <label>Lieu et mode de restauration :</label>
+            <input type="text" class="form-input" id="restauration" placeholder="Si applicable (pique-nique, restaurant...)">
+        </div>
+
+        <div class="form-row">
+            <label>Classe(s) participante(s) <span class="required">*</span> :</label>
+            <input type="text" class="form-input form-input-medium" id="classes" placeholder="CP, CE1..." required>
+        </div>
+
+        <div class="row-inline">
+            <div class="form-row">
+                <label>Nombre d'élèves <span class="required">*</span> :</label>
+                <input type="number" class="form-input form-input-short" id="nb-eleves" placeholder="25" min="1" max="50" required>
+            </div>
+            <div class="form-row">
+                <label>Nombre d'accompagnateurs <span class="required">*</span> :</label>
+                <input type="number" class="form-input form-input-short" id="nb-accompagnateurs" placeholder="3" min="1" max="20" required>
+            </div>
+        </div>
+
+        <div class="section-title">👥 Équipe d'encadrement</div>
+
+        <table class="table" id="equipe-table">
+            <thead>
+                <tr>
+                    <th>Qualité <span class="required">*</span></th>
+                    <th>Nom <span class="required">*</span></th>
+                    <th>Prénom <span class="required">*</span></th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="equipe-tbody">
+                <tr>
+                    <td><input type="text" class="equipe-qualite" placeholder="Enseignant, AESH, Parent..." required></td>
+                    <td><input type="text" class="equipe-nom" placeholder="Nom" required></td>
+                    <td><input type="text" class="equipe-prenom" placeholder="Prénom" required></td>
+                    <td><button type="button" onclick="removeRow(this)" class="btn btn-danger btn-small">Supprimer</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="equipe-qualite" placeholder="Enseignant, AESH, Parent..."></td>
+                    <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                    <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                    <td><button type="button" onclick="removeRow(this)" class="btn btn-danger btn-small">Supprimer</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="button" onclick="addRow()" class="btn btn-success" style="margin-bottom: 20px;">
+            <span>➕</span> Ajouter une personne
+        </button>
+
+        <div class="visa-section">
+            <div class="section-title">✅ Visa</div>
+
+            <div class="form-row">
+                <label>Date de transmission au directeur <span class="required">*</span> :</label>
+                <input type="date" class="form-input form-input-medium" id="date-transmission" required>
+            </div>
+
+            <div class="decision-section">
+                <div style="font-weight: 600; margin-bottom: 15px; font-size: 16px; color: var(--primary-color);">Décision du directeur d'école :</div>
+                
+                <div class="checkbox-group-inline">
+                    <label><input type="checkbox" id="accord" name="decision"> ✅ Accord</label>
+                    <label><input type="checkbox" id="refus" name="decision"> ❌ Refus motivé</label>
+                </div>
+
+                <div class="signature-row">
+                    <div class="form-row">
+                        <label>Date <span class="required">*</span> :</label>
+                        <input type="date" class="form-input form-input-short" id="date-decision" required>
+                    </div>
+                    <div>
+                        <label>Signature du directeur d'école :</label>
+                        <div class="signature-area"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Formulaire de demande d'autorisation d'une sortie scolaire sans nuitée — Saint-Jean-de-la-Barre
+        </div>
+    </div>
+
+    <script>
+        let autoSaveTimer;
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
             updateProgress();
-        }
-    }
-
-    // --- Dynamic Table (Equipe d'encadrement) ---
-
-    function addRow(qualite = '', nom = '', prenom = '') {
-        const tbody = document.getElementById('equipe-tbody');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>
-                <select class="equipe-qualite form-input" required>
-                    <option value="">Sélectionner une qualité</option>
-                    <option value="Enseignant">Enseignant</option>
-                    <option value="AESH">AESH</option>
-                    <option value="Parent">Parent</option>
-                    <option value="ATSEM">ATSEM</option>
-                    <option value="Intervenant extérieur">Intervenant extérieur</option>
-                    <option value="Autre">Autre</option>
-                </select>
-            </td>
-            <td><input type="text" class="equipe-nom" placeholder="Nom" value="${nom}" ${nom === '' ? 'required' : ''}></td>
-            <td><input type="text" class="equipe-prenom" placeholder="Prénom" value="${prenom}" ${prenom === '' ? 'required' : ''}></td>
-            <td><button type="button" onclick="removeRow(this)" class="btn btn-danger btn-small">Supprimer</button></td>
-        `;
-        tbody.appendChild(newRow);
-
-        // Set the selected value if provided (for loading)
-        const qualiteSelect = newRow.querySelector('.equipe-qualite');
-        if (qualite) {
-            qualiteSelect.value = qualite;
-        }
-
-        newRow.querySelectorAll('input, select').forEach(input => { // Include select
-            input.addEventListener('input', () => { // Works for select as well
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    saveForm();
-                    showAutoSaveIndicator();
-                }, 1000);
-                updateProgress();
-            });
-            input.addEventListener('change', () => { // For select as well
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => {
-                    saveForm();
-                    showAutoSaveIndicator();
-                }, 1000);
-                updateProgress();
-            });
-        });
-        updateProgress(); // Update progress bar after adding a row
-    }
-
-    function removeRow(button) {
-        const tbody = document.getElementById('equipe-tbody');
-        if (tbody.children.length > 1) { // Prevent removing all rows
-            button.closest('tr').remove();
-            saveForm(); // Save after removing a row
-            updateProgress();
-        } else {
-            showMessage('Vous devez avoir au moins une personne dans l\'équipe d\'encadrement.', 'validation');
-        }
-    }
-
-    // --- Form Validation ---
-
-    function setupValidation() {
-        const form = document.querySelector('.form-container');
-        form.addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent default submission
-            validateForm();
+            setupAutoSave();
+            setupValidation();
         });
 
-        document.querySelectorAll('.form-container input, .form-container select').forEach(element => { // Include select
-            element.addEventListener('input', function() {
-                // Clear validation message when user starts typing again
-                document.getElementById('validationMessage').style.display = 'none';
-                // Re-validate just this field on input to give immediate feedback
-                if (!this.checkValidity()) {
-                    this.style.borderColor = 'var(--danger-color)';
-                } else {
-                    this.style.borderColor = 'var(--border-color)';
-                }
-            });
-            // For selects, 'change' event is more appropriate for validation feedback
-            if (element.tagName === 'SELECT') {
-                element.addEventListener('change', function() {
-                     document.getElementById('validationMessage').style.display = 'none';
-                    if (!this.checkValidity()) {
-                        this.style.borderColor = 'var(--danger-color)';
-                    } else {
-                        this.style.borderColor = 'var(--border-color)';
-                    }
-                });
-            }
-        });
-    }
-
-    function validateForm() {
-        let isValid = true;
-        let errorMessage = '';
-
-        // Check if at least one of 'Maternelle' or 'Élémentaire' is checked
-        const maternelle = document.getElementById('maternelle');
-        const elementaire = document.getElementById('elementaire');
-        if (!maternelle.checked && !elementaire.checked) {
-            errorMessage += '<li>Veuillez sélectionner au moins "Maternelle" ou "Élémentaire".</li>';
-            isValid = false;
-        }
-
-        // Check if at least one 'Type de sortie' is checked
-        const typeSortieCheckboxes = document.querySelectorAll('input[name="type-sortie"]');
-        const isTypeSortieChecked = Array.from(typeSortieCheckboxes).some(checkbox => checkbox.checked);
-        if (!isTypeSortieChecked) {
-            errorMessage += '<li>Veuillez sélectionner le type de sortie.</li>';
-            isValid = false;
-        }
-
-        // Validate all required input fields (text, number, date, time) and select fields
-        document.querySelectorAll('.form-input[required], .table input[required], .table select[required]').forEach(element => { // Include select
-            if (element.tagName === 'SELECT') {
-                if (element.value === '') { // Check for empty value in select
-                    isValid = false;
-                    element.style.borderColor = 'var(--danger-color)'; // Highlight invalid fields
-                    if (!errorMessage.includes(`Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).`)) {
-                        errorMessage += `<li>Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).</li>`;
-                    }
-                } else {
-                    element.style.borderColor = 'var(--border-color)';
-                }
-            } else if (!element.value.trim()) { // For text inputs
-                isValid = false;
-                element.style.borderColor = 'var(--danger-color)'; // Highlight invalid fields
-                if (!errorMessage.includes(`Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).`)) {
-                    errorMessage += `<li>Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).</li>`;
-                }
-            } else {
-                element.style.borderColor = 'var(--border-color)';
-            }
-        });
-
-        // Specific validation for Equipe d'encadrement table
-        const equipeRows = document.querySelectorAll('#equipe-tbody tr');
-        equipeRows.forEach((row, index) => {
-            const qualite = row.querySelector('.equipe-qualite'); // This is now a <select>
-            const nom = row.querySelector('.equipe-nom');
-            const prenom = row.querySelector('.equipe-prenom');
-
-            // Check if any of the fields in a row are filled, then all must be filled
-            const rowHasContent = qualite.value !== '' || nom.value.trim() !== '' || prenom.value.trim() !== ''; // Check value for select
-
-            if (rowHasContent) {
-                if (qualite.value === '') { // Check value for select
-                    isValid = false;
-                    qualite.style.borderColor = 'var(--danger-color)';
-                    if (!errorMessage.includes(`Qualité de l'équipe d'encadrement`)) {
-                        errorMessage += `<li>La qualité est requise pour chaque personne de l'équipe d'encadrement remplie.</li>`;
-                    }
-                } else { qualite.style.borderColor = 'var(--border-color)'; }
-                if (!nom.value.trim()) {
-                    isValid = false;
-                    nom.style.borderColor = 'var(--danger-color)';
-                    if (!errorMessage.includes(`Nom de l'équipe d'encadrement`)) {
-                        errorMessage += `<li>Le nom est requis pour chaque personne de l'équipe d'encadrement remplie.</li>`;
-                    }
-                } else { nom.style.borderColor = 'var(--border-color)'; }
-                if (!prenom.value.trim()) {
-                    isValid = false;
-                    prenom.style.borderColor = 'var(--danger-color)';
-                    if (!errorMessage.includes(`Prénom de l'équipe d'encadrement`)) {
-                        errorMessage += `<li>Le prénom est requis pour chaque personne de l'équipe d'encadrement remplie.</li>`;
-                    }
-                } else { prenom.style.borderColor = 'var(--border-color)'; }
-            }
-        });
-
-        // Check if at least one decision checkbox is checked
-        const decisionCheckboxes = document.querySelectorAll('input[name="decision"]');
-        const isDecisionChecked = Array.from(decisionCheckboxes).some(checkbox => checkbox.checked);
-        if (!isDecisionChecked) {
-            errorMessage += '<li>Veuillez indiquer la décision du directeur (Accord ou Refus).</li>';
-            isValid = false;
-        }
-
-
-        if (!isValid) {
-            document.getElementById('validationMessage').innerHTML = `<strong>Veuillez corriger les erreurs suivantes :</strong><ul>${errorMessage}</ul>`;
-            document.getElementById('validationMessage').style.display = 'block';
-            document.getElementById('successMessage').style.display = 'none';
-        } else {
-            showMessage('Formulaire validé avec succès ! Vous pouvez maintenant exporter.', 'success');
-            document.getElementById('validationMessage').style.display = 'none';
-        }
-        return isValid;
-    }
-
-    // Handle unique selection for checkbox groups (Type de sortie and Décision du directeur)
-    function setupCheckboxGroups() {
-        const typeSortieCheckboxes = document.querySelectorAll('input[name="type-sortie"]');
-        typeSortieCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    typeSortieCheckboxes.forEach(otherCheckbox => {
-                        if (otherCheckbox !== this) {
-                            otherCheckbox.checked = false;
-                        }
-                    });
-                }
-                updateProgress();
-                saveForm();
-            });
-        });
-
-        const decisionCheckboxes = document.querySelectorAll('input[name="decision"]');
-        decisionCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    decisionCheckboxes.forEach(otherCheckbox => {
-                        if (otherCheckbox !== this) {
-                            otherCheckbox.checked = false;
-                        }
-                    });
-                }
-                updateProgress();
-                saveForm();
-            });
-        });
-    }
-
-    // --- PDF Export (Requires html2pdf.js library) ---
-
-    async function exportToPDF() {
-        if (!validateForm()) {
-            showMessage('Veuillez corriger les erreurs du formulaire avant d\'exporter en PDF.', 'validation');
-            return;
-        }
-
-        // Temporarily hide toolbar and auto-save indicator for clean PDF
-        const toolbar = document.querySelector('.toolbar');
-        const autoSaveIndicator = document.getElementById('autoSaveIndicator');
-        toolbar.style.display = 'none';
-        autoSaveIndicator.style.display = 'none';
-
-        // Ensure the page content is fully rendered before PDF generation
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const element = document.querySelector('.form-container');
-        const options = {
-            margin: 10,
-            filename: 'demande_sortie_scolaire.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, logging: true, dpi: 192, letterRendering: true },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        html2pdf().set(options).from(element).save().then(() => {
-            // Restore toolbar and auto-save indicator after PDF generation
-            toolbar.style.display = 'block';
-            autoSaveIndicator.style.display = 'block';
-            showMessage('PDF exporté avec succès !', 'success');
-        }).catch(error => {
-            console.error("Error generating PDF:", error);
-            showMessage('Erreur lors de la génération du PDF.', 'validation');
-            // Ensure toolbar is restored even on error
-            toolbar.style.display = 'block';
-            autoSaveIndicator.style.display = 'block';
-        });
-    }
-
-    // Make functions globally accessible if they are called from inline HTML
-    window.clearForm = clearForm;
-    window.saveForm = saveForm;
-    window.loadForm = loadForm;
-    window.exportToPDF = exportToPDF;
-    window.addRow = addRow;
-    window.removeRow = removeRow;
-    window.updateProgress = updateProgress; // Useful for initial load and debugging
-
-</script>
-</body>
-</html>
+        // Auto-sauvegarde
