@@ -1,501 +1,536 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulaire de demande d'autorisation de sortie scolaire sans nuitée</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+/* ... (your existing HTML and CSS code, with the HTML change above) ... */
+
+<script>
+    let autoSaveTimer;
+    let saveTimeout; // For debouncing auto-save
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        loadForm(); // Load saved data on page load
+        updateProgress();
+        setupAutoSave();
+        setupValidation();
+        setupCheckboxGroups();
+    });
+
+    // --- Utility Functions ---
+
+    function showMessage(message, type = 'validation') {
+        const validationMessage = document.getElementById('validationMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        if (type === 'validation') {
+            validationMessage.textContent = message;
+            validationMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        } else if (type === 'success') {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            validationMessage.style.display = 'none';
         }
-        .form-container {
-            background-color: white;
-            padding: 30px;
-            border: 2px solid #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            text-align: center;
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-        }
-        .section-title {
-            font-weight: bold;
-            margin: 20px 0 10px 0;
-            text-decoration: underline;
-        }
-        .form-row {
-            margin: 12px 0;
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .form-row label {
-            min-width: 200px;
-            margin-right: 10px;
-        }
-        .checkbox-group {
-            margin: 5px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .checkbox-group-inline {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-        .checkbox-group input[type="checkbox"] {
-            margin-right: 8px;
-        }
-        .form-input {
-            border: none;
-            border-bottom: 1px dotted #000;
-            background: transparent;
-            padding: 4px 8px;
-            font-family: inherit;
-            font-size: 14px;
-            min-width: 200px;
-        }
-        .form-input-short {
-            min-width: 80px;
-        }
-        .form-input-medium {
-            min-width: 150px;
-        }
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        .table th, .table td {
-            border: 1px solid #000;
-            padding: 8px;
-            text-align: left;
-        }
-        .table th {
-            background-color: #d3d3d3;
-            font-weight: bold;
-        }
-        .table input {
-            border: none;
-            background: transparent;
-            width: 100%;
-            padding: 4px;
-            font-family: inherit;
-        }
-        .visa-section {
-            margin-top: 30px;
-            border-top: 1px solid #000;
-            padding-top: 20px;
-        }
-        .decision-section {
-            margin: 20px 0;
-        }
-        .signature-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 12px;
-        }
-        .buttons {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-        }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 0 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-        .btn-secondary:hover {
-            background-color: #545b62;
-        }
-        .btn-success {
-            background-color: #28a745;
-        }
-        .btn-success:hover {
-            background-color: #1e7e34;
-        }
-        .row-inline {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        @media print {
-            .buttons {
-                display: none;
+        // Hide after 5 seconds
+        setTimeout(() => {
+            validationMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }, 5000);
+    }
+
+    function showAutoSaveIndicator() {
+        const indicator = document.getElementById('autoSaveIndicator');
+        indicator.classList.add('show');
+        setTimeout(() => {
+            indicator.classList.remove('show');
+        }, 2000); // Hide after 2 seconds
+    }
+
+    function updateProgress() {
+        const formElements = document.querySelectorAll('.form-input, input[type="date"], input[type="time"], input[type="checkbox"]');
+        let filledFields = 0;
+        let totalFields = 0;
+
+        formElements.forEach(element => {
+            // Exclude the decision checkboxes from the progress calculation
+            if (element.name === 'decision') {
+                return;
             }
-        }
-    </style>
-</head>
-<body>
-    <div class="buttons">
-        <button class="btn" onclick="clearForm()">Nouveau formulaire</button>
-        <button class="btn btn-secondary" onclick="saveForm()">Sauvegarder</button>
-        <button class="btn btn-secondary" onclick="loadForm()">Charger</button>
-        <button class="btn btn-success" onclick="window.print()">Imprimer / PDF</button>
-    </div>
 
-    <div class="form-container">
-        <div class="header">
-            Formulaire de demande d'autorisation d'une sortie scolaire<br>
-            sans nuitée
-        </div>
+            if (element.type === 'checkbox') {
+                // For checkbox groups where at least one must be checked
+                if (element.closest('.checkbox-group') || element.closest('.checkbox-group-inline')) {
+                    const groupName = element.name || element.id; // Use name or ID for unique group identification
+                    const groupCheckboxes = document.querySelectorAll(`input[name="${groupName}"], input[id="${groupName}"]`);
+                    if (!element._countedGroup) { // Ensure group is only counted once
+                         totalFields++;
+                         if (Array.from(groupCheckboxes).some(cb => cb.checked)) {
+                             filledFields++;
+                         }
+                         groupCheckboxes.forEach(cb => cb._countedGroup = true); // Mark as counted
+                    }
+                } else { // Individual checkboxes
+                    totalFields++;
+                    if (element.checked) {
+                        filledFields++;
+                    }
+                }
+            } else if (element.type === 'text' || element.type === 'number' || element.type === 'tel' || element.type === 'date' || element.type === 'time') {
+                totalFields++;
+                if (element.value.trim() !== '') {
+                    filledFields++;
+                }
+            } else if (element.tagName === 'SELECT') { // Handle select elements
+                totalFields++;
+                if (element.value !== '') { // A value has been selected
+                    filledFields++;
+                }
+            }
+        });
 
-        <div class="section-title">Informations générales</div>
+        // Handle the dynamic table rows (equipe d'encadrement)
+        const equipeRows = document.querySelectorAll('#equipe-tbody tr');
+        equipeRows.forEach(row => {
+            const qualite = row.querySelector('.equipe-qualite'); // This is now a <select>
+            const nom = row.querySelector('.equipe-nom');
+            const prenom = row.querySelector('.equipe-prenom');
 
-        <div class="form-row">
-            <label>Sortie impliquant des élèves de :</label>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="maternelle"> Maternelle</label>
-                <label><input type="checkbox" id="elementaire"> Élémentaire</label>
-            </div>
-        </div>
+            // Only count fields if the row isn't completely empty
+            // For <select>, an empty value "" means not selected
+            if (qualite.value !== '' || nom.value.trim() !== '' || prenom.value.trim() !== '') {
+                totalFields += 3; // Qualité, Nom, Prénom
+                if (qualite.value !== '') filledFields++; // Check value for select
+                if (nom.value.trim() !== '') filledFields++;
+                if (prenom.value.trim() !== '') filledFields++;
+            }
+        });
 
-        <div class="form-row">
-            <label>Type de sortie :</label>
-            <div class="checkbox-group">
-                <label><input type="checkbox" id="obligatoire-rec"> Sortie scolaire obligatoire récurrente</label>
-                <label><input type="checkbox" id="obligatoire-occ"> Sortie scolaire obligatoire occasionnelle</label>
-                <label><input type="checkbox" id="facultative"> Sortie scolaire facultative</label>
-            </div>
-        </div>
+        const progressBar = document.getElementById('progressBar');
+        const progressPercentage = totalFields > 0 ? (filledFields / totalFields) * 100 : 0;
+        progressBar.style.width = progressPercentage + '%';
+    }
 
-        <div class="form-row">
-            <label>Nom de l'école :</label>
-            <input type="text" class="form-input" id="nom-ecole" placeholder="Nom de l'école">
-        </div>
 
-        <div class="form-row">
-            <label>Adresse :</label>
-            <input type="text" class="form-input" id="adresse" placeholder="Adresse complète">
-        </div>
+    // --- Auto-Save and Manual Save/Load ---
 
-        <div class="row-inline">
-            <div>
-                <label>Code postal :</label>
-                <input type="text" class="form-input form-input-short" id="code-postal" placeholder="Code postal">
-            </div>
-            <div>
-                <label>Commune :</label>
-                <input type="text" class="form-input form-input-medium" id="commune" placeholder="Commune">
-            </div>
-        </div>
+    function setupAutoSave() {
+        document.querySelectorAll('.form-container input, .form-container select, .form-container textarea').forEach(input => {
+            input.addEventListener('input', () => { // Works for text, number, select
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveForm();
+                    showAutoSaveIndicator();
+                }, 1000); // Save 1 second after last input
+                updateProgress();
+            });
+            input.addEventListener('change', () => { // For checkboxes, radios, dates, select
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveForm();
+                    showAutoSaveIndicator();
+                }, 1000);
+                updateProgress();
+            });
+        });
+    }
 
-        <div class="form-row">
-            <label>Enseignant référent :</label>
-            <input type="text" class="form-input" id="enseignant" placeholder="Nom et prénom de l'enseignant référent">
-        </div>
+    function saveForm() {
+        const formData = {};
 
-        <div class="form-row">
-            <label>Téléphone permettant de joindre le groupe en cas d'urgence :</label>
-            <input type="tel" class="form-input" id="telephone" placeholder="Numéro de téléphone">
-        </div>
+        // General Information
+        formData['maternelle'] = document.getElementById('maternelle').checked;
+        formData['elementaire'] = document.getElementById('elementaire').checked;
 
-        <div class="form-row">
-            <label>Date(s) de la sortie :</label>
-            <input type="date" class="form-input form-input-medium" id="date-sortie">
-        </div>
+        formData['type-sortie'] = Array.from(document.querySelectorAll('input[name="type-sortie"]:checked')).map(cb => cb.id);
 
-        <div class="form-row">
-            <label>Si la sortie scolaire obligatoire est récurrente, nombre de séances :</label>
-            <input type="number" class="form-input form-input-short" id="nb-seances" placeholder="Nombre">
-        </div>
+        formData['nom-ecole'] = document.getElementById('nom-ecole').value;
+        formData['adresse'] = document.getElementById('adresse').value;
+        formData['code-postal'] = document.getElementById('code-postal').value;
+        formData['commune'] = document.getElementById('commune').value;
+        formData['enseignant'] = document.getElementById('enseignant').value;
+        formData['telephone'] = document.getElementById('telephone').value;
+        formData['date-sortie'] = document.getElementById('date-sortie').value;
+        formData['nb-seances'] = document.getElementById('nb-seances').value;
+        formData['heure-depart'] = document.getElementById('heure-depart').value;
+        formData['heure-retour'] = document.getElementById('heure-retour').value;
+        formData['lieu-rassemblement'] = document.getElementById('lieu-rassemblement').value;
+        formData['lieu-sortie'] = document.getElementById('lieu-sortie').value;
+        formData['restauration'] = document.getElementById('restauration').value;
+        formData['classes'] = document.getElementById('classes').value;
+        formData['nb-eleves'] = document.getElementById('nb-eleves').value;
+        formData['nb-accompagnateurs'] = document.getElementById('nb-accompagnateurs').value;
 
-        <div class="row-inline">
-            <div>
-                <label>Heure de départ :</label>
-                <input type="time" class="form-input form-input-short" id="heure-depart">
-            </div>
-            <div>
-                <label>Heure de retour :</label>
-                <input type="time" class="form-input form-input-short" id="heure-retour">
-            </div>
-        </div>
+        // Equipe d'encadrement
+        const equipe = [];
+        document.querySelectorAll('#equipe-tbody tr').forEach(row => {
+            const qualite = row.querySelector('.equipe-qualite').value; // Get value from select
+            const nom = row.querySelector('.equipe-nom').value;
+            const prenom = row.querySelector('.equipe-prenom').value;
+            equipe.push({ qualite, nom, prenom });
+        });
+        formData['equipe'] = equipe;
 
-        <div class="form-row">
-            <label>Lieu de rassemblement :</label>
-            <input type="text" class="form-input" id="lieu-rassemblement" placeholder="Lieu de rassemblement">
-        </div>
+        // Visa Section
+        formData['date-transmission'] = document.getElementById('date-transmission').value;
+        formData['decision'] = Array.from(document.querySelectorAll('input[name="decision"]:checked')).map(cb => cb.id);
+        formData['date-decision'] = document.getElementById('date-decision').value;
 
-        <div class="form-row">
-            <label>Lieu(x) de la sortie :</label>
-            <input type="text" class="form-input" id="lieu-sortie" placeholder="Destination de la sortie">
-        </div>
+        localStorage.setItem('schoolTripForm', JSON.stringify(formData));
+        updateProgress();
+    }
 
-        <div class="form-row">
-            <label>Lieu et mode de restauration :</label>
-            <input type="text" class="form-input" id="restauration" placeholder="Préciser si applicable">
-        </div>
+    function loadForm() {
+        const savedData = localStorage.getItem('schoolTripForm');
+        if (savedData) {
+            const formData = JSON.parse(savedData);
 
-        <div class="form-row">
-            <label>Classe(s) participant à la sortie :</label>
-            <input type="text" class="form-input form-input-medium" id="classes" placeholder="Classes">
-        </div>
+            // General Information
+            document.getElementById('maternelle').checked = formData['maternelle'] || false;
+            document.getElementById('elementaire').checked = formData['elementaire'] || false;
 
-        <div class="row-inline">
-            <div>
-                <label>Nombre d'élèves :</label>
-                <input type="number" class="form-input form-input-short" id="nb-eleves" placeholder="Nombre">
-            </div>
-            <div>
-                <label>Nombre d'accompagnateurs :</label>
-                <input type="number" class="form-input form-input-short" id="nb-accompagnateurs" placeholder="Nombre">
-            </div>
-        </div>
+            document.querySelectorAll('input[name="type-sortie"]').forEach(cb => {
+                cb.checked = formData['type-sortie'] && formData['type-sortie'].includes(cb.id);
+            });
 
-        <div class="section-title">Équipe d'encadrement</div>
+            document.getElementById('nom-ecole').value = formData['nom-ecole'] || '';
+            document.getElementById('adresse').value = formData['adresse'] || '';
+            document.getElementById('code-postal').value = formData['code-postal'] || '';
+            document.getElementById('commune').value = formData['commune'] || '';
+            document.getElementById('enseignant').value = formData['enseignant'] || '';
+            document.getElementById('telephone').value = formData['telephone'] || '';
+            document.getElementById('date-sortie').value = formData['date-sortie'] || '';
+            document.getElementById('nb-seances').value = formData['nb-seances'] || '';
+            document.getElementById('heure-depart').value = formData['heure-depart'] || '';
+            document.getElementById('heure-retour').value = formData['heure-retour'] || '';
+            document.getElementById('lieu-rassemblement').value = formData['lieu-rassemblement'] || '';
+            document.getElementById('lieu-sortie').value = formData['lieu-sortie'] || '';
+            document.getElementById('restauration').value = formData['restauration'] || '';
+            document.getElementById('classes').value = formData['classes'] || '';
+            document.getElementById('nb-eleves').value = formData['nb-eleves'] || '';
+            document.getElementById('nb-accompagnateurs').value = formData['nb-accompagnateurs'] || '';
 
-        <table class="table" id="equipe-table">
-            <thead>
-                <tr>
-                    <th>Qualité (enseignant, AESH, ATSEM, parent d'élèves, etc.)</th>
-                    <th>Nom</th>
-                    <th>Prénom</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="equipe-tbody">
-                <tr>
-                    <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
-                    <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
-                    <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
-                    <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-                </tr>
-                <tr>
-                    <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
-                    <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
-                    <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
-                    <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <button type="button" onclick="addRow()" class="btn" style="margin-bottom: 20px;">Ajouter une personne</button>
-
-        <div class="visa-section">
-            <div class="section-title">Visa</div>
-
-            <div class="form-row">
-                <label>Date de transmission du dossier au directeur d'école :</label>
-                <input type="date" class="form-input form-input-medium" id="date-transmission">
-            </div>
-
-            <div class="decision-section">
-                <div style="font-weight: bold; margin-bottom: 10px;">Décision du directeur d'école :</div>
-                
-                <div class="checkbox-group-inline">
-                    <label><input type="checkbox" id="accord"> Accord</label>
-                    <label><input type="checkbox" id="refus"> Refus motivé</label>
-                </div>
-
-                <div class="signature-row">
-                    <div>
-                        <label>Date :</label>
-                        <input type="date" class="form-input form-input-short" id="date-decision">
-                    </div>
-                    <div>
-                        <label>Signature du directeur d'école :</label>
-                        <span style="display: inline-block; width: 200px; border-bottom: 1px dotted #000; height: 20px;"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            Formulaire de demande d'autorisation d'une sortie scolaire sans nuitée — 1er degré
-        </div>
-    </div>
-
-    <script>
-        // Fonction pour ajouter une ligne dans le tableau d'équipe
-        function addRow() {
-            const tbody = document.getElementById('equipe-tbody');
-            const newRow = document.createElement('tr');
-            newRow.innerHTML = `
-                <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
-                <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
-                <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
-                <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-            `;
-            tbody.appendChild(newRow);
-        }
-
-        // Fonction pour supprimer une ligne
-        function removeRow(button) {
-            const row = button.closest('tr');
-            const tbody = row.parentNode;
-            if (tbody.children.length > 1) {
-                row.remove();
+            // Equipe d'encadrement
+            const equipeTbody = document.getElementById('equipe-tbody');
+            equipeTbody.innerHTML = ''; // Clear existing rows
+            if (formData['equipe'] && formData['equipe'].length > 0) {
+                formData['equipe'].forEach(person => {
+                    addRow(person.qualite, person.nom, person.prenom);
+                });
             } else {
-                alert('Vous devez conserver au moins une ligne.');
+                addRow(); // Add at least one empty row if no data
+            }
+
+
+            // Visa Section
+            document.getElementById('date-transmission').value = formData['date-transmission'] || '';
+            document.querySelectorAll('input[name="decision"]').forEach(cb => {
+                cb.checked = formData['decision'] && formData['decision'].includes(cb.id);
+            });
+            document.getElementById('date-decision').value = formData['date-decision'] || '';
+
+            showMessage('Formulaire chargé avec succès !', 'success');
+        } else {
+            showMessage('Aucune donnée sauvegardée trouvée.', 'validation');
+            // Ensure at least one row exists if no data was loaded
+            if (document.querySelectorAll('#equipe-tbody tr').length === 0) {
+                addRow();
             }
         }
+        updateProgress();
+    }
 
-        // Fonction pour vider le formulaire
-        function clearForm() {
-            if (confirm('Êtes-vous sûr de vouloir créer un nouveau formulaire ? Toutes les données actuelles seront perdues.')) {
-                document.querySelectorAll('input').forEach(input => {
-                    if (input.type === 'checkbox') {
-                        input.checked = false;
+    function clearForm() {
+        if (confirm('Voulez-vous vraiment effacer toutes les données du formulaire ?')) {
+            document.querySelectorAll('.form-container input, .form-container select').forEach(element => { // Include select
+                if (element.type === 'checkbox' || element.type === 'radio') {
+                    element.checked = false;
+                } else if (element.tagName === 'SELECT') {
+                    element.value = ''; // Reset select to its first option (empty value)
+                }
+                else {
+                    element.value = '';
+                }
+            });
+            document.getElementById('equipe-tbody').innerHTML = ''; // Clear table rows
+            addRow(); // Add one empty row back
+            localStorage.removeItem('schoolTripForm');
+            showMessage('Formulaire effacé avec succès !', 'success');
+            updateProgress();
+        }
+    }
+
+    // --- Dynamic Table (Equipe d'encadrement) ---
+
+    function addRow(qualite = '', nom = '', prenom = '') {
+        const tbody = document.getElementById('equipe-tbody');
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td>
+                <select class="equipe-qualite form-input" required>
+                    <option value="">Sélectionner une qualité</option>
+                    <option value="Enseignant">Enseignant</option>
+                    <option value="AESH">AESH</option>
+                    <option value="Parent">Parent</option>
+                    <option value="ATSEM">ATSEM</option>
+                    <option value="Intervenant extérieur">Intervenant extérieur</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </td>
+            <td><input type="text" class="equipe-nom" placeholder="Nom" value="${nom}" ${nom === '' ? 'required' : ''}></td>
+            <td><input type="text" class="equipe-prenom" placeholder="Prénom" value="${prenom}" ${prenom === '' ? 'required' : ''}></td>
+            <td><button type="button" onclick="removeRow(this)" class="btn btn-danger btn-small">Supprimer</button></td>
+        `;
+        tbody.appendChild(newRow);
+
+        // Set the selected value if provided (for loading)
+        const qualiteSelect = newRow.querySelector('.equipe-qualite');
+        if (qualite) {
+            qualiteSelect.value = qualite;
+        }
+
+        newRow.querySelectorAll('input, select').forEach(input => { // Include select
+            input.addEventListener('input', () => { // Works for select as well
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveForm();
+                    showAutoSaveIndicator();
+                }, 1000);
+                updateProgress();
+            });
+            input.addEventListener('change', () => { // For select as well
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    saveForm();
+                    showAutoSaveIndicator();
+                }, 1000);
+                updateProgress();
+            });
+        });
+        updateProgress(); // Update progress bar after adding a row
+    }
+
+    function removeRow(button) {
+        const tbody = document.getElementById('equipe-tbody');
+        if (tbody.children.length > 1) { // Prevent removing all rows
+            button.closest('tr').remove();
+            saveForm(); // Save after removing a row
+            updateProgress();
+        } else {
+            showMessage('Vous devez avoir au moins une personne dans l\'équipe d\'encadrement.', 'validation');
+        }
+    }
+
+    // --- Form Validation ---
+
+    function setupValidation() {
+        const form = document.querySelector('.form-container');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent default submission
+            validateForm();
+        });
+
+        document.querySelectorAll('.form-container input, .form-container select').forEach(element => { // Include select
+            element.addEventListener('input', function() {
+                // Clear validation message when user starts typing again
+                document.getElementById('validationMessage').style.display = 'none';
+                // Re-validate just this field on input to give immediate feedback
+                if (!this.checkValidity()) {
+                    this.style.borderColor = 'var(--danger-color)';
+                } else {
+                    this.style.borderColor = 'var(--border-color)';
+                }
+            });
+            // For selects, 'change' event is more appropriate for validation feedback
+            if (element.tagName === 'SELECT') {
+                element.addEventListener('change', function() {
+                     document.getElementById('validationMessage').style.display = 'none';
+                    if (!this.checkValidity()) {
+                        this.style.borderColor = 'var(--danger-color)';
                     } else {
-                        input.value = '';
+                        this.style.borderColor = 'var(--border-color)';
                     }
                 });
-                
-                // Réinitialiser le tableau avec 2 lignes vides
-                const tbody = document.getElementById('equipe-tbody');
-                tbody.innerHTML = `
-                    <tr>
-                        <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
-                        <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
-                        <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
-                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-                    </tr>
-                    <tr>
-                        <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
-                        <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
-                        <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
-                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-                    </tr>
-                `;
             }
+        });
+    }
+
+    function validateForm() {
+        let isValid = true;
+        let errorMessage = '';
+
+        // Check if at least one of 'Maternelle' or 'Élémentaire' is checked
+        const maternelle = document.getElementById('maternelle');
+        const elementaire = document.getElementById('elementaire');
+        if (!maternelle.checked && !elementaire.checked) {
+            errorMessage += '<li>Veuillez sélectionner au moins "Maternelle" ou "Élémentaire".</li>';
+            isValid = false;
         }
 
-        // Fonction pour sauvegarder les données
-        function saveForm() {
-            const formData = {};
-            
-            // Sauvegarder tous les champs input
-            document.querySelectorAll('input').forEach(input => {
-                if (input.type === 'checkbox') {
-                    formData[input.id] = input.checked;
-                } else if (input.className.includes('equipe-')) {
-                    // Gérer les champs du tableau séparément
-                    return;
+        // Check if at least one 'Type de sortie' is checked
+        const typeSortieCheckboxes = document.querySelectorAll('input[name="type-sortie"]');
+        const isTypeSortieChecked = Array.from(typeSortieCheckboxes).some(checkbox => checkbox.checked);
+        if (!isTypeSortieChecked) {
+            errorMessage += '<li>Veuillez sélectionner le type de sortie.</li>';
+            isValid = false;
+        }
+
+        // Validate all required input fields (text, number, date, time) and select fields
+        document.querySelectorAll('.form-input[required], .table input[required], .table select[required]').forEach(element => { // Include select
+            if (element.tagName === 'SELECT') {
+                if (element.value === '') { // Check for empty value in select
+                    isValid = false;
+                    element.style.borderColor = 'var(--danger-color)'; // Highlight invalid fields
+                    if (!errorMessage.includes(`Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).`)) {
+                        errorMessage += `<li>Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).</li>`;
+                    }
                 } else {
-                    formData[input.id] = input.value;
+                    element.style.borderColor = 'var(--border-color)';
                 }
-            });
+            } else if (!element.value.trim()) { // For text inputs
+                isValid = false;
+                element.style.borderColor = 'var(--danger-color)'; // Highlight invalid fields
+                if (!errorMessage.includes(`Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).`)) {
+                    errorMessage += `<li>Veuillez remplir tous les champs obligatoires (<span class="required">*</span>).</li>`;
+                }
+            } else {
+                element.style.borderColor = 'var(--border-color)';
+            }
+        });
 
-            // Sauvegarder les données du tableau
-            const equipeData = [];
-            document.querySelectorAll('#equipe-tbody tr').forEach(row => {
-                const qualite = row.querySelector('.equipe-qualite').value;
-                const nom = row.querySelector('.equipe-nom').value;
-                const prenom = row.querySelector('.equipe-prenom').value;
-                equipeData.push({ qualite, nom, prenom });
-            });
-            formData.equipe = equipeData;
+        // Specific validation for Equipe d'encadrement table
+        const equipeRows = document.querySelectorAll('#equipe-tbody tr');
+        equipeRows.forEach((row, index) => {
+            const qualite = row.querySelector('.equipe-qualite'); // This is now a <select>
+            const nom = row.querySelector('.equipe-nom');
+            const prenom = row.querySelector('.equipe-prenom');
 
-            // Créer un fichier JSON et le télécharger
-            const dataStr = JSON.stringify(formData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'formulaire_sortie_scolaire.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            // Check if any of the fields in a row are filled, then all must be filled
+            const rowHasContent = qualite.value !== '' || nom.value.trim() !== '' || prenom.value.trim() !== ''; // Check value for select
+
+            if (rowHasContent) {
+                if (qualite.value === '') { // Check value for select
+                    isValid = false;
+                    qualite.style.borderColor = 'var(--danger-color)';
+                    if (!errorMessage.includes(`Qualité de l'équipe d'encadrement`)) {
+                        errorMessage += `<li>La qualité est requise pour chaque personne de l'équipe d'encadrement remplie.</li>`;
+                    }
+                } else { qualite.style.borderColor = 'var(--border-color)'; }
+                if (!nom.value.trim()) {
+                    isValid = false;
+                    nom.style.borderColor = 'var(--danger-color)';
+                    if (!errorMessage.includes(`Nom de l'équipe d'encadrement`)) {
+                        errorMessage += `<li>Le nom est requis pour chaque personne de l'équipe d'encadrement remplie.</li>`;
+                    }
+                } else { nom.style.borderColor = 'var(--border-color)'; }
+                if (!prenom.value.trim()) {
+                    isValid = false;
+                    prenom.style.borderColor = 'var(--danger-color)';
+                    if (!errorMessage.includes(`Prénom de l'équipe d'encadrement`)) {
+                        errorMessage += `<li>Le prénom est requis pour chaque personne de l'équipe d'encadrement remplie.</li>`;
+                    }
+                } else { prenom.style.borderColor = 'var(--border-color)'; }
+            }
+        });
+
+        // Check if at least one decision checkbox is checked
+        const decisionCheckboxes = document.querySelectorAll('input[name="decision"]');
+        const isDecisionChecked = Array.from(decisionCheckboxes).some(checkbox => checkbox.checked);
+        if (!isDecisionChecked) {
+            errorMessage += '<li>Veuillez indiquer la décision du directeur (Accord ou Refus).</li>';
+            isValid = false;
         }
 
-        // Fonction pour charger les données
-        function loadForm() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const formData = JSON.parse(e.target.result);
-                            
-                            // Charger tous les champs
-                            Object.keys(formData).forEach(key => {
-                                if (key === 'equipe') return; // Gérer séparément
-                                
-                                const element = document.getElementById(key);
-                                if (element) {
-                                    if (element.type === 'checkbox') {
-                                        element.checked = formData[key];
-                                    } else {
-                                        element.value = formData[key];
-                                    }
-                                }
-                            });
 
-                            // Charger les données du tableau
-                            if (formData.equipe) {
-                                const tbody = document.getElementById('equipe-tbody');
-                                tbody.innerHTML = '';
-                                
-                                formData.equipe.forEach(person => {
-                                    const row = document.createElement('tr');
-                                    row.innerHTML = `
-                                        <td><input type="text" class="equipe-qualite" value="${person.qualite || ''}" placeholder="Qualité"></td>
-                                        <td><input type="text" class="equipe-nom" value="${person.nom || ''}" placeholder="Nom"></td>
-                                        <td><input type="text" class="equipe-prenom" value="${person.prenom || ''}" placeholder="Prénom"></td>
-                                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
-                                    `;
-                                    tbody.appendChild(row);
-                                });
-                            }
-                            
-                            alert('Formulaire chargé avec succès !');
-                        } catch (error) {
-                            alert('Erreur lors du chargement du fichier. Vérifiez que c\'est un fichier JSON valide.');
+        if (!isValid) {
+            document.getElementById('validationMessage').innerHTML = `<strong>Veuillez corriger les erreurs suivantes :</strong><ul>${errorMessage}</ul>`;
+            document.getElementById('validationMessage').style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        } else {
+            showMessage('Formulaire validé avec succès ! Vous pouvez maintenant exporter.', 'success');
+            document.getElementById('validationMessage').style.display = 'none';
+        }
+        return isValid;
+    }
+
+    // Handle unique selection for checkbox groups (Type de sortie and Décision du directeur)
+    function setupCheckboxGroups() {
+        const typeSortieCheckboxes = document.querySelectorAll('input[name="type-sortie"]');
+        typeSortieCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    typeSortieCheckboxes.forEach(otherCheckbox => {
+                        if (otherCheckbox !== this) {
+                            otherCheckbox.checked = false;
                         }
-                    };
-                    reader.readAsText(file);
+                    });
                 }
-            };
-            input.click();
+                updateProgress();
+                saveForm();
+            });
+        });
+
+        const decisionCheckboxes = document.querySelectorAll('input[name="decision"]');
+        decisionCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    decisionCheckboxes.forEach(otherCheckbox => {
+                        if (otherCheckbox !== this) {
+                            otherCheckbox.checked = false;
+                        }
+                    });
+                }
+                updateProgress();
+                saveForm();
+            });
+        });
+    }
+
+    // --- PDF Export (Requires html2pdf.js library) ---
+
+    async function exportToPDF() {
+        if (!validateForm()) {
+            showMessage('Veuillez corriger les erreurs du formulaire avant d\'exporter en PDF.', 'validation');
+            return;
         }
 
-        // Gérer les cases à cocher mutuellement exclusives pour les décisions
-        document.getElementById('accord').addEventListener('change', function() {
-            if (this.checked) {
-                document.getElementById('refus').checked = false;
-            }
-        });
+        // Temporarily hide toolbar and auto-save indicator for clean PDF
+        const toolbar = document.querySelector('.toolbar');
+        const autoSaveIndicator = document.getElementById('autoSaveIndicator');
+        toolbar.style.display = 'none';
+        autoSaveIndicator.style.display = 'none';
 
-        document.getElementById('refus').addEventListener('change', function() {
-            if (this.checked) {
-                document.getElementById('accord').checked = false;
-            }
+        // Ensure the page content is fully rendered before PDF generation
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const element = document.querySelector('.form-container');
+        const options = {
+            margin: 10,
+            filename: 'demande_sortie_scolaire.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, logging: true, dpi: 192, letterRendering: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(options).from(element).save().then(() => {
+            // Restore toolbar and auto-save indicator after PDF generation
+            toolbar.style.display = 'block';
+            autoSaveIndicator.style.display = 'block';
+            showMessage('PDF exporté avec succès !', 'success');
+        }).catch(error => {
+            console.error("Error generating PDF:", error);
+            showMessage('Erreur lors de la génération du PDF.', 'validation');
+            // Ensure toolbar is restored even on error
+            toolbar.style.display = 'block';
+            autoSaveIndicator.style.display = 'block';
         });
-    </script>
+    }
+
+    // Make functions globally accessible if they are called from inline HTML
+    window.clearForm = clearForm;
+    window.saveForm = saveForm;
+    window.loadForm = loadForm;
+    window.exportToPDF = exportToPDF;
+    window.addRow = addRow;
+    window.removeRow = removeRow;
+    window.updateProgress = updateProgress; // Useful for initial load and debugging
+
+</script>
 </body>
 </html>
