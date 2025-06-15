@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de demande d'autorisation de sortie scolaire sans nuitée</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background-color: white;
+            padding: 30px;
+            border: 2px solid #000;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+        .section-title {
+            font-weight: bold;
+            margin: 20px 0 10px 0;
+            text-decoration: underline;
+        }
+        .form-row {
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .form-row label {
+            min-width: 200px;
+            margin-right: 10px;
+        }
+        .checkbox-group {
+            margin: 5px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .checkbox-group-inline {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .form-input {
+            border: none;
+            border-bottom: 1px dotted #000;
+            background: transparent;
+            padding: 4px 8px;
+            font-family: inherit;
+            font-size: 14px;
+            min-width: 200px;
+        }
+        .form-input-short {
+            min-width: 80px;
+        }
+        .form-input-medium {
+            min-width: 150px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        .table th {
+            background-color: #d3d3d3;
+            font-weight: bold;
+        }
+        .table input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 4px;
+            font-family: inherit;
+        }
+        .visa-section {
+            margin-top: 30px;
+            border-top: 1px solid #000;
+            padding-top: 20px;
+        }
+        .decision-section {
+            margin: 20px 0;
+        }
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #545b62;
+        }
+        .btn-success {
+            background-color: #28a745;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .row-inline {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        @media print {
+            .buttons {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="buttons">
+        <button class="btn" onclick="clearForm()">Nouveau formulaire</button>
+        <button class="btn btn-secondary" onclick="saveForm()">Sauvegarder</button>
+        <button class="btn btn-secondary" onclick="loadForm()">Charger</button>
+        <button class="btn btn-success" onclick="window.print()">Imprimer / PDF</button>
+    </div>
+
+    <div class="form-container">
+        <div class="header">
+            Formulaire de demande d'autorisation d'une sortie scolaire<br>
+            sans nuitée
+        </div>
+
+        <div class="section-title">Informations générales</div>
+
+        <div class="form-row">
+            <label>Sortie impliquant des élèves de :</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="maternelle"> Maternelle</label>
+                <label><input type="checkbox" id="elementaire"> Élémentaire</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Type de sortie :</label>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="obligatoire-rec"> Sortie scolaire obligatoire récurrente</label>
+                <label><input type="checkbox" id="obligatoire-occ"> Sortie scolaire obligatoire occasionnelle</label>
+                <label><input type="checkbox" id="facultative"> Sortie scolaire facultative</label>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Nom de l'école :</label>
+            <input type="text" class="form-input" id="nom-ecole" placeholder="Nom de l'école">
+        </div>
+
+        <div class="form-row">
+            <label>Adresse :</label>
+            <input type="text" class="form-input" id="adresse" placeholder="Adresse complète">
+        </div>
+
+        <div class="row-inline">
+            <div>
+                <label>Code postal :</label>
+                <input type="text" class="form-input form-input-short" id="code-postal" placeholder="Code postal">
+            </div>
+            <div>
+                <label>Commune :</label>
+                <input type="text" class="form-input form-input-medium" id="commune" placeholder="Commune">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Enseignant référent :</label>
+            <input type="text" class="form-input" id="enseignant" placeholder="Nom et prénom de l'enseignant référent">
+        </div>
+
+        <div class="form-row">
+            <label>Téléphone permettant de joindre le groupe en cas d'urgence :</label>
+            <input type="tel" class="form-input" id="telephone" placeholder="Numéro de téléphone">
+        </div>
+
+        <div class="form-row">
+            <label>Date(s) de la sortie :</label>
+            <input type="date" class="form-input form-input-medium" id="date-sortie">
+        </div>
+
+        <div class="form-row">
+            <label>Si la sortie scolaire obligatoire est récurrente, nombre de séances :</label>
+            <input type="number" class="form-input form-input-short" id="nb-seances" placeholder="Nombre">
+        </div>
+
+        <div class="row-inline">
+            <div>
+                <label>Heure de départ :</label>
+                <input type="time" class="form-input form-input-short" id="heure-depart">
+            </div>
+            <div>
+                <label>Heure de retour :</label>
+                <input type="time" class="form-input form-input-short" id="heure-retour">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <label>Lieu de rassemblement :</label>
+            <input type="text" class="form-input" id="lieu-rassemblement" placeholder="Lieu de rassemblement">
+        </div>
+
+        <div class="form-row">
+            <label>Lieu(x) de la sortie :</label>
+            <input type="text" class="form-input" id="lieu-sortie" placeholder="Destination de la sortie">
+        </div>
+
+        <div class="form-row">
+            <label>Lieu et mode de restauration :</label>
+            <input type="text" class="form-input" id="restauration" placeholder="Préciser si applicable">
+        </div>
+
+        <div class="form-row">
+            <label>Classe(s) participant à la sortie :</label>
+            <input type="text" class="form-input form-input-medium" id="classes" placeholder="Classes">
+        </div>
+
+        <div class="row-inline">
+            <div>
+                <label>Nombre d'élèves :</label>
+                <input type="number" class="form-input form-input-short" id="nb-eleves" placeholder="Nombre">
+            </div>
+            <div>
+                <label>Nombre d'accompagnateurs :</label>
+                <input type="number" class="form-input form-input-short" id="nb-accompagnateurs" placeholder="Nombre">
+            </div>
+        </div>
+
+        <div class="section-title">Équipe d'encadrement</div>
+
+        <table class="table" id="equipe-table">
+            <thead>
+                <tr>
+                    <th>Qualité (enseignant, AESH, ATSEM, parent d'élèves, etc.)</th>
+                    <th>Nom</th>
+                    <th>Prénom</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="equipe-tbody">
+                <tr>
+                    <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
+                    <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                    <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                    <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+                </tr>
+                <tr>
+                    <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
+                    <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                    <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                    <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button type="button" onclick="addRow()" class="btn" style="margin-bottom: 20px;">Ajouter une personne</button>
+
+        <div class="visa-section">
+            <div class="section-title">Visa</div>
+
+            <div class="form-row">
+                <label>Date de transmission du dossier au directeur d'école :</label>
+                <input type="date" class="form-input form-input-medium" id="date-transmission">
+            </div>
+
+            <div class="decision-section">
+                <div style="font-weight: bold; margin-bottom: 10px;">Décision du directeur d'école :</div>
+                
+                <div class="checkbox-group-inline">
+                    <label><input type="checkbox" id="accord"> Accord</label>
+                    <label><input type="checkbox" id="refus"> Refus motivé</label>
+                </div>
+
+                <div class="signature-row">
+                    <div>
+                        <label>Date :</label>
+                        <input type="date" class="form-input form-input-short" id="date-decision">
+                    </div>
+                    <div>
+                        <label>Signature du directeur d'école :</label>
+                        <span style="display: inline-block; width: 200px; border-bottom: 1px dotted #000; height: 20px;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Formulaire de demande d'autorisation d'une sortie scolaire sans nuitée — 1er degré
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour ajouter une ligne dans le tableau d'équipe
+        function addRow() {
+            const tbody = document.getElementById('equipe-tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
+                <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        // Fonction pour supprimer une ligne
+        function removeRow(button) {
+            const row = button.closest('tr');
+            const tbody = row.parentNode;
+            if (tbody.children.length > 1) {
+                row.remove();
+            } else {
+                alert('Vous devez conserver au moins une ligne.');
+            }
+        }
+
+        // Fonction pour vider le formulaire
+        function clearForm() {
+            if (confirm('Êtes-vous sûr de vouloir créer un nouveau formulaire ? Toutes les données actuelles seront perdues.')) {
+                document.querySelectorAll('input').forEach(input => {
+                    if (input.type === 'checkbox') {
+                        input.checked = false;
+                    } else {
+                        input.value = '';
+                    }
+                });
+                
+                // Réinitialiser le tableau avec 2 lignes vides
+                const tbody = document.getElementById('equipe-tbody');
+                tbody.innerHTML = `
+                    <tr>
+                        <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
+                        <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                        <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="equipe-qualite" placeholder="Qualité"></td>
+                        <td><input type="text" class="equipe-nom" placeholder="Nom"></td>
+                        <td><input type="text" class="equipe-prenom" placeholder="Prénom"></td>
+                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Fonction pour sauvegarder les données
+        function saveForm() {
+            const formData = {};
+            
+            // Sauvegarder tous les champs input
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox') {
+                    formData[input.id] = input.checked;
+                } else if (input.className.includes('equipe-')) {
+                    // Gérer les champs du tableau séparément
+                    return;
+                } else {
+                    formData[input.id] = input.value;
+                }
+            });
+
+            // Sauvegarder les données du tableau
+            const equipeData = [];
+            document.querySelectorAll('#equipe-tbody tr').forEach(row => {
+                const qualite = row.querySelector('.equipe-qualite').value;
+                const nom = row.querySelector('.equipe-nom').value;
+                const prenom = row.querySelector('.equipe-prenom').value;
+                equipeData.push({ qualite, nom, prenom });
+            });
+            formData.equipe = equipeData;
+
+            // Créer un fichier JSON et le télécharger
+            const dataStr = JSON.stringify(formData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'formulaire_sortie_scolaire.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // Fonction pour charger les données
+        function loadForm() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const formData = JSON.parse(e.target.result);
+                            
+                            // Charger tous les champs
+                            Object.keys(formData).forEach(key => {
+                                if (key === 'equipe') return; // Gérer séparément
+                                
+                                const element = document.getElementById(key);
+                                if (element) {
+                                    if (element.type === 'checkbox') {
+                                        element.checked = formData[key];
+                                    } else {
+                                        element.value = formData[key];
+                                    }
+                                }
+                            });
+
+                            // Charger les données du tableau
+                            if (formData.equipe) {
+                                const tbody = document.getElementById('equipe-tbody');
+                                tbody.innerHTML = '';
+                                
+                                formData.equipe.forEach(person => {
+                                    const row = document.createElement('tr');
+                                    row.innerHTML = `
+                                        <td><input type="text" class="equipe-qualite" value="${person.qualite || ''}" placeholder="Qualité"></td>
+                                        <td><input type="text" class="equipe-nom" value="${person.nom || ''}" placeholder="Nom"></td>
+                                        <td><input type="text" class="equipe-prenom" value="${person.prenom || ''}" placeholder="Prénom"></td>
+                                        <td><button type="button" onclick="removeRow(this)" class="btn" style="padding: 5px 10px; font-size: 12px;">Supprimer</button></td>
+                                    `;
+                                    tbody.appendChild(row);
+                                });
+                            }
+                            
+                            alert('Formulaire chargé avec succès !');
+                        } catch (error) {
+                            alert('Erreur lors du chargement du fichier. Vérifiez que c\'est un fichier JSON valide.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        // Gérer les cases à cocher mutuellement exclusives pour les décisions
+        document.getElementById('accord').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('refus').checked = false;
+            }
+        });
+
+        document.getElementById('refus').addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('accord').checked = false;
+            }
+        });
+    </script>
+</body>
+</html>
