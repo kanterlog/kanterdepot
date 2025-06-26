@@ -1,491 +1,117 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mots Mêlés : Le Grand Voyage de Magellan</title>
-    <!-- Importation des polices Google Fonts pour un style "ancien" -->
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Old+Standard+TT&display=swap" rel="stylesheet">
-    <style>
-        /* --- Styles généraux et Thème Magellan --- */
-        body {
-            font-family: 'Merriweather', serif;
-            margin: 0;
-            padding: 20px;
-            /* Image de fond : carte ancienne du monde */
-            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Magellan_world_map-fr.svg/1000px-Magellan_world_map-fr.svg.png') no-repeat center center fixed;
-            background-size: cover;
-            color: #3d2c1f; /* Brun foncé */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <title>Séance 3 - Codage Binaire</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #0f172a, #1e293b);
+      color: #f8fafc;
+      padding: 2rem;
+    }
 
-        #game-container {
-            background-color: rgba(255, 255, 255, 0.95); /* Blanc semi-transparent pour le contenu */
-            border: 5px solid #a0522d; /* Sienna / Brun terre */
-            border-radius: 15px;
-            box-shadow: 8px 8px 20px rgba(0, 0, 0, 0.4); /* Ombre portée pour un effet de profondeur */
-            padding: 30px;
-            max-width: 1000px; /* Augmenter la largeur max pour la plus grande grille */
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-            align-items: center;
-        }
+    header {
+      text-align: center;
+      padding-bottom: 1.5rem;
+    }
 
-        h1 {
-            font-family: 'Old Standard TT', serif; /* Police de style ancien */
-            color: #5a2e0e; /* Brun foncé */
-            text-shadow: 2px 2px 3px rgba(0,0,0,0.2);
-            font-size: 2.8em;
-            margin-bottom: 10px;
-        }
+    h1 {
+      font-size: 2rem;
+      color: #38bdf8;
+      border-bottom: 2px solid #38bdf8;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
 
-        #instructions {
-            font-size: 1.1em;
-            text-align: center;
-            color: #6a4a37;
-        }
+    section {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+    }
 
-        /* --- Disposition du jeu (Grille et Liste de mots) --- */
-        #word-search-game {
-            display: flex;
-            flex-direction: row; /* Grille à gauche, liste à droite par défaut */
-            gap: 30px;
-            width: 100%;
-            justify-content: center;
-            align-items: flex-start; /* Alignement en haut pour la liste de mots */
-        }
+    h2 {
+      color: #facc15;
+    }
 
-        #grid-container {
-            /* **ATTENTION : PASSE DE 12 À 15 COLONNES** */
-            display: grid;
-            grid-template-columns: repeat(15, 1fr); /* 15 colonnes pour la grille */
-            gap: 2px;
-            background-color: #a0522d; /* Couleur des "lignes" de la grille */
-            border: 3px solid #7a3e1b;
-            border-radius: 8px;
-            padding: 5px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.2); /* Effet d'enfoncement */
-        }
+    .bit-box {
+      display: inline-block;
+      background: #0ea5e9;
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      margin: 0.2rem;
+      border-radius: 5px;
+      font-weight: bold;
+    }
 
-        .grid-cell {
-            width: 40px; /* Taille de chaque cellule */
-            height: 40px;
-            background-color: #f5deb3; /* Wheat / Couleur papier ancien */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #3d2c1f;
-            cursor: pointer;
-            user-select: none; /* Empêche la sélection de texte du navigateur */
-            border: 1px solid #d2b48c; /* Tan */
-            border-radius: 3px;
-            transition: background-color 0.2s, color 0.2s; /* Transition fluide des couleurs */
-        }
-
-        .grid-cell.selected {
-            background-color: #ffd700; /* Gold / Couleur d'une boussole dorée */
-            color: #1a1a1a;
-            border-color: #ccac00;
-        }
-
-        .grid-cell.found {
-            background-color: #8fbc8f; /* DarkSeaGreen / Vert mer/terre pour les mots trouvés */
-            color: rgba(0, 0, 0, 0.5); /* Lettres estompées */
-            border-color: #6b8e23;
-        }
-
-        #word-list-container {
-            flex-shrink: 0; /* Empêche le rétrécissement de la liste */
-            background-color: #f8f8e8; /* Papier léger */
-            border: 2px solid #a0522d;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
-        }
-
-        #word-list-container h2 {
-            font-family: 'Old Standard TT', serif;
-            color: #5a2e0e;
-            margin-top: 0;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        #word-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            font-size: 1.2em;
-        }
-
-        #word-list li {
-            margin-bottom: 8px;
-            padding: 5px 10px;
-            background-color: #fff;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            color: #3d2c1f;
-        }
-
-        #word-list li.found {
-            text-decoration: line-through; /* Barrer le word trouvé */
-            color: #888;
-            background-color: #e0e0e0;
-            opacity: 0.7;
-        }
-
-        #status {
-            margin-top: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #006400; /* Vert foncé pour succès */
-            text-align: center;
-        }
-
-        #reset-button {
-            background-color: #4CAF50; /* Vert */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1.1em;
-            margin-top: 20px;
-            transition: background-color 0.3s ease;
-        }
-
-        #reset-button:hover {
-            background-color: #45a049;
-        }
-
-        /* --- Responsive Design pour iPad et plus petits écrans --- */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px; /* Moins de padding sur les petits écrans */
-            }
-            #game-container {
-                padding: 15px;
-                margin: 10px;
-                max-width: 100%; /* Ajustement pour petits écrans */
-            }
-
-            h1 {
-                font-size: 2em;
-            }
-
-            #word-search-game {
-                flex-direction: column; /* La grille et la liste s'empilent sur les petits écrans */
-                align-items: center;
-            }
-
-            .grid-cell {
-                width: 28px; /* Réduire la taille des cellules pour mieux s'adapter à 15x15 */
-                height: 28px;
-                font-size: 1.1em; /* Légèrement plus petit */
-            }
-
-            #grid-container {
-                /* Ajuster la largeur de la grille en fonction de la nouvelle taille de cellule (28px * 15 colonnes + 2px * 14 gaps + 10px padding) */
-                width: calc(28px * 15 + 2px * 14 + 10px); 
-                padding: 3px;
-            }
-
-            #word-list-container {
-                padding: 15px;
-                width: 90%; /* La liste prend plus de largeur */
-            }
-
-            #word-list li {
-                font-size: 1em;
-            }
-        }
-    </style>
+    footer {
+      text-align: center;
+      color: #94a3b8;
+      margin-top: 3rem;
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
 <body>
+  <header>
+    <h1>✨ Séance 3 : Codage en 0 et 1 ✨</h1>
+    <p>Comprendre le codage binaire comme les vrais ordinateurs</p>
+  </header>
 
-    <div id="game-container">
-        <h1>Mots Mêlés : Le Grand Voyage de Magellan</h1>
-        <p id="instructions">
-            Retrouve les mots liés à l'expédition de Fernand de Magellan dans la grille.
-            <br>Clique et glisse (ou touche et glisse sur iPad) pour sélectionner les lettres. Les mots trouvés s'estompent !
-        </p>
+  <section>
+    <h2>🧪 Le défi du jour</h2>
+    <p>Les machines ne comprennent que deux choses : <strong>0</strong> et <strong>1</strong>. On les appelle des <em>bits</em>.</p>
+    <p>Ton objectif : <strong>coder des infos</strong> comme des directions ou des jours de la semaine avec uniquement des bits.</p>
+  </section>
 
-        <div id="word-search-game">
-            <div id="grid-container">
-                <!-- Les cellules de la grille seront générées ici par JavaScript -->
-            </div>
-            <div id="word-list-container">
-                <h2>Mots à trouver :</h2>
-                <ul id="word-list">
-                    <!-- Les mots à trouver seront générés ici par JavaScript -->
-                </ul>
-            </div>
-        </div>
+  <section>
+    <h2>🔧 Activité 1 - Coder les directions</h2>
+    <p><em>Situation :</em> Le rover est un petit véhicule d’exploration autonome envoyé sur une planète lointaine. Il peut avancer, tourner et éviter les obstacles. Pour lui envoyer des ordres depuis la base, on utilise des signaux lumineux : une lumière éteinte signifie <strong>0</strong>, une lumière allumée signifie <strong>1</strong>. Le rover ne comprend que ces deux signaux. À toi de créer un code simple en 0 et 1 pour qu’il comprenne quelle direction (Nord, Sud, Est, Ouest) il doit prendre !</p>
+    <p>Code les directions :</p>
+    <ul>
+      <li><span class="bit-box">Nord</span> = <span class="bit-box">00</span></li>
+      <li><span class="bit-box">Sud</span> = <span class="bit-box">11</span></li>
+      <li><span class="bit-box">Est</span> = <span class="bit-box">01</span></li>
+      <li><span class="bit-box">Ouest</span> = <span class="bit-box">10</span></li>
+    </ul>
+    <p><strong>▶⃣ Ton tour :</strong> invente ton propre code !</p>
+  </section>
 
-        <div id="status"></div>
-        <button id="reset-button">Recommencer</button>
-    </div>
+  <section>
+    <h2>📅 Activité 2 - Coder les jours de la semaine</h2>
+    <p><em>Situation :</em> Chaque jour, le rover envoie un message à la base en utilisant des signaux lumineux : une lumière allumée = <strong>1</strong>, une lumière éteinte = <strong>0</strong>. Ces signaux doivent permettre à la base de comprendre quel jour de la semaine nous sommes. Mais le rover ne peut utiliser que trois lumières successives ! À toi de réfléchir à un code binaire permettant de différencier les 7 jours grâce à des suites de 0 et de 1.</p>
+    <p>Avec <strong>3 bits</strong>, tu peux faire 8 codes. Parfait pour coder les 7 jours !</p>
+    <ul>
+      <li>Lundi = <span class="bit-box">000</span></li>
+      <li>Mardi = <span class="bit-box">001</span></li>
+      <li>Mercredi = <span class="bit-box">010</span></li>
+      <li>Jeudi = <span class="bit-box">011</span></li>
+      <li>Vendredi = <span class="bit-box">100</span></li>
+      <li>Samedi = <span class="bit-box">101</span></li>
+      <li>Dimanche = <span class="bit-box">110</span></li>
+    </ul>
+    <p><strong>▶⃣ Ton défi :</strong> Invente ton propre code pour les jours !</p>
+  </section>
 
-    <script>
-        const gridContainer = document.getElementById('grid-container');
-        const wordListElement = document.getElementById('word-list');
-        const statusDisplay = document.getElementById('status');
-        const resetButton = document.getElementById('reset-button');
+  <section>
+    <h2>🤯 Ce qu'on retient</h2>
+    <ul>
+      <li>1 bit ➞ 2 éléments</li>
+      <li>2 bits ➞ 4 éléments</li>
+      <li>3 bits ➞ 8 éléments</li>
+      <li>4 bits ➞ 16 éléments</li>
+    </ul>
+    <p><strong>Plus on ajoute de bits, plus on peut coder de choses !</strong></p>
+  </section>
 
-        // LA NOUVELLE GRILLE DE 15x15 LETTRES, AVEC TOUS LES MOTS INSERÉS
-        // CORRECTION : "PORTUGAL" est désormais bien placé et épelé.
-        const largeMagellanGrid = [
-            ['M', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'A', 'S', 'I', 'E', 'X', 'Y', 'Z'], // MAGELLAN (H), ASIE (H)
-            ['I', 'F', 'L', 'E', 'C', 'H', 'E', 'R', 'T', 'N', 'O', 'P', 'Q', 'R', 'S'], // FLECHE (H)
-            ['N', 'O', 'P', 'R', 'O', 'Q', 'U', 'S', 'I', 'E', 'C', 'L', 'E', 'T', 'U'], // SIECLE (H)
-            ['A', 'L', 'T', 'G', 'A', 'T', 'N', 'V', 'I', 'G', 'A', 'T', 'E', 'U', 'R'], // NAVIGATEUR (H)
-            ['V', 'Y', 'M', 'O', 'N', 'D', 'E', 'J', 'K', 'L', 'M', 'O', 'N', 'O', 'P'], // MONDE (H)
-            ['I', 'D', 'E', 'S', 'V', 'A', 'G', 'E', 'L', 'L', 'A', 'N', 'V', 'R', 'Q'], // DETROIT (V)
-            ['G', 'R', 'T', 'T', 'O', 'R', 'T', 'E', 'D', 'N', 'F', 'G', 'H', 'T', 'I'], // DETROIT (H, à l'envers)
-            ['A', 'E', 'P', 'A', 'C', 'I', 'F', 'I', 'Q', 'U', 'E', 'A', 'B', 'U', 'J'], // PACIFIQUE (H)
-            ['T', 'E', 'R', 'B', 'M', 'I', 'Q', 'O', 'E', 'R', 'P', 'M', 'E', 'R', 'T'], // EMPEREUR (diag inv)
-            ['O', 'S', 'I', 'L', 'L', 'E', 'H', 'P', 'S', 'E', 'N', 'I', 'P', 'P', 'O'], // PHILIPPINES (H, à l'envers)
-            ['R', 'I', 'E', 'U', 'P', 'O', 'R', 'T', 'U', 'G', 'A', 'L', 'E', 'G', 'L'], // PORTUGAL (H) - CORRIGÉ ICI
-            ['Y', 'O', 'V', 'A', 'G', 'E', 'E', 'X', 'P', 'E', 'D', 'I', 'T', 'I', 'O'], // VOYAGE (H), EXPEDITION (diag)
-            ['A', 'G', 'A', 'M', 'E', 'R', 'I', 'Q', 'U', 'E', 'N', 'M', 'N', 'O', 'P'], // AMERIQUE (H)
-            ['G', 'E', 'L', 'L', 'A', 'N', 'E', 'P', 'T', 'U', 'A', 'Z', 'Y', 'X', 'W'],
-            ['U', 'R', 'A', 'V', 'I', 'G', 'A', 'T', 'E', 'U', 'R', 'Q', 'W', 'E', 'R'] // NAVIGATEUR (H, à l'envers)
-        ];
-
-        // Mots à trouver (LISTE COMPLÈTE DE LA DICTÉE)
-        // Cette liste est la cible de tous les mots de la dictée
-        const wordsToFindFullList = [
-            { word: 'MAGELLAN', found: false },
-            { word: 'EXPEDITION', found: false },
-            { word: 'NAVIGATEUR', found: false },
-            { word: 'DETROIT', found: false },
-            { word: 'PACIFIQUE', found: false },
-            { word: 'ASIE', found: false },
-            { word: 'AMERIQUE', found: false },
-            { word: 'PORTUGAL', found: false },
-            { word: 'PHILIPPINES', found: false },
-            { word: 'MONDE', found: false },
-            { word: 'VOYAGE', found: false },
-            { word: 'FLECHE', found: false },
-            { word: 'EMPEREUR', found: false },
-            { word: 'SIECLE', found: false }
-        ];
-
-        let currentGrid = largeMagellanGrid; // Utilise la nouvelle grille plus grande
-        let currentWordsToFind = []; // Sera initialisé à partir de wordsToFindFullList
-
-        let isSelecting = false;
-        let startCell = null;
-        let selectedCells = []; 
-
-        function initGame() {
-            gridContainer.innerHTML = '';
-            wordListElement.innerHTML = '';
-            statusDisplay.textContent = '';
-
-            currentWordsToFind = JSON.parse(JSON.stringify(wordsToFindFullList)); // Copie profonde pour réinitialiser
-
-            currentGrid.forEach((row, rowIndex) => {
-                row.forEach((letter, colIndex) => {
-                    const cell = document.createElement('div');
-                    cell.classList.add('grid-cell');
-                    cell.textContent = letter;
-                    cell.dataset.row = rowIndex;
-                    cell.dataset.col = colIndex;
-                    gridContainer.appendChild(cell);
-                });
-            });
-
-            currentWordsToFind.forEach(wordObj => {
-                const li = document.createElement('li');
-                li.textContent = wordObj.word;
-                li.dataset.word = wordObj.word; 
-                wordListElement.appendChild(li);
-            });
-
-            isSelecting = false;
-            startCell = null;
-            selectedCells = [];
-            
-            document.querySelectorAll('.grid-cell.found, .grid-cell.selected').forEach(cell => {
-                cell.classList.remove('found', 'selected');
-            });
-            document.querySelectorAll('#word-list li.found').forEach(li => {
-                li.classList.remove('found');
-            });
-        }
-
-        function getCellFromEvent(event) {
-            let target = event.target;
-            if (event.touches && event.touches[0]) {
-                target = document.elementFromPoint(event.touches[0].clientX, event.touches[0].clientY);
-            }
-            if (target && target.classList.contains('grid-cell')) {
-                return target;
-            }
-            return null;
-        }
-
-        function handleStart(event) {
-            event.preventDefault(); 
-            const cell = getCellFromEvent(event);
-            if (!cell || cell.classList.contains('found')) return; 
-
-            isSelecting = true;
-            startCell = {
-                row: parseInt(cell.dataset.row),
-                col: parseInt(cell.dataset.col)
-            };
-            highlightSelection(startCell, startCell); 
-        }
-
-        function handleMove(event) {
-            event.preventDefault(); 
-            if (!isSelecting) return;
-
-            const currentCell = getCellFromEvent(event);
-            if (!currentCell) return;
-
-            const endCoords = {
-                row: parseInt(currentCell.dataset.row),
-                col: parseInt(currentCell.dataset.col)
-            };
-            highlightSelection(startCell, endCoords); 
-        }
-
-        function handleEnd(event) {
-            event.preventDefault(); 
-            if (!isSelecting) return;
-
-            isSelecting = false;
-            const endCell = getCellFromEvent(event);
-            if (!endCell) { 
-                clearSelection();
-                return;
-            }
-
-            const endCoords = {
-                row: parseInt(endCell.dataset.row),
-                col: parseInt(endCell.dataset.col)
-            };
-
-            checkWord(startCell, endCoords); 
-            clearSelection(); 
-        }
-
-        function highlightSelection(start, end) {
-            clearSelection(); 
-
-            if (!start || !end) return;
-
-            const cellsInLine = getCellsInLine(start, end); 
-            selectedCells = [];
-            cellsInLine.forEach(coords => {
-                const cell = document.querySelector(`[data-row="${coords.row}"][data-col="${coords.col}"]`);
-                if (cell && !cell.classList.contains('found')) { 
-                    cell.classList.add('selected');
-                    selectedCells.push(cell);
-                }
-            });
-        }
-
-        function clearSelection() {
-            selectedCells.forEach(cell => cell.classList.remove('selected'));
-            selectedCells = [];
-        }
-
-        function getCellsInLine(start, end) {
-            const cells = [];
-            const dRow = Math.sign(end.row - start.row); 
-            const dCol = Math.sign(end.col - start.col); 
-
-            if (dRow !== 0 && dCol !== 0 && Math.abs(end.row - start.row) !== Math.abs(end.col - start.col)) {
-                return []; 
-            }
-
-            let currentRow = start.row;
-            let currentCol = start.col;
-
-            while (true) {
-                if (currentRow < 0 || currentRow >= currentGrid.length ||
-                    currentCol < 0 || currentCol >= currentGrid[0].length) {
-                    break; 
-                }
-                cells.push({ row: currentRow, col: currentCol });
-                if (currentRow === end.row && currentCol === end.col) break; 
-                currentRow += dRow;
-                currentCol += dCol;
-            }
-            return cells;
-        }
-
-        function checkWord(start, end) {
-            const cells = getCellsInLine(start, end);
-            if (cells.length === 0) { 
-                statusDisplay.textContent = "Sélection non valide.";
-                statusDisplay.style.color = '#8B0000';
-                return;
-            }
-
-            let word = '';
-            cells.forEach(coords => {
-                word += currentGrid[coords.row][coords.col];
-            });
-
-            const reversedWord = word.split('').reverse().join(''); 
-
-            let foundWordObj = currentWordsToFind.find(w => !w.found && (w.word === word || w.word === reversedWord));
-
-            if (foundWordObj) {
-                foundWordObj.found = true;
-                statusDisplay.textContent = `Mot trouvé : "${foundWordObj.word}" !`;
-                statusDisplay.style.color = '#006400'; 
-
-                cells.forEach(coords => {
-                    const cell = document.querySelector(`[data-row="${coords.row}"][data-col="${coords.col}"]`);
-                    if (cell) cell.classList.add('found');
-                });
-
-                const li = document.querySelector(`#word-list li[data-word="${foundWordObj.word}"]`);
-                if (li) li.classList.add('found');
-
-                checkGameCompletion(); 
-
-            } else {
-                statusDisplay.textContent = "Ce n'est pas un mot ou il a déjà été trouvé.";
-                statusDisplay.style.color = '#8B0000'; 
-            }
-        }
-
-        function checkGameCompletion() {
-            const allFound = currentWordsToFind.every(w => w.found);
-            if (allFound) {
-                statusDisplay.textContent = "Félicitations ! Vous avez trouvé tous les mots du Grand Voyage !";
-                statusDisplay.style.color = '#00008B'; 
-            }
-        }
-
-        // --- Gestionnaires d'événements ---
-        gridContainer.addEventListener('mousedown', handleStart);
-        gridContainer.addEventListener('mousemove', handleMove);
-        gridContainer.addEventListener('mouseup', handleEnd);
-
-        gridContainer.addEventListener('touchstart', handleStart, { passive: false });
-        gridContainer.addEventListener('touchmove', handleMove, { passive: false });
-        gridContainer.addEventListener('touchend', handleEnd, { passive: false });
-
-        gridContainer.addEventListener('contextmenu', (e) => e.preventDefault());
-
-        resetButton.addEventListener('click', initGame); 
-
-        initGame();
-
-    </script>
+  <footer>
+    Projet "1,2,3... Codez !" - Fondation La main à la pâte<br>
+    Codage binaire - CM1/CM2
+  </footer>
 </body>
 </html>
