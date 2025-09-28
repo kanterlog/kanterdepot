@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jeu interactif : Verbes du 3ème groupe</title>
+  <style>
+    /* Global styles */
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: #f7f9fb;
+      color: #030a18;
+      margin: 0;
+      padding: 0 1rem;
+    }
+    h1, h2 {
+      color: #475da7;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 0;
+    }
+    .section {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .button {
+      display: inline-block;
+      background-color: #475da7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.8rem;
+      transition: background-color 0.2s;
+    }
+    .button:hover {
+      background-color: #35467f;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.6rem;
+    }
+    th, td {
+      padding: 0.4rem;
+      text-align: left;
+    }
+    tr:nth-child(even) {
+      background-color: #f1f5f9;
+    }
+    select, input[type="text"] {
+      padding: 0.3rem;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+    select.correct, input.correct {
+      border-color: #38a169;
+      background-color: #f0fff4;
+    }
+    select.incorrect, input.incorrect {
+      border-color: #e53e3e;
+      background-color: #fff5f5;
+    }
+    .result {
+      font-weight: bold;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      background-color: #eceff9;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+      color: #0a2142;
+    }
+
+    /* Memory game styles */
+    .memory-board {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+    }
+
+    .card {
+      width: 110px;
+      height: 70px;
+      perspective: 600px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    .card.flipped .card-inner {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .card-front {
+      background-color: #475da7;
+      color: #fff;
+    }
+    .card-back {
+      background-color: #f1f5fb;
+      color: #0a2142;
+      transform: rotateY(180deg);
+      border: 1px solid #b5bfd8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- tableau de bord pour le score global -->
+    <div class="scoreboard" id="scoreboard">Score : <span id="score">0</span> point(s)</div>
+    <h1>Les verbes du 3ème groupe : activité interactive</h1>
+    <p>
+      Les verbes du 3<sup>e</sup> groupe sont des verbes irréguliers. Ce sont tous les verbes qui ne se terminent
+      pas par <em>-er</em> (sauf le verbe <em>aller</em>) ou qui ne se conjuguent pas comme le verbe
+      <em>finir</em>. Dans ce groupe, on trouve des verbes en <em>–ir</em> qui n’ont pas la terminaison
+      <em>–issant</em>, des verbes en <em>–oir</em>, des verbes en <em>–re</em> ainsi que le verbe
+      <em>aller</em>. Le <strong>radical</strong> est la partie du verbe qui ne change pas, tandis que la
+      <strong>terminaison</strong> varie selon la personne et le temps.
+    </p>
+
+    <!-- Jeu 1 : Classification des verbes -->
+    <div class="section" id="classification">
+      <h2>Jeu 1 : Classe ces verbes dans le bon groupe</h2>
+      <p>Choisis le groupe (1<sup>er</sup>, 2<sup>e</sup> ou 3<sup>e</sup>) pour chaque verbe :</p>
+      <table>
+        <tr>
+          <th>Verbe</th>
+          <th>Groupe</th>
+        </tr>
+        <tr>
+          <td>manger</td>
+          <td>
+            <select id="verb1">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>finir</td>
+          <td>
+            <select id="verb2">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>venir</td>
+          <td>
+            <select id="verb3">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>mettre</td>
+          <td>
+            <select id="verb4">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>chanter</td>
+          <td>
+            <select id="verb5">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>grandir</td>
+          <td>
+            <select id="verb6">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>sentir</td>
+          <td>
+            <select id="verb7">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>dire</td>
+          <td>
+            <select id="verb8">
+              <option value="">-- choisir --</option>
+              <option value="1">1er groupe</option>
+              <option value="2">2e groupe</option>
+              <option value="3">3e groupe</option>
+            </select>
+          </td>
+        </tr>
+      </table>
+      <button class="button" onclick="checkClassification()">Vérifier</button>
+      <p class="result" id="classificationResult"></p>
+    </div>
+
+    <!-- Jeu 2 : Conjugaison du verbe dire -->
+    <div class="section" id="conjugation">
+      <h2>Jeu 2 : Conjugue le verbe <em>dire</em> au présent</h2>
+      <p>Écris la bonne forme conjuguée pour chaque personne :</p>
+      <table>
+        <tr>
+          <th>Personne</th>
+          <th>Forme à écrire</th>
+        </tr>
+        <tr>
+          <td>Je</td>
+          <td><input type="text" id="dire1" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Tu</td>
+          <td><input type="text" id="dire2" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Il/Elle</td>
+          <td><input type="text" id="dire3" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Nous</td>
+          <td><input type="text" id="dire4" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Vous</td>
+          <td><input type="text" id="dire5" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Ils/Elles</td>
+          <td><input type="text" id="dire6" placeholder="…" /></td>
+        </tr>
+      </table>
+      <button class="button" onclick="checkConjugation()">Vérifier</button>
+      <p class="result" id="conjugationResult"></p>
+    </div>
+
+    <!-- Jeu 3 : Trouve le radical -->
+    <div class="section" id="radical">
+      <h2>Jeu 3 : Trouve le radical</h2>
+      <p>Écris le radical de chaque forme :</p>
+      <table>
+        <tr>
+          <th>Forme conjuguée</th>
+          <th>Ton radical</th>
+        </tr>
+        <tr>
+          <td>Je prends</td>
+          <td><input type="text" id="rad1" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Nous venons</td>
+          <td><input type="text" id="rad2" placeholder="…" /></td>
+        </tr>
+        <tr>
+          <td>Tu vois</td>
+          <td><input type="text" id="rad3" placeholder="…" /></td>
+        </tr>
+      </table>
+      <button class="button" onclick="checkRadical()">Vérifier</button>
+      <p class="result" id="radicalResult"></p>
+    </div>
+
+    <!-- Jeu 4 : Quiz-minute -->
+    <div class="section" id="quiz">
+      <h2>Jeu 4 : Quiz-minute</h2>
+      <p>Réponds à un maximum de questions en une minute ! Appuie sur « Démarrer » pour lancer le défi.</p>
+      <button class="button" id="startQuiz">Démarrer</button>
+      <div id="quizArea" style="display: none; margin-top: 1rem;">
+        <div id="timer" style="font-weight: bold; margin-bottom: 0.5rem;">Temps : 60 s</div>
+        <div id="question"></div>
+        <div id="options" style="margin-top: 0.5rem;"></div>
+        <button class="button" id="nextQuestion" style="display: none;">Question suivante</button>
+        <p class="result" id="quizResult"></p>
+      </div>
+    </div>
+
+    <!-- Jeu 5 : Mémo-verbes -->
+    <div class="section" id="memory">
+      <h2>Jeu 5 : Mémo-verbes</h2>
+      <p>Retourne les cartes deux par deux pour associer chaque verbe à son groupe. Essaie de faire le meilleur score !</p>
+      <div id="memoryBoard" class="memory-board"></div>
+      <p class="result" id="memoryResult"></p>
+    </div>
+  </div>
+
+  <script>
+    // Jeu 1 : vérification des groupes
+    function checkClassification() {
+      const correctAnswers = {
+        verb1: '1', // manger
+        verb2: '2', // finir
+        verb3: '3', // venir
+        verb4: '3', // mettre
+        verb5: '1', // chanter
+        verb6: '2', // grandir
+        verb7: '3', // sentir
+        verb8: '3'  // dire
+      };
+      let score = 0;
+      let total = Object.keys(correctAnswers).length;
+      for (const id in correctAnswers) {
+        const select = document.getElementById(id);
+        if (!select) continue;
+        const value = select.value;
+        // Remove any previous classes
+        select.classList.remove('correct', 'incorrect');
+        if (value === correctAnswers[id]) {
+          score++;
+          select.classList.add('correct');
+        } else {
+          select.classList.add('incorrect');
+        }
+      }
+      const result = document.getElementById('classificationResult');
+      if (score === total) {
+        result.textContent = 'Bravo ! Toutes tes réponses sont correctes.';
+      } else {
+        result.textContent = `Tu as ${score} bonne(s) réponse(s) sur ${total}. Essaie encore !`;
+      }
+    }
+
+    // Jeu 2 : vérification de la conjugaison de dire
+    function checkConjugation() {
+      const answers = ['dis', 'dis', 'dit', 'disons', 'dites', 'disent'];
+      let score = 0;
+      for (let i = 0; i < answers.length; i++) {
+        const input = document.getElementById('dire' + (i + 1));
+        const userValue = input.value.trim().toLowerCase();
+        input.classList.remove('correct', 'incorrect');
+        if (userValue === answers[i]) {
+          score++;
+          input.classList.add('correct');
+        } else {
+          input.classList.add('incorrect');
+        }
+      }
+      const result = document.getElementById('conjugationResult');
+      if (score === answers.length) {
+        result.textContent = 'Super ! Tu as correctement conjugué « dire ». '; 
+      } else {
+        result.textContent = `Tu as ${score} bonne(s) réponse(s) sur ${answers.length}. Vérifie bien les terminaisons !`;
+      }
+    }
+
+    // Jeu 3 : vérification des radicaux
+    function checkRadical() {
+      const answers = ['prend', 'ven', 'voi'];
+      let score = 0;
+      for (let i = 0; i < answers.length; i++) {
+        const input = document.getElementById('rad' + (i + 1));
+        const userValue = input.value.trim().toLowerCase();
+        input.classList.remove('correct', 'incorrect');
+        if (userValue === answers[i]) {
+          score++;
+          input.classList.add('correct');
+        } else {
+          input.classList.add('incorrect');
+        }
+      }
+      const result = document.getElementById('radicalResult');
+      if (score === answers.length) {
+        result.textContent = 'Parfait ! Tu as trouvé tous les radicaux.';
+      } else {
+        result.textContent = `Tu as ${score} bonne(s) réponse(s) sur ${answers.length}. Regarde bien la partie qui reste stable !`;
+      }
+    }
+  </script>
+  <!-- Script complémentaire pour gérer le score global et les jeux avancés -->
+  <script>
+    /**
+     * Ce script complémentaire ajoute un tableau de score global et deux nouveaux
+     * jeux interactifs : un quiz-minute et un mémo-verbes. Il redéfinit les
+     * fonctions de vérification existantes pour ajouter des points au score.
+     */
+
+    // Score global
+    let totalScore = 0;
+    function updateScore(points) {
+      totalScore += points;
+      const scoreEl = document.getElementById('score');
+      if (scoreEl) {
+        scoreEl.textContent = totalScore;
+      }
+    }
+
+    // Redéfinition des fonctions de vérification pour ajouter des points
+    function checkClassification() {
+      const correct = {
+        verb1: '1', verb2: '2', verb3: '3', verb4: '3',
+        verb5: '1', verb6: '2', verb7: '3', verb8: '3'
+      };
+      let scoreLocal = 0;
+      for (const id in correct) {
+        const select = document.getElementById(id);
+        if (!select) continue;
+        const val = select.value;
+        select.classList.remove('correct', 'incorrect');
+        if (val === correct[id]) {
+          scoreLocal++;
+          select.classList.add('correct');
+        } else {
+          select.classList.add('incorrect');
+        }
+      }
+      const res = document.getElementById('classificationResult');
+      const total = Object.keys(correct).length;
+      if (scoreLocal === total) {
+        res.textContent = 'Bravo ! Toutes tes réponses sont correctes.';
+      } else {
+        res.textContent = `Tu as ${scoreLocal} bonne(s) réponse(s) sur ${total}. Essaie encore !`;
+      }
+      if (scoreLocal > 0) updateScore(scoreLocal);
+    }
+
+    function checkConjugation() {
+      const answers = ['dis', 'dis', 'dit', 'disons', 'dites', 'disent'];
+      let scoreLocal = 0;
+      for (let i = 0; i < answers.length; i++) {
+        const input = document.getElementById('dire' + (i + 1));
+        const value = input.value.trim().toLowerCase();
+        input.classList.remove('correct', 'incorrect');
+        if (value === answers[i]) {
+          scoreLocal++;
+          input.classList.add('correct');
+        } else {
+          input.classList.add('incorrect');
+        }
+      }
+      const res = document.getElementById('conjugationResult');
+      if (scoreLocal === answers.length) {
+        res.textContent = 'Super ! Tu as correctement conjugué « dire ». ';
+      } else {
+        res.textContent = `Tu as ${scoreLocal} bonne(s) réponse(s) sur ${answers.length}. Vérifie bien les terminaisons !`;
+      }
+      if (scoreLocal > 0) updateScore(scoreLocal);
+    }
+
+    function checkRadical() {
+      const answers = ['prend', 'ven', 'voi'];
+      let scoreLocal = 0;
+      for (let i = 0; i < answers.length; i++) {
+        const input = document.getElementById('rad' + (i + 1));
+        const value = input.value.trim().toLowerCase();
+        input.classList.remove('correct', 'incorrect');
+        if (value === answers[i]) {
+          scoreLocal++;
+          input.classList.add('correct');
+        } else {
+          input.classList.add('incorrect');
+        }
+      }
+      const res = document.getElementById('radicalResult');
+      if (scoreLocal === answers.length) {
+        res.textContent = 'Parfait ! Tu as trouvé tous les radicaux.';
+      } else {
+        res.textContent = `Tu as ${scoreLocal} bonne(s) réponse(s) sur ${answers.length}. Regarde bien la partie qui reste stable !`;
+      }
+      if (scoreLocal > 0) updateScore(scoreLocal);
+    }
+
+    // Questions pour le quiz-minute
+    const quizQuestions = [
+      { q: "Quelle est la terminaison d’un verbe du 3ème groupe en -re à la 1ère personne du singulier ?", opts: ['s','e','es'], ans: 0 },
+      { q: "Le verbe « aller » appartient à quel groupe ?", opts: ['1er groupe','2ème groupe','3ème groupe'], ans: 2 },
+      { q: "Trouvez la bonne conjugaison : nous (venir) au présent.", opts: ['venons','venez','viens'], ans: 0 },
+      { q: "Quel est le radical du verbe « prendre » au présent ?", opts: ['pren','prend','pre'], ans: 1 },
+      { q: "Complétez : je (voir) au présent → … ?", opts: ['vois','voies','voit'], ans: 0 },
+      { q: "Quel auxiliaire utilise-t-on pour conjuguer le verbe ‘dire’ au passé composé ?", opts: ['être','avoir','aller'], ans: 1 }
+    ];
+    let quizTimer, timeLeft, quizScore;
+
+    function startQuizGame() {
+      const btn = document.getElementById('startQuiz');
+      if (btn) btn.style.display = 'none';
+      document.getElementById('quizArea').style.display = 'block';
+      timeLeft = 60;
+      quizScore = 0;
+      document.getElementById('timer').textContent = `Temps : ${timeLeft} s`;
+      quizTimer = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').textContent = `Temps : ${timeLeft} s`;
+        if (timeLeft <= 0) endQuiz();
+      }, 1000);
+      nextQuizQuestion();
+    }
+
+    function nextQuizQuestion() {
+      document.getElementById('quizResult').textContent = '';
+      const nextBtn = document.getElementById('nextQuestion');
+      nextBtn.style.display = 'none';
+      const current = quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
+      nextBtn.dataset.answer = current.ans;
+      document.getElementById('question').textContent = current.q;
+      const optsDiv = document.getElementById('options');
+      optsDiv.innerHTML = '';
+      current.opts.forEach((opt, idx) => {
+        const lbl = document.createElement('label');
+        lbl.style.display = 'block';
+        lbl.style.marginBottom = '0.3rem';
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = 'quizOption';
+        radio.value = idx;
+        lbl.appendChild(radio);
+        lbl.appendChild(document.createTextNode(' ' + opt));
+        optsDiv.appendChild(lbl);
+      });
+      optsDiv.onclick = function() {
+        nextBtn.style.display = 'inline-block';
+      };
+      nextBtn.onclick = submitQuizAnswer;
+    }
+
+    function submitQuizAnswer() {
+      const selected = document.querySelector('input[name="quizOption"]:checked');
+      if (!selected) return;
+      const correctIndex = parseInt(this.dataset.answer);
+      const userIndex = parseInt(selected.value);
+      let msg;
+      if (userIndex === correctIndex) {
+        quizScore++;
+        updateScore(2);
+        msg = 'Bonne réponse !';
+      } else {
+        msg = 'Mauvaise réponse.';
+      }
+      document.getElementById('quizResult').textContent = msg;
+      this.style.display = 'none';
+      setTimeout(() => { if (timeLeft > 0) nextQuizQuestion(); }, 700);
+    }
+
+    function endQuiz() {
+      clearInterval(quizTimer);
+      document.getElementById('options').innerHTML = '';
+      document.getElementById('question').textContent = '';
+      document.getElementById('timer').textContent = '';
+      document.getElementById('nextQuestion').style.display = 'none';
+      document.getElementById('quizResult').textContent = `Fin du jeu ! Tu as répondu correctement à ${quizScore} question(s).`;
+    }
+
+    // Initialisation du bouton de quiz
+    document.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('startQuiz');
+      if (startBtn) startBtn.addEventListener('click', startQuizGame);
+    });
+
+    // Mémo-verbes : jeu de mémoire
+    function initMemoryGame() {
+      const board = document.getElementById('memoryBoard');
+      const pairs = [
+        { verb: 'chanter', group: '1er groupe' },
+        { verb: 'finir', group: '2e groupe' },
+        { verb: 'venir', group: '3e groupe' },
+        { verb: 'faire', group: '3e groupe' },
+        { verb: 'aimer', group: '1er groupe' },
+        { verb: 'grandir', group: '2e groupe' }
+      ];
+      let cards = [];
+      pairs.forEach((p, idx) => {
+        cards.push({ text: p.verb, id: idx });
+        cards.push({ text: p.group, id: idx });
+      });
+      cards.sort(() => Math.random() - 0.5);
+      let first = null;
+      let second = null;
+      let lock = false;
+      let found = 0;
+      const total = pairs.length;
+      cards.forEach((info) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.pairId = info.id;
+        const inner = document.createElement('div');
+        inner.classList.add('card-inner');
+        const front = document.createElement('div');
+        front.classList.add('card-face', 'card-front');
+        front.textContent = '?';
+        const back = document.createElement('div');
+        back.classList.add('card-face', 'card-back');
+        back.textContent = info.text;
+        inner.appendChild(front);
+        inner.appendChild(back);
+        card.appendChild(inner);
+        board.appendChild(card);
+        card.addEventListener('click', () => {
+          if (lock) return;
+          if (card.classList.contains('matched') || card.classList.contains('flipped')) return;
+          card.classList.add('flipped');
+          if (!first) {
+            first = card;
+            return;
+          }
+          second = card;
+          if (first.dataset.pairId === second.dataset.pairId) {
+            first.classList.add('matched');
+            second.classList.add('matched');
+            first = null;
+            second = null;
+            found++;
+            updateScore(2);
+            if (found === total) {
+              document.getElementById('memoryResult').textContent = 'Bravo ! Tu as trouvé toutes les paires.';
+            }
+          } else {
+            lock = true;
+            setTimeout(() => {
+              if (first) first.classList.remove('flipped');
+              if (second) second.classList.remove('flipped');
+              first = null;
+              second = null;
+              lock = false;
+            }, 900);
+          }
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMemoryGame();
+    });
+  </script>
+</body>
+</html>
